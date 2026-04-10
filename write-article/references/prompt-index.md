@@ -53,4 +53,5 @@ Source: [Diataxis Framework](https://diataxis.fr/)
 
 ---
 
-All prompts available at: https://jeffbailey.us/prompts/{slug}/
+All prompts available at: `https://jeffbailey.us/prompts/{slug}/`
+Raw HTML for caching: `https://jeffbailey.us/prompts/{slug}/raw.html`

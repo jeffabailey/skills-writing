@@ -7,6 +7,19 @@
 
 ## Installation
 
+### Cursor (skills + slash commands)
+
+From your Shell dotfiles repo, run MCP distribution (installs symlinks into `~/.cursor/skills` and `~/.cursor/commands`):
+
+```bash
+~/Shell/configure_mcp.sh distribute
+```
+
+- **Skills** come from this repository’s skill folders (for example `write-article/`).
+- **Slash commands** come from `.cursor/commands/*.md` in this repo (for example `/write-article`, `/hugo-agents`).
+
+Override install locations with `SKILLS_REPO_PATH` and `SKILLS_WRITING_REPO_PATH` if your clones live elsewhere.
+
 ### As a skill directory
 
 Add this repository as a skill source in your Claude Code project:
@@ -39,6 +52,7 @@ If you are not Jeff Bailey, update `additionalDirectories` to point to your loca
 /write:copy       # Landing page / marketing copy
 /write:debug      # Structured bug analysis
 /write:seo        # Internal link optimization
+/hugo:agents      # Hugo blog AGENTS.md compliance (read site AGENTS.md in order)
 ```
 
 ## Customization

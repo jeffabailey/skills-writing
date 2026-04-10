@@ -13,6 +13,9 @@ Claude Code skills for structured article creation, review, ideation, and strate
 | [write-copy](write-copy/SKILL.md) | `/write:copy` | Landing page and marketing copy |
 | [write-debug](write-debug/SKILL.md) | `/write:debug` | Structured bug minimization |
 | [write-seo](write-seo/SKILL.md) | `/write:seo` | Internal link optimization |
+| [hugo-agents-compliance](hugo-agents-compliance/SKILL.md) | `/hugo:agents` | Apply Hugo `AGENTS.md` top-to-bottom for blog Markdown |
+
+**Cursor:** After `~/Shell/configure_mcp.sh distribute`, slash commands match the files in [`.cursor/commands/`](.cursor/commands/) (for example `/write-article`, `/hugo-agents`). Claude Code may use the ` /write:…` style shown above; the workflows are the same.
 
 ## Writing Frameworks
 
