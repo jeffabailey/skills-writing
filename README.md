@@ -19,7 +19,7 @@ Claude Code skills for structured article creation, review, ideation, and strate
 
 ## Writing Frameworks
 
-### Article Creation (15 frameworks)
+### Article Creation (16 frameworks)
 
 **Documentation (Diataxis):** Tutorials, How-to Guides, Reference, Explanation
 
@@ -31,6 +31,8 @@ Claude Code skills for structured article creation, review, ideation, and strate
 
 **Reference:** Fact-Based Reference, List Articles, Fundamentals
 
+**Learning:** Learn X (launch pad — teaches the 20% that does 80%, then links curated video/audio/books/online resources)
+
 ### Article Review
 
 Each creation framework has a corresponding review rubric with scoring dimensions, quality thresholds, and specific evaluation criteria.
@@ -41,7 +43,7 @@ Idea Storm, Competitor Analysis, McKinsey Consultant, Landing Page Copy, Bug Min
 
 ## How It Works
 
-Skills fetch prompts from `https://jeffbailey.us/prompts/{slug}/` at runtime via WebFetch. Private prompts (Fundamentals, Writing Style, Internal Link Optimize) are read from the local filesystem via `additionalDirectories`.
+Skills fetch prompts from `https://jeffbailey.us/prompts/{slug}/` at runtime via WebFetch. Private prompts (Fundamentals, Learn X, Writing Style, Internal Link Optimize) are read from the local filesystem via `additionalDirectories`.
 
 This means:
 - Prompts are always up to date with the published versions
