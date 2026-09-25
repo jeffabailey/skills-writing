@@ -62,15 +62,12 @@ A core goal of this skill: **the reader should be able to tell what was added an
 
 If the article is for jeffbaileyblog, also load and apply the writing style guide so the revision stays consistent with the rest of the site. Prompts are cached locally to avoid repeated network fetches.
 
-**Cache directory**: `~/.claude/cache/writing-prompts/`
 
 **To load the writing style guide**:
 
-1. Check if `~/.claude/cache/writing-prompts/writing-style.md` exists
 2. If it exists, read and use it
 3. If it does not exist, fetch and cache it:
    ```bash
-   mkdir -p ~/.claude/cache/writing-prompts && curl -s "https://jeffbailey.us/prompts/writing-style/raw.html" | pandoc -f html -t markdown --wrap=none -o ~/.claude/cache/writing-prompts/writing-style.md
    ```
 4. Read the newly cached file and use it
 
@@ -133,3 +130,13 @@ The `articletype` frontmatter field names the writing framework an article was a
 ## Reference
 
 Writing framework prompts and the site writing style guide are maintained at https://jeffbailey.us/prompts/
+
+## Loading a Prompt
+
+Every prompt this skill needs is bundled in `references/`. Read the file directly:
+
+* `references/seo-front-matter.md`
+* `references/writing-style.md`
+
+There is no network fetch and no cache. The files on disk are the source of truth.
+

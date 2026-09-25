@@ -1,29 +1,20 @@
 ---
 name: write-competitor-analysis
-description: Competitive landscape analysis using the Competitor Analysis prompt from jeffbailey.us. Direct shortcut — use when the user says /write:competitor-analysis.
+description: Competitive landscape analysis using the Competitor Analysis prompt bundled in this skill. Direct shortcut — use when the user says /write:competitor-analysis.
 ---
 
 # Competitor Analysis
 
 Direct shortcut to the Competitor Analysis prompt. Skips prompt selection — use `/write:strategy` for the general strategy workflow instead.
 
-## Prompt Caching
+## Loading a Prompt
 
-All prompts are cached locally as markdown to avoid repeated network fetches.
+Every prompt this skill needs is bundled in `references/`. Read the file directly:
 
-**Cache directory**: `~/.claude/cache/writing-prompts/`
+* `references/competitor-analysis.md`
+* `references/writing-style.md`
 
-**To load the prompt**:
-
-1. Check if `~/.claude/cache/writing-prompts/competitor-analysis.md` exists
-2. If it exists, read and use it
-3. If it does not exist, fetch and cache it:
-   ```bash
-   mkdir -p ~/.claude/cache/writing-prompts && curl -s "https://jeffbailey.us/prompts/competitor-analysis/raw.html" | pandoc -f html -t markdown --wrap=none -o ~/.claude/cache/writing-prompts/competitor-analysis.md
-   ```
-4. Read the newly cached file and use it
-
-**To refresh a cached prompt**: delete the cached file and re-fetch using step 3.
+There is no network fetch and no cache. The files on disk are the source of truth.
 
 ## Workflow
 

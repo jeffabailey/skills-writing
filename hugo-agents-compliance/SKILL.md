@@ -12,6 +12,19 @@ When you create or edit Markdown for the **jeffbaileyblog** Hugo site, treat the
 - **Site-wide:** `<hugo-site-root>/AGENTS.md` (the `hugo/` folder in the blog repo).
 - **Section or series overrides:** any `AGENTS.md` **closer to the file** you are editing (for example `content/blog/fundamentals-x/AGENTS.md`). Read the global file first, then the nearest `AGENTS.md` on the path from `content/` down to the bundle. **Nearer files add or override** where they say they do.
 
+## Post shape and categories: no exploration needed
+
+Do NOT read sibling posts to "establish the shape" of a post, and do NOT grep the content tree to discover categories. Both are already available deterministically:
+
+- **Front-matter shape:** the **`## Front matter (blog posts)`** section of `AGENTS.md` is the canonical, complete shape. Use it directly (plus any nearer `AGENTS.md` overrides). A sibling post adds nothing and may itself be non-compliant.
+- **Categories in use:** run, from the Hugo site root:
+
+  ```bash
+  ./scripts/generate-site-metadata.py
+  ```
+
+  It prints JSON with every category in use (`categories`) and per-category post counts (`category_counts`, sorted by frequency — prefer higher-count categories when several fit). If you cannot run the script, read `data/site-metadata.json` (its last written output) instead; add `--write` when running the script to refresh that file.
+
 ## Workflow (always in this order)
 
 1. **Open and read** `<hugo-site-root>/AGENTS.md` from top to bottom. Note every `##` section; your compliance pass must cover each section that applies to the task.
@@ -56,8 +69,25 @@ When you create or edit Markdown for the **jeffbaileyblog** Hugo site, treat the
   ```
 
   Where `my-slug` matches the `slug` value exactly, the extension is `.png`, and the value is bare (no double quotes). Example: for `slug: how-long-should-a-function-be`, use `image: how-long-should-a-function-be.png`.
+- **Front matter — `categories:` MUST contain at least one entry (never missing, never empty):** Every content file the pass touches — blog posts AND pages under `content/` — must declare a `categories:` list with **at least one** category. A missing `categories:` block, an empty list, or `categories: []` is a compliance failure. Do NOT skip this check because the file is `type: page` instead of `type: post`; "the front-matter shape section only covers posts" is not an exemption. If the file has no categories, add the best fit from categories already in use on the site — get the list with:
+
+  ```bash
+  ./scripts/generate-site-metadata.py
+  ```
+
+  Only invent a new category when nothing existing fits, and say so explicitly in your summary.
+- **Front matter — prefer existing categories, and never restate the site's context in a category name:** The whole site is about software development, so every category already implies it. Category names that spell it out are redundant. When choosing, ALWAYS prefer the short existing form over a "software"/"development"-qualified variant:
+
+  - "Software Development" → use **Software**.
+  - "Development Tools" → use **Tools**.
+
+  Apply the same test to any candidate: strip the words "software" and "development" and check whether an existing category already covers what remains. Pick from the existing category list first; inventing a new category (especially a qualified variant of an existing one) is a last resort.
+- **Front matter — `categories:` and `keywords:` must fit the target article:** On every create or edit pass, review both lists against the article's actual content and update them so they stay relevant. Pick `categories:` from categories already in use on the site (run `./scripts/generate-site-metadata.py` from the site root) rather than inventing new ones. For `keywords:`, follow the single SEO prompt at `hugo/content/prompts/seo-front-matter.md` — primary keyword first, 4–7 long-tail phrases the article substantively covers, no category duplication.
+- **Front matter — `title:` and `description:` follow the SEO prompt:** Apply `hugo/content/prompts/seo-front-matter.md`, the one place SEO rules live (based on Google's SEO Starter Guide) — unique, accurate titles that front-load the primary keyword with any type or series label after it, and a succinct one- or two-sentence description that leads with the same keyword and matches the content.
+- **Front matter — update `lastmod:` when updating an article:** Any substantive edit to an existing post must set `lastmod:` to today's date (same `YYYY-MM-DD` format as `date:`). Leave `date:` unchanged — it records original publication.
 - **Formatting:** No Markdown tables for comparisons or structured lists where `AGENTS.md` requires the `cards` shortcode; no `` ```text `` diagrams — use Mermaid as specified.
 - **Links:** Internal links use **`{{< ref "slug" >}}`** with slug only unless the file already follows another established pattern; external links and **`## References`** follow the reference rules at the end of the doc.
+- **Voice — NEVER sanitize profanity:** A compliance pass fixes structure, front matter, and banned phrases. It does NOT clean up swearing. If the source draft says "fuck", the compliant rewrite says "fuck". Profanity is part of the site's authentic voice per `writing-style.md`; removing or softening it is a compliance failure, not a courtesy.
 - **Checklists:** Before you consider the work done, run through the **SEO** and **Publishing** checklists in `AGENTS.md` for anything user-visible or publish-related.
 - **Banned phrases:** Re-grep against the `writing-style.md` ban list (see workflow step 5) after every edit pass. Author-blindness and prose-tool regression both make this a recurring failure, not a one-time check.
 

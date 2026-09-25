@@ -1,80 +1,103 @@
 ---
 name: write-review
-description: Reviews articles against writing framework rubrics hosted at jeffbailey.us. Detects the framework used, fetches the review prompt, and evaluates the article. Use when the user says /write:review, asks to review an article, evaluate writing quality, check an article against a framework, or get feedback on a draft. Triggers on "review article", "evaluate writing", "check article", "review draft", "writing feedback", "article quality".
+description: Reviews articles against 16 bundled writing framework rubrics. Detects the framework used, loads the rubric from this skill, and evaluates the article. Use when the user says /write:review, asks to review an article, evaluate writing quality, check an article against a framework, or get feedback on a draft. Triggers on "review article", "evaluate writing", "check article", "review draft", "writing feedback", "article quality". With no article specified, reviews the last article created or adjusted.
 ---
 
 # Article Review
 
-Review articles against structured writing framework rubrics. Each review prompt is hosted at jeffbailey.us and defines evaluation criteria, scoring dimensions, and quality standards for a specific article type.
+Review articles against structured writing framework rubrics. Each review prompt is bundled in `references/` and defines evaluation criteria, scoring dimensions, and quality standards for a specific article type.
 
 ## Available Review Frameworks
 
 ### Documentation (Diataxis)
 
-| Framework | What It Evaluates | Slug |
+| Framework | What It Evaluates | File |
 |-----------|-------------------|------|
-| Tutorials Review | Learning flow, setup safety, checkpoints, troubleshooting | `diataxis-article-tutorials-review` |
-| How-to Guides Review | Task clarity, execution steps, troubleshooting coverage | `diataxis-article-how-to-guides-review` |
-| Reference Review | Accuracy, completeness, structure, consistency | `diataxis-article-reference-review` |
-| Explanation Review | Conceptual clarity, learning scaffolding, mental models | `diataxis-article-explanation-review` |
+| Tutorials Review | Learning flow, setup safety, checkpoints, troubleshooting | `references/diataxis-article-tutorials.md` |
+| How-to Guides Review | Task clarity, execution steps, troubleshooting coverage | `references/diataxis-article-how-to-guides.md` |
+| Reference Review | Accuracy, completeness, structure, consistency | `references/diataxis-article-reference.md` |
+| Explanation Review | Conceptual clarity, learning scaffolding, mental models | `references/diataxis-article-explanation.md` |
 
 ### Persuasion and Engagement
 
-| Framework | What It Evaluates | Slug |
+| Framework | What It Evaluates | File |
 |-----------|-------------------|------|
-| AIDA Review | Hook strength, value clarity, desire-building, call-to-action | `aida-article-review` |
-| PAS Review | Problem clarity, agitation strength, solution quality | `problem-agitate-solve-article-review` |
-| Influence Pieces Review | Persuasion techniques, evidence quality, framing | `influence-pieces-article-review` |
+| AIDA Review | Hook strength, value clarity, desire-building, call-to-action | `references/aida.md` |
+| PAS Review | Problem clarity, agitation strength, solution quality | `references/problem-agitate-solve.md` |
+| Influence Pieces Review | Persuasion techniques, evidence quality, framing | `references/influence-pieces.md` |
 
 ### Structural and Rhetorical
 
-| Framework | What It Evaluates | Slug |
+| Framework | What It Evaluates | File |
 |-----------|-------------------|------|
-| Classical Rhetoric Review | Balance of ethos, pathos, logos | `classical-rhetoric-article-review` |
-| TEA Review | Evidence quality, analysis depth, integration | `tea-article-review` |
-| Thought Pieces Review | Idea development, exploration depth, dialectical quality | `thought-pieces-article-review` |
+| Classical Rhetoric Review | Balance of ethos, pathos, logos | `references/classical-rhetoric.md` |
+| TEA Review | Evidence quality, analysis depth, integration | `references/tea.md` |
+| Thought Pieces Review | Idea development, exploration depth, dialectical quality | `references/thought-pieces.md` |
 
 ### Instructional Design
 
-| Framework | What It Evaluates | Slug |
+| Framework | What It Evaluates | File |
 |-----------|-------------------|------|
-| Backward Design Review | Outcomes clarity, assessment alignment, activity design | `backward-design-article-review` |
-| Lesson Planning Review | Framework compliance, instructional quality, progression | `lesson-planning-article-review` |
+| Backward Design Review | Outcomes clarity, assessment alignment, activity design | `references/backward-design.md` |
+| Lesson Planning Review | Framework compliance, instructional quality, progression | `references/lesson-planning.md` |
 
 ### Reference and Lookup
 
-| Framework | What It Evaluates | Slug |
+| Framework | What It Evaluates | File |
 |-----------|-------------------|------|
-| Fact-Based Reference Review | Lookup quality, analytical reference, accuracy | `fact-based-reference-article-review` |
-| List Articles Review | List structure, SEO, search/filter usability | `a-list-article-review` |
+| Fact-Based Reference Review | Lookup quality, analytical reference, accuracy | `references/fact-based-reference.md` |
+| List Articles Review | List structure, SEO, search/filter usability | `references/a-list.md` |
 
 ### Blog-Specific: Fundamentals Review
 
-| Framework | What It Evaluates | Slug |
+| Framework | What It Evaluates | File |
 |-----------|-------------------|------|
-| Fundamentals Review | Diátaxis Explanation + blog-specific checks for `content/blog/fundamentals-x/`; target score 9.8+ | `fundamentals-article-review` |
+| Fundamentals Review | Diátaxis Explanation + blog-specific checks for `content/blog/fundamentals-x/`; target score 9.8+ | `references/fundamentals.md` |
+| Learn X Review | Launch-pad structure, 20/80 coverage, and curated resource quality for `content/blog/learn-x/` | `references/learn.md` |
 
-## Prompt Caching
+## Loading a Rubric
 
-All prompts are cached locally as markdown to avoid repeated network fetches.
+Every rubric is bundled in this skill. Read the file named in the tables above:
 
-**Cache directory**: `~/.claude/cache/writing-prompts/`
+```
+references/<framework>.md
+```
 
-**To load a prompt** (replace `{slug}` with the prompt slug from the tables above, e.g. `a-list-article-review`):
+There is no network fetch and no cache. The files on disk are the source of truth.
 
-1. Check if `~/.claude/cache/writing-prompts/{slug}.md` exists
-2. If it exists, read and use it
-3. If it does not exist, fetch and cache it:
-   ```bash
-   mkdir -p ~/.claude/cache/writing-prompts && curl -s "https://jeffbailey.us/prompts/{slug}/raw.html" | pandoc -f html -t markdown --wrap=none -o ~/.claude/cache/writing-prompts/{slug}.md
-   ```
-4. Read the newly cached file and use it
+Two shared files apply to every rubric:
 
-**To refresh a cached prompt**: delete the cached file and re-fetch using step 3.
+* `references/writing-style.md` sets voice, tone, formatting, link style, and the banned-phrase list.
+* `references/seo-front-matter.md` sets `title:`, `description:`, and `keywords:` rules.
+
+Read them when reviewing anything destined for jeffbaileyblog.
 
 ## Workflow
 
-1. **Receive the article** -- The user provides an article to review, either as text, a file path, or a URL.
+1. **Resolve the target article** -- Use the article the user specified, as text, a file path, or a URL.
+
+   **If the user specified no article, review the last article created or adjusted.** Resolve in this order and stop at the first hit:
+
+   1. **This conversation.** An article you created or edited earlier in this session.
+   2. **The working tree.** The most recently modified uncommitted or untracked article:
+
+      ```bash
+      R=$(git rev-parse --show-toplevel) && git -C "$R" ls-files -m -o --exclude-standard -- '*.md' \
+        | grep -vEi '(^|/)(README|CLAUDE|AGENTS|CONTEXT|MEMORY|notes|links)\.md$' \
+        | sed "s|^|$R/|" | tr '\n' '\0' | xargs -0 ls -t 2>/dev/null | head -1
+      ```
+
+   3. **The last commit.** The most recently committed article:
+
+      ```bash
+      R=$(git rev-parse --show-toplevel) && git -C "$R" log -1 --name-only --pretty=format: -- '*.md' \
+        | sed '/^$/d' \
+        | grep -vEi '(^|/)(README|CLAUDE|AGENTS|CONTEXT|MEMORY|notes|links)\.md$' | head -1
+      ```
+
+   4. **Ask the user.** Only when the first three come up empty.
+
+   Name the resolved path before applying the rubric, so the user can redirect you if it is wrong.
 
 2. **Detect the framework** -- Read the article and determine which writing framework it was written against. Look for structural signals:
    - Step-by-step with "you will learn" → Tutorial
@@ -112,4 +135,4 @@ All prompts are cached locally as markdown to avoid repeated network fetches.
 
 ## Reference
 
-All writing framework review prompts are maintained at https://jeffbailey.us/prompts/
+All rubrics live in `references/` in this skill. Edit them here; nothing is fetched at runtime.

@@ -1,11 +1,11 @@
 ---
 name: write-strategy
-description: Runs strategic analysis for content and business using prompts from jeffbailey.us. Includes competitor analysis and McKinsey-style consulting. Use when the user says /write:strategy, needs competitor analysis, wants strategic content planning, asks for growth analysis, or needs business consulting output. Triggers on "competitor analysis", "competitive landscape", "mckinsey", "growth analysis", "strategic planning", "content strategy", "market analysis".
+description: Runs strategic analysis for content and business using prompts bundled in this skill. Includes competitor analysis and McKinsey-style consulting. Use when the user says /write:strategy, needs competitor analysis, wants strategic content planning, asks for growth analysis, or needs business consulting output. Triggers on "competitor analysis", "competitive landscape", "mckinsey", "growth analysis", "strategic planning", "content strategy", "market analysis".
 ---
 
 # Writing Strategy
 
-Run strategic analysis for content planning and business growth using structured prompts from jeffbailey.us.
+Run strategic analysis for content planning and business growth using structured prompts bundled in this skill.
 
 ## Available Prompts
 
@@ -14,23 +14,15 @@ Run strategic analysis for content planning and business growth using structured
 | Competitor Analysis | Competitive landscape mapping, opportunity gaps, prioritized actions | `competitor-analysis` |
 | McKinsey Consultant | Growth scorecard, bottleneck identification, quick wins, 90-day roadmap | `mckinsey-consultant` |
 
-## Prompt Caching
+## Loading a Prompt
 
-All prompts are cached locally as markdown to avoid repeated network fetches.
+Every prompt this skill needs is bundled in `references/`. Read the file directly:
 
-**Cache directory**: `~/.claude/cache/writing-prompts/`
+* `references/competitor-analysis.md`
+* `references/mckinsey-consultant.md`
+* `references/writing-style.md`
 
-**To load a prompt** (replace `{slug}` with the prompt slug from the table above):
-
-1. Check if `~/.claude/cache/writing-prompts/{slug}.md` exists
-2. If it exists, read and use it
-3. If it does not exist, fetch and cache it:
-   ```bash
-   mkdir -p ~/.claude/cache/writing-prompts && curl -s "https://jeffbailey.us/prompts/{slug}/raw.html" | pandoc -f html -t markdown --wrap=none -o ~/.claude/cache/writing-prompts/{slug}.md
-   ```
-4. Read the newly cached file and use it
-
-**To refresh a cached prompt**: delete the cached file and re-fetch using step 3.
+There is no network fetch and no cache. The files on disk are the source of truth.
 
 ## Workflow
 

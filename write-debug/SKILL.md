@@ -1,11 +1,11 @@
 ---
 name: write-debug
-description: Systematic debugging and bug minimization using structured analysis from jeffbailey.us. Use when the user says /write:debug, needs to minimize a bug report, wants structured debugging help, or asks for systematic issue analysis. Triggers on "bug report", "minimize bug", "debug", "reproduce bug", "isolate issue".
+description: Systematic debugging and bug minimization using structured analysis bundled in this skill. Use when the user says /write:debug, needs to minimize a bug report, wants structured debugging help, or asks for systematic issue analysis. Triggers on "bug report", "minimize bug", "debug", "reproduce bug", "isolate issue".
 ---
 
 # Bug Minimization
 
-Apply structured debugging methodology to isolate, reproduce, and document bugs using the bug minimizer prompt from jeffbailey.us.
+Apply structured debugging methodology to isolate, reproduce, and document bugs using the bug minimizer prompt bundled in this skill.
 
 ## Available Prompts
 
@@ -13,23 +13,14 @@ Apply structured debugging methodology to isolate, reproduce, and document bugs 
 |--------|---------|------|
 | Bug Minimizer | Systematic debugging: isolate, reproduce, gather evidence, hypothesize, test | `bug-minimizer` |
 
-## Prompt Caching
+## Loading a Prompt
 
-All prompts are cached locally as markdown to avoid repeated network fetches.
+Every prompt this skill needs is bundled in `references/`. Read the file directly:
 
-**Cache directory**: `~/.claude/cache/writing-prompts/`
+* `references/bug-minimizer.md`
+* `references/writing-style.md`
 
-**To load a prompt** (replace `{slug}` with the prompt slug from the table above):
-
-1. Check if `~/.claude/cache/writing-prompts/{slug}.md` exists
-2. If it exists, read and use it
-3. If it does not exist, fetch and cache it:
-   ```bash
-   mkdir -p ~/.claude/cache/writing-prompts && curl -s "https://jeffbailey.us/prompts/{slug}/raw.html" | pandoc -f html -t markdown --wrap=none -o ~/.claude/cache/writing-prompts/{slug}.md
-   ```
-4. Read the newly cached file and use it
-
-**To refresh a cached prompt**: delete the cached file and re-fetch using step 3.
+There is no network fetch and no cache. The files on disk are the source of truth.
 
 ## Workflow
 

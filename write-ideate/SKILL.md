@@ -1,11 +1,11 @@
 ---
 name: write-ideate
-description: Brainstorms article ideas and content strategies using structured ideation prompts from jeffbailey.us. Use when the user says /write:ideate, wants to brainstorm topics, generate article ideas, explore content angles, or needs creative inspiration for writing. Triggers on "brainstorm", "idea storm", "article ideas", "content ideas", "what should I write about", "topic ideas".
+description: Brainstorms article ideas and content strategies using structured ideation prompts bundled in this skill. Use when the user says /write:ideate, wants to brainstorm topics, generate article ideas, explore content angles, or needs creative inspiration for writing. Triggers on "brainstorm", "idea storm", "article ideas", "content ideas", "what should I write about", "topic ideas".
 ---
 
 # Writing Ideation
 
-Generate article ideas and content strategies using structured brainstorming techniques. Fetches ideation prompts from jeffbailey.us.
+Generate article ideas and content strategies using structured brainstorming techniques. Fetches ideation prompts bundled in this skill.
 
 ## Available Prompts
 
@@ -13,23 +13,14 @@ Generate article ideas and content strategies using structured brainstorming tec
 |--------|---------|------|
 | Idea Storm | Divergent thinking, perspective shifting, constraint removal, analogous thinking | `idea-storm` |
 
-## Prompt Caching
+## Loading a Prompt
 
-All prompts are cached locally as markdown to avoid repeated network fetches.
+Every prompt this skill needs is bundled in `references/`. Read the file directly:
 
-**Cache directory**: `~/.claude/cache/writing-prompts/`
+* `references/idea-storm.md`
+* `references/writing-style.md`
 
-**To load a prompt** (replace `{slug}` with the prompt slug from the table above):
-
-1. Check if `~/.claude/cache/writing-prompts/{slug}.md` exists
-2. If it exists, read and use it
-3. If it does not exist, fetch and cache it:
-   ```bash
-   mkdir -p ~/.claude/cache/writing-prompts && curl -s "https://jeffbailey.us/prompts/{slug}/raw.html" | pandoc -f html -t markdown --wrap=none -o ~/.claude/cache/writing-prompts/{slug}.md
-   ```
-4. Read the newly cached file and use it
-
-**To refresh a cached prompt**: delete the cached file and re-fetch using step 3.
+There is no network fetch and no cache. The files on disk are the source of truth.
 
 ## Workflow
 

@@ -1,11 +1,11 @@
 ---
 name: write-copy
-description: Creates marketing and landing page copy using persuasion frameworks from jeffbailey.us. Use when the user says /write:copy, needs landing page copy, wants marketing text, asks for sales copy, or needs conversion-focused writing. Triggers on "landing page", "marketing copy", "sales copy", "conversion copy", "copywriting", "CTA", "call to action".
+description: Creates marketing and landing page copy using persuasion frameworks bundled in this skill. Use when the user says /write:copy, needs landing page copy, wants marketing text, asks for sales copy, or needs conversion-focused writing. Triggers on "landing page", "marketing copy", "sales copy", "conversion copy", "copywriting", "CTA", "call to action".
 ---
 
 # Marketing Copy
 
-Create high-converting marketing and landing page copy using structured persuasion frameworks from jeffbailey.us.
+Create high-converting marketing and landing page copy using structured persuasion frameworks bundled in this skill.
 
 ## Available Prompts
 
@@ -13,23 +13,15 @@ Create high-converting marketing and landing page copy using structured persuasi
 |--------|---------|------|
 | Landing Page Copy | 48 Laws of Power applied to copywriting: hook, persona, persuasive sections, CTA, social proof | `landing-page-copy` |
 
-## Prompt Caching
+## Loading a Prompt
 
-All prompts are cached locally as markdown to avoid repeated network fetches.
+Every prompt this skill needs is bundled in `references/`. Read the file directly:
 
-**Cache directory**: `~/.claude/cache/writing-prompts/`
+* `references/landing-page-copy.md`
+* `references/seo-front-matter.md`
+* `references/writing-style.md`
 
-**To load a prompt** (replace `{slug}` with the prompt slug from the table above):
-
-1. Check if `~/.claude/cache/writing-prompts/{slug}.md` exists
-2. If it exists, read and use it
-3. If it does not exist, fetch and cache it:
-   ```bash
-   mkdir -p ~/.claude/cache/writing-prompts && curl -s "https://jeffbailey.us/prompts/{slug}/raw.html" | pandoc -f html -t markdown --wrap=none -o ~/.claude/cache/writing-prompts/{slug}.md
-   ```
-4. Read the newly cached file and use it
-
-**To refresh a cached prompt**: delete the cached file and re-fetch using step 3.
+There is no network fetch and no cache. The files on disk are the source of truth.
 
 ## Workflow
 
