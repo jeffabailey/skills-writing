@@ -11,13 +11,13 @@ Optimize internal linking between published blog posts for improved navigation a
 
 | Prompt | Purpose | Local Path |
 |--------|---------|------------|
-| Internal Link Optimize | Internal linking strategy for published blog posts | Read from local: `/prompts/internal-link-optimize.md` (private) |
+| Internal Link Optimize | Internal linking strategy for published blog posts | `references/internal-link-optimize.md` |
 
 ## Workflow
 
 1. **Understand the scope** -- Ask the user which posts to analyze. This could be a single new post that needs links added, or a broader audit of existing content.
 
-2. **Fetch the prompt** -- Read the Internal Link Optimize prompt from the local filesystem (this is a private prompt).
+2. **Fetch the prompt** -- Read `references/internal-link-optimize.md`.
 
 3. **Gather the content** -- Read the blog posts to be analyzed. Understand the existing link structure and content relationships.
 
@@ -31,7 +31,7 @@ The rules for `title:`, `description:`, and `keywords:` live in exactly one plac
 **SEO front matter prompt** in the blog repo:
 
 ```
-hugo/content/prompts/seo-front-matter.md
+references/seo-front-matter.md
 ```
 
 Read that file and follow it. It carries the Google SEO Starter Guide rules plus the
