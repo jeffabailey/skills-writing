@@ -31,7 +31,9 @@ There is no network fetch and no cache. The files on disk are the source of trut
 
 4. **Apply the prompt** -- Substitute all gathered values, then follow the loaded prompt to create the copy. The prompt defines hook structure, persuasion law selection, section design, and CTA placement.
 
-5. **Deliver the copy** -- Present the draft with clear sections. Highlight which persuasion techniques were used and why.
+5. **Remove AI tells** -- Invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) on the copy in edit mode. Persuasive copy is where AI tells cluster: "elevate", "seamless", "supercharge", vague taglines ("The future of..."), eyebrow labels over headings, and emoji decoration. It replaces them with claims only this product can make. When the copy ships as page markup or a mockup, include the UI and graphics references too. If a tell cannot be replaced without a fact the user has not given, flag it instead of inventing one. If it is not installed, say so in the delivery note and skip this step.
+
+6. **Deliver the copy** -- Present the draft with clear sections. Highlight which persuasion techniques were used and why.
 
 ## Reference
 

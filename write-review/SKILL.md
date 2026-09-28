@@ -126,10 +126,12 @@ Read them when reviewing anything destined for jeffbaileyblog.
 
 6. **Apply writing style check** -- If the article is for jeffbaileyblog, also load the writing style guide (slug: `writing-style`) using the same caching steps. Flag any style violations.
 
+   Then invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode, so it lists AI tells (prose, plus any diagrams or images) without editing the article. Fold its findings into the review's issues list with their locations. A review never edits the article. If the skill is not installed, say so and skip it.
+
 7. **Deliver the review** -- Present findings with:
    - Overall score
    - Per-dimension scores with evidence
-   - Specific issues with line references where possible
+   - Specific issues with line references where possible, including AI tells from `ai-sanitize`
    - Prioritized improvement suggestions
    - Strengths to preserve
 

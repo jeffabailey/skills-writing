@@ -1,11 +1,11 @@
 ---
 name: write-validate-article
-description: Validates a Markdown article for the jeffbaileyblog Hugo site by enforcing AGENTS.md + writing-style.md compliance (read top to bottom, including nested AGENTS.md), running a banned-phrase scan, verifying the Hugo build, then running link checking (lychee) and Markdown linting (markdownlint). Use when the user says /write:validate-article or /hugo:agents, wants to validate an article, check article quality, run all checks on a Markdown file, "apply AGENTS.md", "Hugo blog rules", "compliance with hugo AGENTS", drafting blog posts, or fixing Hugo build errors.
+description: Validates a Markdown article for the jeffbaileyblog Hugo site by enforcing AGENTS.md + writing-style.md compliance (read top to bottom, including nested AGENTS.md), running a banned-phrase scan and an AI-tell scan (via the ai-sanitize skill), verifying the Hugo build, then running link checking (lychee) and Markdown linting (markdownlint). Use when the user says /write:validate-article or /hugo:agents, wants to validate an article, check article quality, run all checks on a Markdown file, "apply AGENTS.md", "Hugo blog rules", "compliance with hugo AGENTS", drafting blog posts, or fixing Hugo build errors.
 ---
 
 # Validate Article
 
-Run every validation check against a Markdown article for the **jeffbaileyblog** Hugo site: AGENTS.md compliance, a banned-phrase scan, Hugo build verification, link checking, and Markdown linting. The goal is one publishable file that passes all gates.
+Run every validation check against a Markdown article for the **jeffbaileyblog** Hugo site: AGENTS.md compliance, a banned-phrase scan, an AI-tell scan, Hugo build verification, link checking, and Markdown linting. The goal is one publishable file that passes all gates.
 
 ## Workflow (always in this order)
 
@@ -15,13 +15,15 @@ Run every validation check against a Markdown article for the **jeffbaileyblog**
 
 3. **Run the banned-phrase scan** -- Mandatory, not optional. See "Banned phrase scan" below. Re-run it after every editing pass.
 
-4. **Verify the Hugo build** -- From the Hugo site root run `hugo --gc --minify` (add `-D` when the post is `draft: true`, so `{{< ref >}}` links still resolve). Fix all reported issues, including `REF_NOT_FOUND` from an invalid `{{< ref >}}`.
+4. **Run the AI-tell scan** -- Invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode on the target file. The banned-phrase scan catches exact tokens; this catches the patterns around them (contrast framing, triads, signposting, fake engagement, formatting as personality, decorative Mermaid and cover images). Report its findings with the other checks and offer to fix them. If it is not installed, note the skipped check in the report.
 
-5. **Run link checking** -- Invoke the `write-check-links` skill against the target file (lychee with the Hugo site's `lychee.toml`).
+5. **Verify the Hugo build** -- From the Hugo site root run `hugo --gc --minify` (add `-D` when the post is `draft: true`, so `{{< ref >}}` links still resolve). Fix all reported issues, including `REF_NOT_FOUND` from an invalid `{{< ref >}}`.
 
-6. **Run Markdown linting** -- Invoke the `write-run-markdown-lint` skill against the target file (markdownlint-cli2 with the user's config).
+6. **Run link checking** -- Invoke the `write-check-links` skill against the target file (lychee with the Hugo site's `lychee.toml`).
 
-7. **Report results** -- Summarize the combined results across all checks. If everything passes, confirm the article is valid. If anything fails, present all errors together, grouped by check, and offer to fix them.
+7. **Run Markdown linting** -- Invoke the `write-run-markdown-lint` skill against the target file (markdownlint-cli2 with the user's config).
+
+8. **Report results** -- Summarize the combined results across all checks. If everything passes, confirm the article is valid. If anything fails, present all errors together, grouped by check, and offer to fix them.
 
 ## AGENTS.md compliance
 

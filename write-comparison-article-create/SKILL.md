@@ -62,5 +62,6 @@ Produce these sections in this order. Omit a section only when it genuinely does
      ```bash
      grep -niE "\b(I|I'm|I've|I'll|my|we|our|us)\b" path/to/index.md | grep -viE "style |graph (TB|TD|LR)|fill:#"
      ```
-7. **Run the site's standard build check** (`hugo --gc --minify`, per `AGENTS.md`) and fix any failures.
-8. **Deliver the draft** for review, noting any TODO (e.g. the cover PNG).
+7. **Remove AI tells** — invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) on the draft in edit mode. Comparison pages attract marketing adjectives and hollow verdicts ("a powerful, seamless choice"); it replaces them with the specifics rule 3 demands, and checks the `mermaid` decision tree for rainbow fills and emoji nodes. If it is not installed, say so in the delivery note and skip this step.
+8. **Run the site's standard build check** (`hugo --gc --minify`, per `AGENTS.md`) and fix any failures.
+9. **Deliver the draft** for review, noting any TODO (e.g. the cover PNG).

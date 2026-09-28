@@ -49,7 +49,9 @@ Do NOT read sibling posts to "establish the shape" of a post, and do NOT grep th
 
    Do NOT skip this step on the grounds that the prose "looks fine" or that you wrote it yourself this session. Author-blindness is exactly why this step exists.
 
-6. **After substantive Markdown or content changes**, run from the Hugo site root:
+6. **Remove AI tells.** After the banned-phrase scan passes, invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) in edit mode on the content you created or edited. It catches the patterns a token grep misses (contrast framing, triads, signposting, formatting as personality, decorative Mermaid). `writing-style.md` wins where they disagree, and profanity stays (see *Voice* below). Re-run the banned-phrase scan afterward. If the skill is not installed, say so and continue.
+
+7. **After substantive Markdown or content changes**, run from the Hugo site root:
 
    ```bash
    hugo --gc --minify

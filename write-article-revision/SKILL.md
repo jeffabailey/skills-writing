@@ -97,7 +97,8 @@ grep -niE "\b(I|I'm|I've|I'll|my|we|our|us)\b" path/to/index.md | grep -viE "sty
 
 8. **Deliver** — Present the revised article and the revision summary together, and flag any unresolved tensions where the new sources conflicted with the original so the user can adjudicate.
 
-9. **Review** — Run two review passes on the revised article:
+9. **Review** — Run three review passes on the revised article:
+   - **AI tells** — invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) on the revised article in edit mode. Integrated source material and AI rewriters reliably bring tells in with them. It preserves the article's voice, including profanity. If it is not installed, say so in the delivery note and skip this step.
    - **Line-level polish** — invoke the `writing-clearly-and-concisely` skill on the full revised text.
    - **Framework rubric** — score the article against the rubric for the framework it was written in. **Determine the framework from the article's `articletype` frontmatter field** and invoke the matching review skill per *Article type → review skill* below. If the article has no `articletype`, infer it (see the precedence rule) and **add the `articletype` field as part of this revision** so the next run is unambiguous. If you still cannot determine it, invoke `write-review` — it detects the framework automatically.
 

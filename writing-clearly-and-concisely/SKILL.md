@@ -86,6 +86,8 @@ LLMs regress to statistical means, producing generic, puffy prose. Avoid:
 
 Be specific, not grandiose. Say what it actually does.
 
+For a full cleanup pass that goes beyond sentences, invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin). It covers prose tells in depth plus the tells in UI copy, interface code, diagrams, and images. This skill stays the line-level editor; `ai-sanitize` is the tell hunter.
+
 For comprehensive research on why these patterns occur, see `signs-of-ai-writing.md`. Wikipedia editors developed this guide to detect AI-generated submissions — their patterns are well-documented and field-tested.
 
 ## Bottom Line

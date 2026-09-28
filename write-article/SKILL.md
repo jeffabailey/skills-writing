@@ -93,7 +93,9 @@ Read them only when they apply, so a draft for somewhere other than jeffbaileybl
 
 6. **Apply writing style and SEO** -- If the article is for jeffbaileyblog, read `references/writing-style.md` and `references/seo-front-matter.md` and follow both. For other destinations, ask the user about their style preferences.
 
-7. **Deliver the draft** -- Present the article draft to the user for review.
+7. **Remove AI tells** -- Invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) on the draft in edit mode. It rewrites performative phrasing, contrast framing, reflexive triads, emdashes, and formatting-as-personality, and cleans Mermaid diagrams and other graphics in the draft. The site writing style still wins where the two disagree. If it is not installed, say so in the delivery note and skip this step.
+
+8. **Deliver the draft** -- Present the article draft to the user for review, with the `ai-sanitize` change list.
 
 ## Framework Selection Guide
 
