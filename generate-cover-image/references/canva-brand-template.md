@@ -27,7 +27,7 @@ Read the locator IDs from the design each time; do not hardcode them. Copies of 
 
 ## Splitting the title
 
-Use the short cover title (see SKILL.md step 5), not a long front matter `title:`. Pick the highlight: the subject the article is about, usually its last noun phrase (`What Are ` + `AI Evals` + `?`; `Fundamentals of ` + `Containerization` + empty; `Learn ` + `Nushell` + empty). Everything before it is the lead, everything after it (including punctuation) is the trail. Keep the space at the end of the lead.
+Use the short cover title (see SKILL.md step 5), not a long front matter `title:`. Pick the highlight: the subject the article is about, usually its last noun phrase (`What Are ` + `AI Evals` + `?`; `Fundamentals of ` + `Containerization` + empty; `Learn ` + `Nushell` + empty). Everything before it is the lead, everything after it (including punctuation) is the trail. End the lead with a line break instead of a space, so the lead and the highlight sit on separate lines (`"Learn\n"` + `Tmux`).
 
 ## Steps
 
@@ -35,21 +35,19 @@ Use the short cover title (see SKILL.md step 5), not a long front matter `title:
 
 2. **Read it.** `read-design` with `open_transaction: true` and `filter.fields: ["design_content", "thumbnails"]`. Take the `transaction_id`, the page `id` and `locator_id`, the title element's `locator_id` (the text element whose regions are `Topic `, `key point`, `?`), the logo rect's `locator_id`, and the byline's `locator_id`.
 
-3. **Upload the artwork.** Skip this step if the artwork came from Canva `generate-image`; its media ID (`M...`) is the `mediaId`. Otherwise call `create-upload-url`, then send the 1200x630 PNG's raw bytes in one POST:
+3. **Upload the shade.** The artwork is already a Canva media ID from `generate-image` (SKILL.md step 3), so it needs no upload. Upload the shade overlay from `<skill-dir>/assets/cover-shade.png`: call `create-upload-url`, then send the PNG's raw bytes in one POST:
 
    ```bash
    curl -sS -X POST -H "Content-Type: application/octet-stream" \
-     --data-binary @<background.png> '<upload_url>'
+     --data-binary @<skill-dir>/assets/cover-shade.png '<upload_url>'
    ```
 
-   The response is `{"mediaId":"M..."}`. Each URL works once; get a new one to retry.
-
-   Upload the shade overlay the same way, from `<skill-dir>/assets/cover-shade.png`, and keep its `mediaId`. See [Shading the background](#shading-the-background).
+   The response is `{"mediaId":"M..."}`; keep it. Each URL works once; get a new one to retry. See [Shading the background](#shading-the-background).
 
 4. **Edit.** One `edit-design` call with `finalize: "keep_open"`, `page_index: 1`, and these operations:
 
-   * `update_fill` on the page locator, `asset_type: image`, `asset_id: <mediaId>`, `alt_text: <cover alt text>`
-   * `find_and_replace_text` on the title locator: `"Topic "` → lead
+   * `update_fill` on the page locator, `asset_type: image`, `asset_id: <artwork mediaId>`, `alt_text: <cover alt text>`
+   * `find_and_replace_text` on the title locator: `"Topic "` → lead (ending in `\n`)
    * `find_and_replace_text` on the title locator: `"key point"` → highlight
    * `find_and_replace_text` on the title locator: `"?"` → trail (an empty string removes the region)
    * `update_title` → the article slug
@@ -58,7 +56,7 @@ Use the short cover title (see SKILL.md step 5), not a long front matter `title:
 
    Replace the regions in that order, so a lead or highlight containing `?` is not hit by the last replacement.
 
-5. **Check.** Confirm in the returned `document` that the background `mediaId` is the uploaded one, the shade is a full-page image element listed before the logo, byline, and title (earlier elements draw underneath), and the title regions read lead, highlight, trail. In the thumbnail, the artwork should be clearly darker with black edges, and the title, logo, and byline at full brightness. Draft thumbnails often draw text twice, slightly offset; trust the `document` for text and the thumbnail for layout. If the title runs past three lines or touches the logo, apply `format_text` with a smaller `font_size` to the title locator and check again.
+5. **Check.** Confirm in the returned `document` that the background `mediaId` is the generated artwork, the shade is a full-page image element listed before the logo, byline, and title (earlier elements draw underneath), and the title regions read lead, highlight, trail. In the thumbnail, the artwork should be clearly darker with black edges, and the title, logo, and byline at full brightness. Draft thumbnails often draw text twice, slightly offset; trust the `document` for text and the thumbnail for layout. If the title runs past three lines or touches the logo, apply `format_text` with a smaller `font_size` to the title locator and check again.
 
 6. **Commit.** Show the user the thumbnail and the draft's edit URL, and commit with `edit-design` `finalize: "commit"` once they approve (or straight away if they said to skip review). To abandon, use `finalize: "cancel"`.
 

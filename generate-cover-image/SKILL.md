@@ -12,7 +12,7 @@ Create a cover image whose composition comes from what the article means, not fr
 - **Article**: a Markdown file path, or the draft in the conversation.
 - **Output path**: for jeffbaileyblog, `<page bundle>/<slug>.png` next to the bundle's `index.md` (the slug is the front matter `slug:`). Elsewhere, ask.
 
-For jeffbaileyblog, the generated artwork is only the background. The published `<slug>.png` is the export of a Canva design with the title on it, so generate the artwork to a temporary path such as `<tmp>/<slug>-background.png`, not into the bundle.
+For jeffbaileyblog, the generated artwork is only the background. The published `<slug>.png` is the export of a Canva design with the title on it, so the artwork stays in Canva as a media ID and never goes into the bundle.
 
 Every jeffbaileyblog cover is its own Canva design:
 
@@ -30,28 +30,16 @@ Never open, edit, or publish the brand template. `create-design-from-brand-templ
 
 2. **Write the inspiration text.** In 80 to 150 words of plain prose, state the article's core idea, its emotional tone, and the metaphors, contrasts, or tensions it uses. Describe meaning, not layout. Leave out product names, logos, commands, and quoted code, because the prompt forbids text in the image and names pull models toward literal renderings. Show it to the user only if they asked to review prompts.
 
-3. **Generate.** Save the inspiration text to a temporary file and run:
+3. **Generate with the Canva connector.** Join the prompt and the inspiration text (`cat references/cover-prompt.md <inspiration.txt>`) and send the result to Canva `generate-image` with `aspectRatio: LANDSCAPE_2_1`. Poll `get-generate-image-job` with the returned `jobId` until it returns `SUCCESS`. The result is a Canva media ID (`M...`); it is the background asset in step 5. Canva crops it to fill the 1200x630 page.
 
-   ```bash
-   <skill-dir>/scripts/generate.sh <inspiration.txt> <output.png>
-   ```
+   Do not call the OpenAI Images API or any other image service. If the Canva tools are not connected or the job fails, write the joined prompt to `<output>.prompt.txt`, tell the user why, and stop. Never draw a placeholder or a substitute graphic.
 
-   The script joins `references/cover-prompt.md` and the inspiration text, calls the OpenAI Images API (`gpt-image-1`, 1536x1024, high quality; override with `COVER_IMAGE_MODEL`), then scales and center-crops the result to exactly 1200x630 and checks the size. It needs `OPENAI_API_KEY`, `curl`, `jq`, `python3`, and ImageMagick (`magick`).
-
-   If the script cannot run (no key, no network, or the API refuses, for example `HTTP 429: You have no credits remaining`), fall back in this order:
-
-   1. **Canva `generate-image`** (jeffbaileyblog). Send the same joined prompt (`cat references/cover-prompt.md <inspiration.txt>`) with `aspectRatio: LANDSCAPE_2_1`, then poll `get-generate-image-job` until it returns `SUCCESS`. The result is a Canva media ID (`M...`); use it as the background asset in step 5 and skip the upload there. Canva crops it to fill the 1200x630 page.
-   2. **Another image-generation tool** in the session. Send it the joined prompt and crop the result with `magick <in> -resize '1200x630^' -gravity center -extent 1200x630 <out.png>`.
-   3. **Nothing.** Write the joined prompt to `<output>.prompt.txt`, tell the user, and stop. Never draw a placeholder or a substitute graphic.
-
-   Tell the user which generator made the artwork.
-
-4. **Look at the artwork.** Read the PNG, or the preview `get-generate-image-job` returns. Regenerate once with a sharper inspiration text if it contains any letters, numbers, code, or UI chrome, or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it.
+4. **Look at the artwork.** Read the preview `get-generate-image-job` returns. Regenerate once with a sharper inspiration text if it contains any letters, numbers, code, or UI chrome, or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it.
 
 5. **Create the cover design in Canva (jeffbaileyblog).** Follow `references/canva-brand-template.md`. In short:
 
    1. `create-design-from-brand-template` with `EAHXEEDJKs0` to make a new design.
-   2. Set the artwork as that design's page background (upload it first unless it is already a Canva media ID).
+   2. Set the artwork's media ID as that design's page background.
    3. Darken the background: upload `assets/cover-shade.png` and place it full-page over the background, then bring the logo, byline, and title to the front. This stands in for the Canva Adjust settings Brightness -55 and Vignette 100, which the connector cannot set.
    4. Replace the placeholder title with the short cover title.
    5. Rename the design to the slug.
@@ -59,11 +47,11 @@ Never open, edit, or publish the brand template. `create-design-from-brand-templ
    7. Move the design to folder `FAFgCl26Zkg`.
    8. Export it as a 1200x630 PNG to `<page bundle>/<slug>.png`, and look at the exported PNG before going on.
 
-   The cover title is short, not the full front matter `title:`. The template sets it at about 130 px, which fits roughly two lines of 12 characters. Use the title's lead phrase (`Learn Nushell` for "Learn Nushell: Tables, Pipelines, ..."; `What Are AI Evals?`). If the title is already short, use it as is.
+   The cover title is short, not the full front matter `title:`. The template sets it at about 130 px, which fits roughly two lines of 12 characters. Use the title's lead phrase (`Learn Nushell` for "Learn Nushell: Tables, Pipelines, ..."; `What Are AI Evals?`). If the title is already short, use it as is. Put the lead and the highlight on separate lines (`Learn` above `Nushell`).
 
    If an older design with the same slug name exists in the folder, leave it; the new design replaces it as the cover, and the user can delete the old one.
 
-   If the Canva tools are not connected or a step fails, copy the artwork to `<slug>.png` without a title, and tell the user the Canva step was skipped and why. Other destinations skip this step and write the artwork straight to the output path.
+   If a Canva step fails, stop and tell the user which step failed and why; leave the existing `<slug>.png` in place. Other destinations skip this step; give the user the generated image's "Open generated image" link and media ID instead.
 
 6. **Wire it up (jeffbaileyblog).** Set the front matter unquoted, as `hugo/AGENTS.md` requires:
 
@@ -75,4 +63,4 @@ Never open, edit, or publish the brand template. `create-design-from-brand-templ
 
    The alt text describes the picture itself, not the article. On a Canva cover, include the title as it appears on the image.
 
-7. **Report.** Give the image path, its size, the alt text, which generator made the artwork, and for jeffbaileyblog the Canva design's name, edit URL, and folder. Keep the inspiration text in the reply so the image can be regenerated later.
+7. **Report.** Give the image path, its size, the alt text, the artwork's Canva media ID, and for jeffbaileyblog the Canva design's name, edit URL, and folder. Keep the inspiration text in the reply so the image can be regenerated later.
