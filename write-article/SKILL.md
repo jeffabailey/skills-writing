@@ -95,7 +95,9 @@ Read them only when they apply, so a draft for somewhere other than jeffbaileybl
 
 7. **Remove AI tells** -- Invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) on the draft in edit mode. It rewrites performative phrasing, contrast framing, reflexive triads, emdashes, and formatting-as-personality, and cleans Mermaid diagrams and other graphics in the draft. The site writing style still wins where the two disagree. If it is not installed, say so in the delivery note and skip this step.
 
-8. **Deliver the draft** -- Present the article draft to the user for review, with the `ai-sanitize` change list.
+8. **Generate the cover image** -- Invoke the `generate-cover-image` skill (sibling directory `../generate-cover-image/`) on the sanitized draft. For jeffbaileyblog it generates the background artwork, composites it with the title into the `jbb-feature-image-template` Canva brand template, files the design in the Canva covers folder, exports it to `<slug>.png` in the page bundle, and sets `cover.image` and `cover.alt` in the front matter. The Canva step needs the Canva connector; without it the cover ships as untitled artwork and the skill says so. Skip this step if the user supplied a cover or asked for none. If the skill cannot generate an image, it leaves the prompt in `<slug>.png.prompt.txt`; mention that in the delivery note.
+
+9. **Deliver the draft** -- Present the article draft to the user for review, with the `ai-sanitize` change list, the cover image path and alt text, and the Canva design link.
 
 ## Framework Selection Guide
 
@@ -114,4 +116,4 @@ Use this decision tree when the user does not specify a framework:
 
 ## Reference
 
-All prompts live in `references/` in this skill. Edit them here; nothing is fetched at runtime.
+All prompts live in `references/` in this skill. Edit them here; nothing is fetched at runtime. The cover image prompt lives in `../generate-cover-image/references/cover-prompt.md`.
