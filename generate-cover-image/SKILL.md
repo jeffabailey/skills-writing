@@ -45,7 +45,7 @@ Never open, edit, or publish the brand template. `create-design-from-brand-templ
    5. Rename the design to the slug.
    6. Show the user the preview and commit once they approve.
    7. Move the design to folder `FAFgCl26Zkg`.
-   8. Export it as a 1200x630 PNG to `<page bundle>/<slug>.png`, and look at the exported PNG before going on.
+   8. Export it as a 1200x630 PNG to `<page bundle>/<slug>.png`, compress it with `pngquant`, and look at the exported PNG before going on.
 
    The cover title is short, not the full front matter `title:`. The template sets it at about 130 px, which fits roughly two lines of 12 characters. Use the title's lead phrase (`Learn Nushell` for "Learn Nushell: Tables, Pipelines, ..."; `What Are AI Evals?`). If the title is already short, use it as is. Put the lead and the highlight on separate lines (`Learn` above `Nushell`).
 

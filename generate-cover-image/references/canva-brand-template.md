@@ -62,12 +62,15 @@ Use the short cover title (see SKILL.md step 5), not a long front matter `title:
 
 7. **File it.** `move-item-to-folder` with the design ID and `to_folder_id: FAFgCl26Zkg`.
 
-8. **Export.** `export-design` with `format: {type: png, width: 1200, height: 630}`. Download the returned URL over the bundle's `<slug>.png` and check the size:
+8. **Export and compress.** `export-design` with `format: {type: png, width: 1200, height: 630}`. Keep Canva's default lossless export; do not set `lossless: false`, because `pngquant` compresses better from the lossless source and Canva's lossy pass only adds a second round of loss. Download the returned URL over the bundle's `<slug>.png`, quantize it in place, and check the size:
 
    ```bash
    curl -sSL -o <bundle>/<slug>.png '<download_url>'
-   magick identify -format '%wx%h\n' <bundle>/<slug>.png   # 1200x630
+   pngquant --quality=70-90 --strip --speed 1 --skip-if-larger -f --ext .png <bundle>/<slug>.png
+   magick identify -format '%wx%h %b\n' <bundle>/<slug>.png   # 1200x630, about 100 KB
    ```
+
+   `pngquant` took the Learn Tmux cover from 592 KB to 88 KB with no visible banding. It exits 98 or 99 when it skips the file (already smaller, or below the quality floor); that is fine, keep the Canva file. If `pngquant` is not installed, keep the Canva file and tell the user (`brew install pngquant`). Look at the final PNG for banding in the dark gradients; if it shows, re-export and use `--quality=80-95`.
 
    If the export is not 1200x630, crop it with `magick <in> -resize '1200x630^' -gravity center -extent 1200x630 <out>`.
 
