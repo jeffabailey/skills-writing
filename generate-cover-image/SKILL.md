@@ -1,6 +1,6 @@
 ---
 name: generate-cover-image
-description: Generates a 1200x630 PNG cover image for an article from its meaning, using the bundled cover prompt (dark, futuristic, human-and-system artwork with no text). For jeffbaileyblog it creates a new Canva design from the jbb-feature-image-template brand template (never editing the template itself), swaps in the artwork as the background, sets the title, names the design after the article slug, files it in the blog covers folder, and exports it next to the article with the Hugo cover front matter set. Use when the user says /write:cover, asks for a cover image, hero image, or social/OG image for an article, or when write-article finishes a jeffbaileyblog draft.
+description: Generates a 1200x630 PNG cover image for an article from its meaning, using the bundled cover prompt (dark, futuristic, human-and-system artwork with no text). For jeffbaileyblog it overwrites the article's existing Canva cover design, or creates one from the jbb-feature-image-template brand template (never editing the template itself), swaps in the artwork as the background, sets the title, names the design after the article slug, files it in the blog covers folder, and exports it next to the article with the Hugo cover front matter set. Use when the user says /write:cover, asks for a cover image, hero image, or social/OG image for an article, or when write-article finishes a jeffbaileyblog draft.
 ---
 
 # Generate Cover Image
@@ -22,7 +22,7 @@ Every jeffbaileyblog cover is its own Canva design:
 | Destination folder | `FAFgCl26Zkg` |
 | Design name | the front matter `slug:`, e.g. `learn-nushell` |
 
-Never open, edit, or publish the brand template. `create-design-from-brand-template` makes a new design, and all edits go to that design.
+Never open, edit, or publish the brand template. Edits go to the article's cover design: the existing one named after the slug, or a new one from `create-design-from-brand-template`.
 
 ## Workflow
 
@@ -36,20 +36,17 @@ Never open, edit, or publish the brand template. `create-design-from-brand-templ
 
 4. **Look at the artwork.** Read the preview `get-generate-image-job` returns. Regenerate once with a sharper inspiration text if it contains any letters, numbers, code, or UI chrome, or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it.
 
-5. **Create the cover design in Canva (jeffbaileyblog).** Follow `references/canva-brand-template.md`. In short:
+5. **Create or overwrite the cover design in Canva (jeffbaileyblog).** Follow `references/canva-brand-template.md`. In short:
 
-   1. `create-design-from-brand-template` with `EAHXEEDJKs0` to make a new design.
+   1. Look in folder `FAFgCl26Zkg` for a design titled with the slug. If it exists, edit that design in place. Otherwise `create-design-from-brand-template` with `EAHXEEDJKs0` to make a new one.
    2. Set the artwork's media ID as that design's page background.
-   3. Darken the background: upload `assets/cover-shade.png` and place it full-page over the background, then bring the logo, byline, and title to the front. This stands in for the Canva Adjust settings Brightness -55 and Vignette 100, which the connector cannot set.
-   4. Replace the placeholder title with the short cover title.
-   5. Rename the design to the slug.
-   6. Show the user the preview and commit once they approve.
-   7. Move the design to folder `FAFgCl26Zkg`.
-   8. Export it as a 1200x630 PNG to `<page bundle>/<slug>.png`, compress it with `pngquant`, and look at the exported PNG before going on.
+   3. Replace the placeholder title with the short cover title. Leave the background's brightness alone: no shade layer, no vignette.
+   4. Rename a new design to the slug.
+   5. Show the user the preview and commit once they approve.
+   6. Move a new design to folder `FAFgCl26Zkg`.
+   7. Export it as a 1200x630 PNG to `<page bundle>/<slug>.png`, compress it with `pngquant`, and look at the exported PNG before going on.
 
    The cover title is short, not the full front matter `title:`. The template sets it at about 130 px, which fits roughly two lines of 12 characters. Use the title's lead phrase (`Learn Nushell` for "Learn Nushell: Tables, Pipelines, ..."; `What Are AI Evals?`). If the title is already short, use it as is. Put the lead and the highlight on separate lines (`Learn` above `Nushell`).
-
-   If an older design with the same slug name exists in the folder, leave it; the new design replaces it as the cover, and the user can delete the old one.
 
    If a Canva step fails, stop and tell the user which step failed and why; leave the existing `<slug>.png` in place. Other destinations skip this step; give the user the generated image's "Open generated image" link and media ID instead.
 
