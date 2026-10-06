@@ -21,7 +21,7 @@ There is no network fetch and no cache. The files on disk are the source of trut
 
 1. **Understand the product/service** -- Ask the user about what they are selling or promoting, who the target audience is, what the key value proposition is, and what action they want the reader to take.
 
-2. **Load the prompt** -- Load the Landing Page Copy prompt (slug: `landing-page-copy`) using the caching steps above.
+2. **Read the prompt** -- Load the Landing Page Copy prompt, `references/landing-page-copy.md`.
 
 3. **Gather variables** -- If the loaded prompt contains template variables in the format `{{variable_name|default="value"}}`:
    - **Has a non-empty default**: Present the default and let the user accept or override it.

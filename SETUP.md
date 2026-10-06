@@ -3,17 +3,20 @@
 ## Prerequisites
 
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
-- Access to `jeffbailey.us` for fetching prompts
+
+Each skill bundles its prompts in its own `references/` directory, so the skills need no network access to load them.
 
 ## Installation
 
-### Cursor (skills + slash commands)
+### Claude Code and Cursor (skills + slash commands)
 
-From your Shell dotfiles repo, run MCP distribution (installs symlinks into `~/.cursor/skills` and `~/.cursor/commands`):
+From your Shell dotfiles repo, run MCP distribution. It symlinks each skill folder into `~/.claude/skills` and `~/.cursor/skills`, and the slash commands into `~/.cursor/commands`:
 
 ```bash
-~/Shell/configure_mcp.sh distribute
+~/Shell/config/configure_mcp.sh distribute
 ```
+
+Because the installs are symlinks, edits to a skill take effect without reinstalling. Run it again after adding or renaming a skill.
 
 - **Skills** come from this repository’s skill folders (for example `write-article/`).
 - **Slash commands** come from `.cursor/commands/*.md` in this repo (for example `/write-article`, `/hugo-agents`).
@@ -33,15 +36,6 @@ git clone <repo-url> ~/Projects/writing-skills
 
 Or add the individual skill directories you want to your project's `.claude/skills/` directory.
 
-### Permissions
-
-The included `.claude/settings.local.json` grants:
-
-- **WebFetch** to `jeffbailey.us` for fetching prompts at runtime
-- **additionalDirectories** to the local blog prompts directory for private prompts
-
-If you are not Jeff Bailey, update `additionalDirectories` to point to your local copy of the prompts, or remove it if you only use public prompts.
-
 ## Usage
 
 ```
@@ -59,13 +53,13 @@ If you are not Jeff Bailey, update `additionalDirectories` to point to your loca
 
 ### Using your own prompts
 
-Replace the URLs in each `SKILL.md` with your own prompt hosting location. The skills expect to fetch markdown content from the configured URLs.
+Replace the prompt files in a skill's `references/` directory with your own. Keep the file names, or update the links to them in that skill's `SKILL.md`.
 
 ### Adding frameworks
 
 To add a new writing framework:
 
-1. Create and publish the prompt (create + review variants)
+1. Write the create and review prompts, and save them as `write-article/references/<framework>.md` and `write-review/references/<framework>.md`
 2. Add the framework to the tables in `write-article/SKILL.md` and `write-review/SKILL.md`
-3. Update the corresponding `references/prompt-index.md`
+3. Update `references/prompt-index.md` in both skills
 4. Add framework detection signals to `write-review/SKILL.md` workflow step 2

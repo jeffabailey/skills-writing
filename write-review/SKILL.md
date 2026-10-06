@@ -114,7 +114,7 @@ Read them when reviewing anything destined for jeffbaileyblog.
 
    If detection is ambiguous, ask the user which framework applies.
 
-3. **Load the review prompt** -- Load the prompt for the detected framework using the caching steps above. Use the slug from the Slug column.
+3. **Load the review prompt** -- Read the rubric file for the detected framework, as described in [Loading a Rubric](#loading-a-rubric).
 
 4. **Gather variables** -- If the loaded review prompt contains template variables in the format `{{variable_name|default="value"}}`:
    - **Has a non-empty default**: Present the default and let the user accept or override it.
@@ -124,7 +124,7 @@ Read them when reviewing anything destined for jeffbaileyblog.
 
 5. **Apply the review** -- Substitute all gathered values into the template variables, then follow the loaded review prompt to evaluate the article. The prompt defines scoring dimensions, quality thresholds, and specific checks.
 
-6. **Apply writing style check** -- If the article is for jeffbaileyblog, also load the writing style guide (slug: `writing-style`) using the same caching steps. Flag any style violations.
+6. **Apply writing style check** -- If the article is for jeffbaileyblog, also read `references/writing-style.md`. Flag any style violations.
 
    Then invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode, so it lists AI tells (prose, plus any diagrams or images) without editing the article. Fold its findings into the review's issues list with their locations. A review never edits the article. If the skill is not installed, say so and skip it.
 

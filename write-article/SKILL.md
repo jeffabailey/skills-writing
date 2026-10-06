@@ -80,7 +80,7 @@ Read them only when they apply, so a draft for somewhere other than jeffbaileybl
 
 2. **Recommend a framework** -- Based on the topic and intent, recommend the best framework. Explain briefly why it fits. If multiple frameworks could work, present the top two options with trade-offs.
 
-3. **Load the prompt** -- Once the framework is selected, load it using the caching steps above. Use the slug from the Slug column (e.g. for List Articles, the slug is `references/a-list.md`).
+3. **Load the prompt** -- Once the framework is selected, read its prompt file, named in the Slug column (for List Articles, `references/a-list.md`).
 
 4. **Gather variables** -- The loaded prompt contains template variables in the format `{{variable_name|default="value"}}`. For each variable:
    - **Has a non-empty default** (e.g. `{{tone|default="conversational"}}`): Present the default and let the user accept or override it.

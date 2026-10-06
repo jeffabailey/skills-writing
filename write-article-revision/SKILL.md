@@ -60,18 +60,7 @@ A core goal of this skill: **the reader should be able to tell what was added an
 
 ## Apply the site writing style (when relevant)
 
-If the article is for jeffbaileyblog, also load and apply the writing style guide so the revision stays consistent with the rest of the site. Prompts are cached locally to avoid repeated network fetches.
-
-
-**To load the writing style guide**:
-
-2. If it exists, read and use it
-3. If it does not exist, fetch and cache it:
-   ```bash
-   ```
-4. Read the newly cached file and use it
-
-**To refresh a cached prompt**: delete the cached file and re-fetch using step 3.
+If the article is for jeffbaileyblog, also read and apply `references/writing-style.md`, so the revision stays consistent with the rest of the site.
 
 When `writing-style.md` and any other guidance disagree, `writing-style.md` wins. In particular, honor its Diátaxis voice override: for explanation-type content, write in second person and imperative — newly integrated material must match. After revising such an article, grep for first-person author voice introduced by the new content and fix each hit:
 

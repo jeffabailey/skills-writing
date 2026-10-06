@@ -26,7 +26,7 @@ There is no network fetch and no cache. The files on disk are the source of trut
 
 1. **Receive the bug report** -- The user provides a bug description, reproduction steps, or observed behavior.
 
-2. **Load the prompt** -- Load the Bug Minimizer prompt (slug: `bug-minimizer`) using the caching steps above.
+2. **Read the prompt** -- Load the Bug Minimizer prompt, `references/bug-minimizer.md`.
 
 3. **Gather variables** -- If the loaded prompt contains template variables in the format `{{variable_name|default="value"}}`:
    - **Has a non-empty default**: Present the default and let the user accept or override it.

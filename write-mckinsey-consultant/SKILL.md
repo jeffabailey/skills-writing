@@ -20,7 +20,7 @@ There is no network fetch and no cache. The files on disk are the source of trut
 
 1. **Understand the business context** -- Ask the user about their business, current growth stage, and what strategic questions they need answered.
 
-2. **Load the prompt** -- Load the McKinsey Consultant prompt (slug: `mckinsey-consultant`) using the caching steps above.
+2. **Read the prompt** -- Load the McKinsey Consultant prompt, `references/mckinsey-consultant.md`.
 
 3. **Gather variables** -- If the loaded prompt contains template variables in the format `{{variable_name|default="value"}}`:
    - **Has a non-empty default**: Present the default and let the user accept or override it.

@@ -20,7 +20,7 @@ There is no network fetch and no cache. The files on disk are the source of trut
 
 1. **Understand the context** -- Ask the user about their subject area, audience, existing content, and goals. What gap are they trying to fill?
 
-2. **Load the prompt** -- Load the Idea Storm prompt (slug: `idea-storm`) using the caching steps above.
+2. **Read the prompt** -- Load the Idea Storm prompt, `references/idea-storm.md`.
 
 3. **Gather variables** -- If the loaded prompt contains template variables in the format `{{variable_name|default="value"}}`:
    - **Has a non-empty default**: Present the default and let the user accept or override it.
