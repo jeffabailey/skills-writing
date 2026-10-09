@@ -76,7 +76,7 @@ Use this for more than about three covers, such as every category. It needs abou
    2. Poll each job once; poll again only the ones still `PENDING`. Judge each preview as in step 4 and regenerate the misses now, before editing.
    3. For each cover: read the design without thumbnails, make the single `edit-design` call, check the returned `document` and thumbnail, then commit, move, and export.
    4. Pipe the five `<output> <url>` lines to `scripts/fetch-covers.sh`.
-   5. Look at all five on one sheet: `magick montage <pngs> -tile 1x -geometry 600x315+0+8 -background '#111' /tmp/covers-sheet.png`. Redo any cover whose title is cramped or overlaps the logo, or that repeats an earlier cover's composition.
+   5. Look at all five on one sheet: `magick <pngs> -resize 600x -background '#111' -splice 0x8 -append /tmp/covers-sheet.png`. Redo any cover whose title is cramped or overlaps the logo, or that repeats an earlier cover's composition.
    6. Set the front matter for the five with `scripts/set-cover-frontmatter.py --batch` (one `path<TAB>png<TAB>alt[<TAB>category]` line each), build the site, and check that each page's `og:image` is its cover.
 
    If a call is refused for quota, stop and tell the user how many covers are left.

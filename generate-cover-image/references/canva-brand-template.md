@@ -33,17 +33,19 @@ Short titles:
 
 * **One word** (`Observability`): the whole word is the highlight; the lead and trail are empty, so their regions are removed.
 * **Two words** (`Platform Engineering`): the first word is the lead, the second the highlight (`"Platform\n"` + `Engineering`).
-* **Three or more words** (`Managing Technical Debt`): highlight the last word or noun phrase, and the rest is the lead. When two splits read equally well, take the one whose longest line is shorter, because it keeps the title larger: `"Managing\n"` + `Technical Debt` (14 characters, 111 px) over `"Managing Technical\n"` + `Debt` (18, 86 px).
+* **Three or more words** (`Managing Technical Debt`): highlight the last word or noun phrase, and the rest is the lead. When two splits read equally well, take the one `scripts/title-size.py` sizes larger: `"Managing\n"` + `Technical Debt` (90 px) over `"Managing Technical\n"` + `Debt` (69 px).
 
 Keep the title's own spelling (`macOS`, `DevOps`); the font draws capitals either way, but the design's text is what the editor and the alt text show.
 
 ## Sizing the title
 
-Set the font size in the first edit, not after looking at the result. The font renders in capitals, and the 1087 px title box holds about 12 characters per line at the template's 130.659 px. Take the longest line of the title (lead, or highlight plus trail), counting spaces, and use:
+Set the font size in the first edit, not after looking at the result. The font draws every letter as a capital, and capitals vary a lot in width (`DEVELOPMENT`, 11 characters, wraps mid-word at the template's 130.659 px), so count width, not characters:
 
-`font_size = min(130, floor(1560 / longest line))`
+```bash
+python3 scripts/title-size.py "<line 1>" "<line 2>"   # e.g. "AI" "Development" -> 104
+```
 
-So 12 characters keep the template size, 16 get 97, and `Graph Engineering?` (18) gets 86. Keep it at 72 or more: if a line would need less, break it at a space into two lines. Use at most three lines in total, and at most 100 px when there are three, so the title stays clear of the logo. Skip `format_text` when the result is 130 and the title is still at the template's 130.659 px.
+It weights each character, fits the widest line to the 1087 px title box with a safety margin, caps three-line titles at 100 px, and exits 2 when a line would need less than 72 px: break that line at a space and run it again. When choosing between two splits, run both and keep the larger size. Skip `format_text` when it prints 130 and the title is still at the template's 130.659 px.
 
 ## Steps
 
