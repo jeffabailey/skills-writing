@@ -37,7 +37,7 @@ Never open, edit, or publish the brand template: every cover on the blog is buil
 
    Use only Canva; do not call the OpenAI Images API or any other image service. If Canva is not connected or the job fails, write the joined prompt to `<output>.prompt.txt`, tell the user why, and stop. Never draw a placeholder or substitute graphic.
 
-4. **Judge the artwork from the job's preview,** before building anything on it. Regenerate once with a sharper inspiration text if it shows letters, numbers, code, or UI chrome (icons in circles count), or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it. Checking here, not after export, means a bad image costs one generation instead of a whole design.
+4. **Judge the artwork from the job's preview,** before building anything on it. Regenerate once with a sharper inspiration text if it shows letters, numbers, code, or UI chrome (icons in circles count), or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it. Checking here, not after export, means a bad image costs one generation instead of a whole design. The job preview is small (about 200 px wide), so small marks such as symbols on coins can slip past it: look again at the larger thumbnail the edit returns in step 5, before committing. If the miss shows there, regenerate and send another `update_fill` in the same open transaction; nothing is lost. For subjects that invite emblems (money, flags, sports, brands), say in the inspiration text that surfaces are plain and unmarked.
 
    Write the alt text now, from the preview you are looking at: the `update_fill` in step 5 needs it. Canva's `alt_text` always describes the artwork itself. The front matter alt in step 6 follows its own rule.
 
@@ -79,6 +79,6 @@ Use this for more than about three covers, such as every category. It needs abou
    5. Look at all five on one sheet: `magick <pngs> -resize 600x -background '#111' -splice 0x8 -append /tmp/covers-sheet.png`. Redo any cover whose title is cramped or overlaps the logo, or that repeats an earlier cover's composition.
    6. Set the front matter for the five with `scripts/set-cover-frontmatter.py --batch` (one `path<TAB>png<TAB>alt[<TAB>category]` line each), build the site, and check that each page's `og:image` is its cover.
 
-   If a call is refused for quota, stop and tell the user how many covers are left.
+   Canva limits `generate-image` to 20 calls a minute and also throttles design creation, and the limits are shared by everything using the connector. A batch of five fits; several batches started in the same minute do not. When running batches in parallel (for example, one agent per batch), run at most two or three at once and stagger their starts by a minute. A "rate limited" or "too many requests" error means wait about a minute and retry that call; reuse any designs already created rather than creating them again. A refusal for quota is different: stop and tell the user how many covers are left.
 
 Report the batch as a table: output path, design name and edit URL, artwork media ID, and size. Keep the inspiration texts in the scratch directory and give its path, so any cover can be regenerated later.
