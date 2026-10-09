@@ -27,7 +27,15 @@ Read the locator IDs from the design each time; do not hardcode them. Copies of 
 
 ## Splitting the title
 
-Use the short cover title (see SKILL.md step 5), not a long front matter `title:`. Pick the highlight: the subject the article is about, usually its last noun phrase (`What Are ` + `AI Evals` + `?`; `Fundamentals of ` + `Containerization` + empty; `Learn ` + `Nushell` + empty). Everything before it is the lead, everything after it (including punctuation) is the trail. End the lead with a line break instead of a space, so the lead and the highlight sit on separate lines (`"Learn\n"` + `Tmux`).
+Use the short cover title, not a long front matter `title:`: the title's lead phrase (`Learn Nushell` for "Learn Nushell: Tables, Pipelines, ..."; `What Are AI Evals?`), or the title as is when it is already short. A category's cover title is its `title`. Pick the highlight: the subject the article is about, usually its last noun phrase (`What Are ` + `AI Evals` + `?`; `Fundamentals of ` + `Containerization` + empty; `Learn ` + `Nushell` + empty). Everything before it is the lead, everything after it (including punctuation) is the trail. End the lead with a line break instead of a space, so the lead and the highlight sit on separate lines (`"Learn\n"` + `Tmux`).
+
+Short titles:
+
+* **One word** (`Observability`): the whole word is the highlight; the lead and trail are empty, so their regions are removed.
+* **Two words** (`Platform Engineering`): the first word is the lead, the second the highlight (`"Platform\n"` + `Engineering`).
+* **Three or more words** (`Managing Technical Debt`): highlight the last word or noun phrase, and the rest is the lead. When two splits read equally well, take the one whose longest line is shorter, because it keeps the title larger: `"Managing\n"` + `Technical Debt` (14 characters, 111 px) over `"Managing Technical\n"` + `Debt` (18, 86 px).
+
+Keep the title's own spelling (`macOS`, `DevOps`); the font draws capitals either way, but the design's text is what the editor and the alt text show.
 
 ## Sizing the title
 
@@ -35,14 +43,14 @@ Set the font size in the first edit, not after looking at the result. The font r
 
 `font_size = min(130, floor(1560 / longest line))`
 
-So 12 characters keep the template size, `1000 Life Giving` (16) gets 97, and `Software Engineering` (20) gets 78. Keep it at 72 or more: if a line would need less, break it at a space into two lines. Use at most three lines in total, and at most 100 px when there are three, so the title stays clear of the logo. Skip `format_text` when the result is 130.
+So 12 characters keep the template size, 16 get 97, and `Graph Engineering?` (18) gets 86. Keep it at 72 or more: if a line would need less, break it at a space into two lines. Use at most three lines in total, and at most 100 px when there are three, so the title stays clear of the logo. Skip `format_text` when the result is 130 and the title is still at the template's 130.659 px.
 
 ## Steps
 
 1. **Find or create the design.** `list-folder-items` with `folder_id: FAFgCl26Zkg`, `item_types: ["design"]`, and follow `continuation` until a design titled exactly `<design name>` turns up or the pages run out. For more than one cover, list the folder once, keep a title-to-ID map for the whole run, and add each new design to it; do not list or search per cover.
 
    * **Found:** keep its design ID (`D...`) and overwrite it. If more than one design has that title, use the most recently modified one and tell the user about the others.
-   * **Not found:** `create-design-from-brand-template` with `brand_template_id: EAHXEEDJKs0`. Keep the returned design ID.
+   * **Not found:** `create-design-from-brand-template` with `brand_template_id: EAHXEEDJKs0`. It returns the new design directly (no job to poll). Keep the returned design ID.
 
 2. **Read it.** `read-design` with `open_transaction: true` and `filter.fields: ["design_content", "thumbnails"]`. For a new design, leave out `"thumbnails"`: the before state is always the template placeholder, and the edit returns the after thumbnail. Take the `transaction_id`, the page `locator_id`, and the title element's `locator_id`. In a new design the title is the text element whose regions are `Topic `, `key point`, `?`. In an existing cover it is the large bold text element whose regions hold the old lead, highlight, and trail; note each region's current text.
 
@@ -61,7 +69,7 @@ So 12 characters keep the template size, `1000 Life Giving` (16) gets 97, and `S
 
    For an existing cover, the same operations apply with these changes:
 
-   * Find each region's current text instead of the template placeholders (`"Learn\n"` → new lead, `"Tmux"` → new highlight, old trail → new trail). Skip a region whose text is not changing. If an old region's text also appears in another region, use `replace_text` on the title locator with the full new title, then `format_text` the highlight back to `#ffde59`.
+   * Find each region's current text instead of the template placeholders (`"Learn\n"` → new lead, `"Tmux"` → new highlight, old trail → new trail). Skip a region whose text is not changing; an edit that only swaps the background is valid. Still compute the size for the title, even when its text is unchanged, and add `format_text` when the result differs from the title's current `fontSize` by more than 1 px. If an old region's text also appears in another region, use `replace_text` on the title locator with the full new title, then `format_text` the highlight back to `#ffde59`.
    * Leave out `update_title`; the design already has its name.
    * Add `delete_element` on the old shade element, if step 2 found one.
 
@@ -71,7 +79,7 @@ So 12 characters keep the template size, `1000 Life Giving` (16) gets 97, and `S
 
 6. **File it.** For a new design, `move-item-to-folder` with the design ID and `to_folder_id: FAFgCl26Zkg`. An existing cover is already there; skip this step.
 
-7. **Export and compress.** `export-design` with `format: {type: png, width: 1200, height: 630}`. Keep Canva's default lossless export; do not set `lossless: false`, because `pngquant` compresses better from the lossless source and Canva's lossy pass only adds a second round of loss. Download the returned URL over the bundle's `<slug>.png`, quantize it in place, and check the size:
+7. **Export and compress.** `export-design` with `format: {type: png, width: 1200, height: 630}`. It returns the download URL directly; no `get-export-formats` check is needed for these designs. Keep Canva's default lossless export; do not set `lossless: false`, because `pngquant` compresses better from the lossless source and Canva's lossy pass only adds a second round of loss. Download the returned URL over the bundle's `<slug>.png`, quantize it in place, and check the size:
 
    ```bash
    printf '%s %s\n' <bundle>/<slug>.png '<download_url>' | bash scripts/fetch-covers.sh

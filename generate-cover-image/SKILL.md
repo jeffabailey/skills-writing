@@ -1,79 +1,84 @@
 ---
 name: generate-cover-image
-description: Generates a 1200x630 PNG cover image for an article from its meaning, using the bundled cover prompt (dark, futuristic, human-and-system artwork with no text). For jeffbaileyblog it overwrites the article's existing Canva cover design, or creates one from the jbb-feature-image-template brand template (never editing the template itself), swaps in the artwork as the background, sets the title, names the design after the article slug, files it in the blog covers folder, and exports it next to the article with the Hugo cover front matter set. Also covers category term bundles, and has a batch mode for many covers at once. Use when the user says /write:cover, asks for a cover image, hero image, or social/OG image for an article, or when write-article finishes a jeffbaileyblog draft.
+description: Generates a 1200x630 PNG cover image from what an article means, using the bundled prompt (dark, futuristic, human-and-system artwork with no text) and the Canva connector. For jeffbaileyblog it builds or overwrites the article's own Canva cover design from the jbb-feature-image-template brand template, sets the title, files and exports it beside the article, and sets the Hugo cover front matter; it also covers category pages and runs in batches for many covers at once. Use whenever someone wants a cover, hero, featured, header, OG, social-preview, or share image for a blog post, article, or category page, says /write:cover, asks to redo or refresh an existing cover, or when write-article finishes a jeffbaileyblog draft, even if they don't say "cover".
 ---
 
 # Generate Cover Image
 
-Create a cover image whose composition comes from what the article means, not from its keywords. The prompt is bundled in `references/cover-prompt.md`; it ends with `Use the text below as the central inspiration:` and a `---` line, and the inspiration text is appended after it.
+A cover works when its composition comes from what the article means, not from its keywords. Everything below serves that: the inspiration text carries the meaning, the bundled prompt (`references/cover-prompt.md`) carries the style, and Canva supplies the artwork and the title.
+
+The prompt ends with `Use the text below as the central inspiration:` and a `---` line; append the inspiration text after it.
 
 ## Inputs
 
 - **Article**: a Markdown file path, or the draft in the conversation.
-- **Output path**: for jeffbaileyblog, `<page bundle>/<slug>.png` next to the bundle's `index.md` (the slug is the front matter `slug:`). Elsewhere, ask.
-- **Category term bundles** (jeffbaileyblog `hugo/content/categories/<slug>/_index.md`) take covers too. The slug is the directory name, and the output is `<slug>.png` beside `_index.md`. Read the bundle's `title` and `description` and the titles of the category's posts for the inspiration text. The cover title is the category `title`.
+- **Output**: for jeffbaileyblog, `<page bundle>/<slug>.png` beside the bundle's `index.md`, where the slug is the front matter `slug:`. Elsewhere, ask.
+- **Category pages** (jeffbaileyblog `hugo/content/categories/<slug>/_index.md`) take covers too. The slug is the directory name, the output is `<slug>.png` beside `_index.md`, and the cover title is the bundle's `title`. A category has no body, so read its `description` and the titles and descriptions of up to ten of its newest posts (on its built page, or in the posts that list it) for the inspiration text. Ten is enough to find what the category is about; reading every post in a large one adds nothing to the picture.
 
-For jeffbaileyblog, the generated artwork is only the background. The published `<slug>.png` is the export of a Canva design with the title on it, so the artwork stays in Canva as a media ID and never goes into the bundle.
-
-Every jeffbaileyblog cover is its own Canva design:
+For jeffbaileyblog, the generated artwork is only the background. The published PNG is the export of a Canva design with the title on it; the artwork stays in Canva as a media ID.
 
 | Item | Value |
 |------|-------|
-| Brand template (source, read-only) | `jbb-feature-image-template`, ID `EAHXEEDJKs0`, in brand kit `kAEqeQflWyc` |
+| Brand template (source, read-only) | `jbb-feature-image-template`, ID `EAHXEEDJKs0`, brand kit `kAEqeQflWyc` |
 | Destination folder | `FAFgCl26Zkg` |
-| Design name | the front matter `slug:`, e.g. `learn-nushell`; for a category, `category-<slug>`, e.g. `category-laws`, so it never collides with an article cover |
+| Design name | the article's `slug:`; for a category, `category-<slug>`, so it never collides with an article cover |
 
-Never open, edit, or publish the brand template. Edits go to the article's cover design: the existing one with its design name, or a new one from `create-design-from-brand-template`.
+Never open, edit, or publish the brand template: every cover on the blog is built from it. Edits go to the cover's own design, found by its design name, or to a new one made with `create-design-from-brand-template`.
 
 ## Workflow
 
-1. **Read the article.** Take its title, description, and body.
+0. **When the complaint is about a share preview** ("the preview looks off when I share it", "the card is wrong"), find out what is wrong before drawing anything, because a new image fixes only one of the causes. Check the built page's `og:image` and `twitter:image` (do they point at the bundle's PNG?) and the PNG's size (1200x630?). If both are right, ask the user what looks off: the artwork, the title, or the crop. If they are fine with the cover itself, the likely cause is a cached card: sites cache link previews, and jeffbaileyblog serves HTML with a long cache lifetime and deploys by hand, so a new image shows only after a deploy and a re-share. Say so rather than regenerating. If the user says the artwork or title itself is the problem, go on to step 1.
 
-2. **Write the inspiration text.** In 80 to 150 words of plain prose, state the article's core idea, its emotional tone, and the metaphors, contrasts, or tensions it uses. Describe meaning, not layout. Leave out product names, logos, commands, and quoted code, because the prompt forbids text in the image and names pull models toward literal renderings. Show it to the user only if they asked to review prompts.
+1. **Read the article.** Take its title, description, and body. When replacing a cover, look at the old one too, so the new picture does not repeat it.
 
-3. **Generate with the Canva connector.** Join the prompt and the inspiration text (`cat references/cover-prompt.md <inspiration.txt>`) and send the result to Canva `generate-image` with `aspectRatio: LANDSCAPE_2_1`. Poll `get-generate-image-job` with the returned `jobId` until it returns `SUCCESS`. The result is a Canva media ID (`M...`); it is the background asset in step 5. Canva crops it to fill the 1200x630 page.
+2. **Write the inspiration text.** In 80 to 150 words of plain prose, state the article's core idea, its emotional tone, and the metaphors, contrasts, or tensions it uses, carried by one central scene: a person doing something in a place that embodies the idea (for example, a crew building a bridge whose shape mirrors the crews). A single concrete scene gives the model something to compose; a list of abstract metaphors gets a generic figure in front of a glowing network. Describe the meaning of the scene, not the layout of the image. Leave out product names, logos, commands, and quoted code: the prompt forbids text in the image, and names pull the model toward literal renderings. Show it to the user only if they asked to review prompts.
 
-   Do not call the OpenAI Images API or any other image service. If the Canva tools are not connected or the job fails, write the joined prompt to `<output>.prompt.txt`, tell the user why, and stop. Never draw a placeholder or a substitute graphic.
+3. **Generate with the Canva connector.** Send the joined prompt (`cat references/cover-prompt.md <inspiration.txt>`) to `generate-image` with `aspectRatio: LANDSCAPE_2_1`, then poll `get-generate-image-job` until `SUCCESS`. The result is a media ID (`M...`), the background for step 5. Canva crops it to fill the 1200x630 page.
 
-4. **Look at the artwork.** Read the preview `get-generate-image-job` returns. Regenerate once with a sharper inspiration text if it contains any letters, numbers, code, or UI chrome, or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it.
+   Use only Canva; do not call the OpenAI Images API or any other image service. If Canva is not connected or the job fails, write the joined prompt to `<output>.prompt.txt`, tell the user why, and stop. Never draw a placeholder or substitute graphic.
 
-5. **Create or overwrite the cover design in Canva (jeffbaileyblog).** Follow `references/canva-brand-template.md`. In short:
+4. **Judge the artwork from the job's preview,** before building anything on it. Regenerate once with a sharper inspiration text if it shows letters, numbers, code, or UI chrome (icons in circles count), or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it. Checking here, not after export, means a bad image costs one generation instead of a whole design.
 
-   1. Look in folder `FAFgCl26Zkg` for a design titled with the design name. If it exists, edit that design in place. Otherwise `create-design-from-brand-template` with `EAHXEEDJKs0` to make a new one.
-   2. Set the artwork's media ID as that design's page background.
-   3. Replace the placeholder title with the short cover title. Leave the background's brightness alone: no shade layer, no vignette.
-   4. Rename a new design to the design name.
-   5. Show the user the preview and commit once they approve.
-   6. Move a new design to folder `FAFgCl26Zkg`.
-   7. Export it as a 1200x630 PNG to `<page bundle>/<slug>.png`, compress it with `pngquant`, and look at the exported PNG before going on.
+   Write the alt text now, from the preview you are looking at: the `update_fill` in step 5 needs it. Canva's `alt_text` always describes the artwork itself. The front matter alt in step 6 follows its own rule.
 
-   The cover title is short, not the full front matter `title:`. The template sets it at about 130 px, which fits roughly two lines of 12 characters; set a smaller size for longer lines in the same edit, using the rule in `references/canva-brand-template.md`. Use the title's lead phrase (`Learn Nushell` for "Learn Nushell: Tables, Pipelines, ..."; `What Are AI Evals?`). If the title is already short, use it as is. Put the lead and the highlight on separate lines (`Learn` above `Nushell`).
+5. **Build the cover design in Canva (jeffbaileyblog).** Follow `references/canva-brand-template.md`, which has the locators, the title split and size rules, and the exact operations. In outline:
 
-   If a Canva step fails, stop and tell the user which step failed and why; leave the existing `<slug>.png` in place. Other destinations skip this step; give the user the generated image's "Open generated image" link and media ID instead.
+   1. Find the design by name in folder `FAFgCl26Zkg`, or create one from template `EAHXEEDJKs0`.
+   2. In one `edit-design` call, set the artwork as the page background, set the short cover title (split and sized per the reference), and name a new design.
+   3. Show the user the preview and edit URL, and commit once they approve. When overwriting, say so: the commit cannot be undone through the connector. A bundle that already has a `<slug>.png` but no design by that name is an overwrite too, because the export replaces its PNG: ask before creating its design.
+   4. Move a new design to the folder, export it as a 1200x630 PNG, and fetch it with `scripts/fetch-covers.sh`, which compresses it with `pngquant`. Look at the result.
 
-6. **Wire it up (jeffbaileyblog).** Set the front matter unquoted, as `hugo/AGENTS.md` requires:
+   Leave the background's brightness alone: no shade layer, no vignette. If a Canva step fails, stop, tell the user which step and why, and leave any existing PNG in place. Outside jeffbaileyblog, skip this step and give the user the generated image's "Open generated image" link and media ID.
+
+6. **Set the front matter (jeffbaileyblog)** with `scripts/set-cover-frontmatter.py <bundle file> <png name> "<alt>"`. It writes the cover block unquoted, as `hugo/AGENTS.md` requires, replacing any old one:
 
    ```yaml
    cover:
      image: <slug>.png
-     alt: <one sentence describing what the image shows>
+     alt: <alt text>
    ```
 
-   The alt text describes the picture itself, not the article. On a Canva cover, include the title as it appears on the image. Category bundles are the exception: they set `alt` to the category `title` and add `caption: ""`, matching `categories/laws/_index.md`.
+   For an article, the alt text is one sentence describing the picture itself, including the title as written, not in the capitals the font draws. The script keeps an existing alt's quotes and the block's other keys. For a category, pass `--category`: the alt text is the category `title` and the script adds `caption: ""`.
 
-7. **Report.** Give the image path, its size, the alt text, the artwork's Canva media ID, and for jeffbaileyblog the Canva design's name, edit URL, and folder. Keep the inspiration text in the reply so the image can be regenerated later.
+   Then build the site (`hugo --quiet -D -d /tmp/<dir>` from `hugo/`; `-D` renders drafts) and check that the page's `og:image` is the new PNG.
+
+7. **Report** the image path and size, the alt text, the artwork's media ID, and the design's name, edit URL, and folder. Include the inspiration text so the cover can be regenerated later.
 
 ## Batch mode
 
-Use this for more than about three covers, such as every category. It needs about eight connector calls per cover (generate, poll, create, read, edit, commit, move, export) instead of a dozen, and one review per batch instead of one per cover.
+Use this for more than about three covers, such as every category. It needs about eight connector calls per cover (generate, poll, create, read, edit, commit, move, export) instead of a dozen, and one review per batch instead of one per cover. The steps above still apply to each cover; batch mode changes their order and grouping, not the checks.
 
-1. **Agree on review first.** Batch mode saves new designs without a per-cover approval, so get the user's go-ahead for that up front. It never overwrites an existing cover design without asking: list those designs and get approval for them separately.
-2. **Write every inspiration text first,** one scratch file per cover, so generation is not waiting on reading.
-3. **List the folder once.** Build the title-to-ID map with `list-folder-items` and reuse it for the whole run.
-4. **Generate in batches of five.** Start five `generate-image` calls in one turn, then poll each job once; poll again only the ones still `PENDING`. While they run, create the five designs from the brand template. The job IDs are quota tokens, so if a call is refused for quota, stop and tell the user how many covers are left.
-5. **Edit each design once.** Read it without thumbnails, then make one `edit-design` call with the background, the three title regions, the computed `font_size`, and the design name. Check the returned `document` and thumbnail, then commit, move, and export.
-6. **Fetch the batch in one call.** Pipe the five `<output> <url>` lines to `scripts/fetch-covers.sh`.
-7. **Review the batch on one sheet.** `magick montage <the five PNGs> -tile 1x -geometry 600x315+0+8 -background '#111' /tmp/covers-sheet.png`, then look at the sheet. Redo only the covers that fail step 4's checks or show a cramped title.
-8. **Wire up the front matter for the batch with one script,** then build the site once per batch and check that each page's `og:image` points at its cover.
+1. **Agree on review first.** Batch mode commits new designs without showing each preview, so get the user's go-ahead for that up front. It never overwrites an existing cover without asking: before creating anything, list the covers that already have a design or a PNG, and get approval for those separately.
+2. **List the folder once.** Build a title-to-ID map with `list-folder-items` and reuse it for the run, adding each new design to it.
+3. **Write every inspiration text before generating,** one scratch file per cover, named by slug. Then read them side by side. Texts written in one sitting drift toward the same picture (a lone figure before a glowing network), and a page of identical covers is a quality failure even when each one is fine alone. Give each cover its own central image, drawn from what that article or category is about, and rewrite any two that would produce the same composition.
+4. **Work in batches of five.** Five fit in one turn, can be judged together, and are fetched long before their export URLs expire (about an hour). For each batch:
+   1. Start five `generate-image` calls in one turn, and create the five designs from the template while they run.
+   2. Poll each job once; poll again only the ones still `PENDING`. Judge each preview as in step 4 and regenerate the misses now, before editing.
+   3. For each cover: read the design without thumbnails, make the single `edit-design` call, check the returned `document` and thumbnail, then commit, move, and export.
+   4. Pipe the five `<output> <url>` lines to `scripts/fetch-covers.sh`.
+   5. Look at all five on one sheet: `magick montage <pngs> -tile 1x -geometry 600x315+0+8 -background '#111' /tmp/covers-sheet.png`. Redo any cover whose title is cramped or overlaps the logo, or that repeats an earlier cover's composition.
+   6. Set the front matter for the five with `scripts/set-cover-frontmatter.py --batch` (one `path<TAB>png<TAB>alt[<TAB>category]` line each), build the site, and check that each page's `og:image` is its cover.
 
-Report the batch as a table: output path, design name and edit URL, artwork media ID, and size. Keep the inspiration texts in the scratch directory and list its path, so any cover can be regenerated later.
+   If a call is refused for quota, stop and tell the user how many covers are left.
+
+Report the batch as a table: output path, design name and edit URL, artwork media ID, and size. Keep the inspiration texts in the scratch directory and give its path, so any cover can be regenerated later.
