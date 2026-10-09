@@ -52,7 +52,7 @@ Review articles against structured writing framework rubrics. Each review prompt
 
 | Framework | What It Evaluates | File |
 |-----------|-------------------|------|
-| Fundamentals Review | Diátaxis Explanation + blog-specific checks for `content/blog/fundamentals-x/`; target score 9.8+ | `references/fundamentals.md` |
+| Fundamentals Review | Diátaxis Explanation + blog-specific checks for `content/blog/fundamentals/`; target score 9.8+ | `references/fundamentals.md` |
 | Learn X Review | Launch-pad structure, 20/80 coverage, and curated resource quality for `content/blog/learn-x/` | `references/learn.md` |
 
 ## Loading a Rubric

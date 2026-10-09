@@ -54,7 +54,7 @@ Select the framework that best fits the user's goal. If the user specifies a fra
 
 | Framework | When to Use | File |
 |-----------|-------------|------------|
-| Fundamentals | Foundational concept explanations for jeffbaileyblog; Diátaxis Explanation articles in `content/blog/fundamentals-x` | `references/fundamentals.md` |
+| Fundamentals | Foundational concept explanations for jeffbaileyblog; Diátaxis Explanation articles in `content/blog/fundamentals` | `references/fundamentals.md` |
 | Learn X | Launch-pad articles for jeffbaileyblog: the 20/80 of a topic plus curated video, audio, books, and online resources; `content/blog/learn-x` | `references/learn.md` |
 
 ## Loading a Prompt

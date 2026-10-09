@@ -1,13 +1,13 @@
 ---
 name: write-comparison-article-create
-description: Creates clean, decision-first comparison articles (X vs Y vs Z) that render well in Hugo — verdict up top, scorecard cards, per-criterion deep dive, and use-case recommendations. Use when the user says /write:comparison-article-create, asks to write a comparison or "vs" page, or compare tools/frameworks/products. Articles live in content/blog/comparison-x/.
+description: Creates clean, decision-first comparison articles (X vs Y vs Z) that render well in Hugo — verdict up top, scorecard cards, per-criterion deep dive, and use-case recommendations. Use when the user says /write:comparison-article-create, asks to write a comparison or "vs" page, or compare tools/frameworks/products. Articles live in content/blog/x-vs-x/.
 ---
 
 # Comparison Article Create
 
 Direct shortcut to create a **comparison article** — a page that helps a reader *decide* between several options (frameworks, tools, products, approaches). Self-contained; no hosted prompt to fetch.
 
-A great comparison page is **decision-first, not description-first**. The reader arrives with a choice to make and wants the answer fast, then evidence if they keep reading. Articles live in `content/blog/comparison-x/<slug>/index.md`.
+A great comparison page is **decision-first, not description-first**. The reader arrives with a choice to make and wants the answer fast, then evidence if they keep reading. Articles live in `content/blog/x-vs-x/<slug>/index.md`.
 
 ## Scope of this skill (what it does and does NOT cover)
 

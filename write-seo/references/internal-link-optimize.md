@@ -43,7 +43,7 @@ Read each post to understand its topic and themes, then find targets whose subje
 
 Anchor text should be descriptive and read naturally in the sentence. Links go where the reader would want them: the introduction, key concept explanations, and related-topics sections.
 
-The blog uses a category-based structure: `learn-x/` (educational), `book-x/` (book reviews), `how-x/` (how-to guides), `what-x/` (definitions and explanations), `fundamentals-x/` (basic concepts), `list-x/` (list-based content).
+The blog's folders under `content/blog/` match its format categories: `learn-x/` (Learn X), `what-x/` (What X), `how-x/` (How X), `why-x/` (Why X), `think-x/` (Think X), `x-vs-x/` (X vs X comparisons), `fundamentals/` (basic concepts), `book-reviews/`, `lists/`, `reference/`, `troubleshooting/` (fix guides), `developer-tools/`, `career-development/`, `death-by-1000-cuts/`, and `1000-life-giving-potions/`.
 
 ## How many links
 

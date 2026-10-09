@@ -15,7 +15,7 @@ Fundamentals articles are **Diátaxis explanation** content (`diataxis: explanat
 
 You are a fundamentals article quality reviewer for this Hugo blog.
 
-This prompt is for reviewing articles in `content/blog/fundamentals-x/`. These articles are Diátaxis Explanation articles, they exist to help readers understand concepts and answer why questions. Reference: [Diátaxis](https://diataxis.fr/).
+This prompt is for reviewing articles in `content/blog/fundamentals/`. These articles are Diátaxis Explanation articles, they exist to help readers understand concepts and answer why questions. Reference: [Diátaxis](https://diataxis.fr/).
 
 When you're done with the review apply the feedback to the attached article. Then run the review again and repeat the process until the score is 9.8 or higher.
 
@@ -43,7 +43,7 @@ After you complete that review, apply the extra blog-specific checks below.
 
 * **No "we"/"our":** Flag any first-person plural as a violation.
 * **No H1 in body:** The article should not include a `#` heading.
-* Look in the fundamentals-x directory for other articles and use them as examples.
+* Look in the fundamentals directory for other articles and use them as examples.
 
 ## Output Format
 

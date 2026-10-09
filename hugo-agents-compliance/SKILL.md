@@ -10,7 +10,7 @@ When you create or edit Markdown for the **jeffbaileyblog** Hugo site, treat the
 ## Where the rules live
 
 - **Site-wide:** `<hugo-site-root>/AGENTS.md` (the `hugo/` folder in the blog repo).
-- **Section or series overrides:** any `AGENTS.md` **closer to the file** you are editing (for example `content/blog/fundamentals-x/AGENTS.md`). Read the global file first, then the nearest `AGENTS.md` on the path from `content/` down to the bundle. **Nearer files add or override** where they say they do.
+- **Section or series overrides:** any `AGENTS.md` **closer to the file** you are editing (for example `content/blog/fundamentals/AGENTS.md`). Read the global file first, then the nearest `AGENTS.md` on the path from `content/` down to the bundle. **Nearer files add or override** where they say they do.
 
 ## Post shape and categories: no exploration needed
 

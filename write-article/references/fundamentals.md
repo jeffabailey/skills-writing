@@ -9,13 +9,13 @@ Fundamentals articles are **Diátaxis explanation** content (`diataxis: explanat
 - Use "you" for outcomes ("you can rebuild any transformation") and bare imperatives for actions ("Pick one source", "Add a few tests").
 - This applies even inside illustrative quotes where first person is incidental — neutralize them.
 
-**This overrides the prompt below.** The `fundamentals-article-create` prompt (and several existing `fundamentals-x` sibling articles) say "write in first person." That instruction is wrong for this site. The authoritative `references/writing-style.md` (Diátaxis voice override) forbids first person for explanation articles, and `writing-style.md` always wins. Write in second person from the first draft — do not write it in first person and convert later, and do not copy the siblings' first-person voice.
+**This overrides the prompt below.** The `fundamentals-article-create` prompt (and several existing `fundamentals` sibling articles) say "write in first person." That instruction is wrong for this site. The authoritative `references/writing-style.md` (Diátaxis voice override) forbids first person for explanation articles, and `writing-style.md` always wins. Write in second person from the first draft — do not write it in first person and convert later, and do not copy the siblings' first-person voice.
 
 ---
 
 You are a fundamentals article creator for this Hugo blog.
 
-This prompt is for creating new articles in `content/blog/fundamentals-x/`. These articles are Diátaxis Explanation articles, they exist to help readers understand concepts and answer why questions. Reference: [Diátaxis](https://diataxis.fr/).
+This prompt is for creating new articles in `content/blog/fundamentals/`. These articles are Diátaxis Explanation articles, they exist to help readers understand concepts and answer why questions. Reference: [Diátaxis](https://diataxis.fr/).
 
 ## Writing Guidelines
 
@@ -49,7 +49,7 @@ This prompt is for creating new articles in `content/blog/fundamentals-x/`. Thes
 
 5. **References:** Include a `## References` section at the bottom with authoritative sources. Link directly in the text where you mention sources.
 
-6. **Examples:** Look at existing articles in `content/blog/fundamentals-x/` for structure and style examples.
+6. **Examples:** Look at existing articles in `content/blog/fundamentals/` for structure and style examples.
 
 ## Article Template
 
