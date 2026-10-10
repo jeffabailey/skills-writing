@@ -9,14 +9,20 @@ Run every check on one article for the **jeffbaileyblog** Hugo site and say, wit
 
 To *write or repair* a post to the AGENTS.md rules, use `hugo-agents-compliance`. This skill is the read-only gate.
 
-Scripts (relative to this skill): `scripts/hugo_build.sh`, `scripts/check_front_matter.py`, `scripts/banned_scan.py`.
+Scripts: this skill uses the three checkers that ship with its sibling skill `hugo-agents-compliance` (one copy, so the authoring skill and this gate never disagree):
+
+```bash
+S="${CLAUDE_SKILL_DIR}/../hugo-agents-compliance/scripts"   # verify-build.sh, fmcheck.py, banscan.py
+```
+
+`${CLAUDE_SKILL_DIR}` is this skill's directory. If your agent does not expand it, or `$S` does not exist, use the `hugo-agents-compliance/scripts` folder beside this skill's folder (`~/.claude/skills/hugo-agents-compliance/scripts`, `~/.cursor/skills/...`, or the skills-writing repo). If `hugo-agents-compliance` is not installed, mark steps 1, 2, and 4 `NOT RUN (tool missing)` and say to install it alongside this skill.
 
 ## Severity: three levels
 
 Every finding goes in exactly one bucket. A report that lists noise as errors teaches the user to ignore it, so triage is part of the job.
 
-* **BLOCKING:** the article must not ship. Hugo build errors (including `REF_NOT_FOUND`) or the page not rendering; front-matter BLOCKING lines; any banned-phrase hit; a `{{< ref >}}` to a post that is `draft: true` while this one is not; an external link confirmed dead (404/410, DNS failure) after a second look; markdownlint MD040 (writing-style requires a fence language).
-* **WARNING:** worth fixing, does not stop publishing. Front-matter WARNING lines (description over 160 chars, slug/dir/url mismatch, missing cover file); ai-sanitize findings not already caught by the scan; AGENTS.md judgment items (voice, structure, cards vs tables); other markdownlint findings under the applied config; external links that timed out (unverified).
+* **BLOCKING:** the article must not ship. Hugo build errors (including `REF_NOT_FOUND`) or the page not rendering; front-matter `BLOCK` lines; every ban-scan `BLOCK` hit; a `{{< ref >}}` to a post that is `draft: true` while this one is not; an external link confirmed dead (404/410, DNS failure) after a second look; markdownlint MD040 (writing-style requires a fence language).
+* **WARNING:** worth fixing, does not stop publishing. Front-matter `WARN` lines (description over 160 chars, slug/dir/url mismatch, missing cover file); ban-scan `REVIEW` hits (contrast framing, "quietly", arrow diagrams: writing-style allows contrast that adds meaning, so judge each one); ai-sanitize findings not already caught by the scan; AGENTS.md judgment items (voice, structure, cards vs tables); other markdownlint findings under the applied config; external links that timed out (unverified).
 * **NOISE:** shown in one line, never counted. MD013 or MD052 firing (proof the lint config was not applied, not an article problem); lychee 404 on the cover image when the file exists beside `index.md` (lychee resolves bundle images against the site root); 403/429/999 that `lychee.toml` already accepts.
 
 Verdict: **FAIL** if anything is blocking; **PASS WITH WARNINGS**; or **PASS**. If a tool was missing, the stage reads `NOT RUN (tool missing)` and the verdict carries `(incomplete: <stage>)`. A missing tool is never "check failed" and never "passed".
@@ -33,10 +39,10 @@ Verdict: **FAIL** if anything is blocking; **PASS WITH WARNINGS**; or **PASS**. 
 ### 1. Hugo build (the gate, runs first)
 
 ```bash
-bash scripts/hugo_build.sh <index.md>
+bash "$S/verify-build.sh" <index.md>
 ```
 
-It builds the whole site with `hugo --gc --minify` into `mktemp -d` (never the repo's `public/`), adds `--buildDrafts` when the target is a draft (new posts are `draft: true` and the config does not build drafts, so a plain build "passes" without rendering the page), greps the log for `ERROR`/`REF_NOT_FOUND`, and confirms `<url>/index.html` exists. Results: `BUILD OK` (exit 0); `BUILD FAILED` (exit 1: an error names this file, or its page did not render) is BLOCKING; `SITE BUILD BROKEN by other files` (exit 3: no error names this file) is a WARNING for this article, but say plainly that the site cannot deploy until those files are fixed, and name them. The full build takes 10-60 seconds.
+It builds the whole site with `hugo --gc --minify` into `mktemp -d` (never the repo's `public/`); when the target is a draft it adds a second build with `--buildDrafts` (new posts are `draft: true` and the config does not build drafts, so a plain build "passes" without rendering the page). It greps both logs for `ERROR`/`REF_NOT_FOUND` and confirms `<url>/index.html` exists. Results: `BUILD OK` (exit 0); `BUILD FAILED` (exit 1: an error names this file, or its page did not render) is BLOCKING; `SITE BUILD BROKEN by other files` (exit 3: no error names this file) is a WARNING for this article, but say plainly that the site cannot deploy until those files are fixed, and name them; exit 127 means hugo is missing (NOT RUN). Each build takes 10-60 seconds.
 
 It runs first because it is the only check that resolves internal links and the one that decides pass/fail. Keep going after a failure: the other checks are independent, and the user wants every problem in one report.
 
@@ -47,10 +53,10 @@ Draft links: a draft built with `--buildDrafts` resolves refs to other drafts, s
 ### 2. Front matter
 
 ```bash
-python3 scripts/check_front_matter.py <index.md>
+python3 "$S/fmcheck.py" <index.md>
 ```
 
-Checks what the build lets through: bare `url`/`slug`/`cover.image`; `date`/`lastmod` as `YYYY-MM-DD` (no ISO timestamps); `description` present, quoted, ≤160 chars; `slug` = bundle dir = `url` tail; `cover.image` = `<slug>.png` and the file exists beside `index.md`; `cover.alt`; `type: post`, `author: Jeff Bailey`; 4-7 keywords. Its BLOCKING/WARNING/INFO labels map straight onto the severity buckets. Many legacy posts have no `slug:`; the script falls back to the url tail, then the bundle dir.
+Checks what the build lets through: bare `url`/`slug`/`cover.image`; `date`/`lastmod` as `YYYY-MM-DD` (no ISO timestamps); `description` present, quoted, ≤160 chars; `categories` non-empty and already used on the site; `slug` = bundle dir = `url` tail; `cover.image` = `<slug>.png` and the file exists beside `index.md`; `cover.alt`; `type: post`, `author: Jeff Bailey`; 4-7 keywords. Its `BLOCK`/`WARN`/`INFO` labels map onto BLOCKING/WARNING/INFO; exit 1 means at least one BLOCK. Many legacy posts have no `slug:`; the script falls back to the url tail, then the bundle dir.
 
 ### 3. AGENTS.md compliance pass (read the live rules)
 
@@ -65,16 +71,16 @@ Scripts cover the mechanical rules. Spend this pass on the ones that need judgme
 ### 4. Banned-phrase scan
 
 ```bash
-python3 scripts/banned_scan.py <index.md>      # --list prints the extracted bans
+python3 "$S/banscan.py" <index.md>      # --list prints the extracted bans and exits
 ```
 
-It reads the ban list from the live `writing-style.md` every run: inline `Skip "..."` bullets (the phrase, not the suggested replacement), quoted bullets under `## Writing Style: Things to NOT Do`, `Using these words:`, and contrast-framing templates (`it's not X, it's Y`, `This isn't A. It's B.`, `Not X. Y.`). It also flags emdashes, `<a href>`, inline `[text](url)`, and bare `{{< ref >}}` in body text. It skips code fences and front matter other than `title`/`description`. Every hit is BLOCKING; quote the line and give the rewrite.
+It reads the ban list from the live `writing-style.md` every run (the header prints the path and the live-phrase count; each phrase hit cites its `writing-style.md:<line>`): inline `Skip "..."` bullets (the phrase, not the suggested replacement), quoted bullets under `## Writing Style: Things to NOT Do`, `Do NOT write "..."`, `Using these words:`, and contrast-framing templates (`it's not X, it's Y`, `This isn't A. It's B.`, `Not X. Y.`). It also flags emdashes, `<a href>`, inline `[text](url)` (images excepted), bare `{{< ref >}}`, fences without a language, Markdown tables, a body H1, and `category_footer` in the body. It skips code (fenced and inline) and front matter other than `title`/`description` (emdash is flagged anywhere). `BLOCK` hits are BLOCKING (exit 1); `REVIEW` hits are WARNING. Quote the line and give the rewrite.
 
 Do not skip it because the prose "looks fine". Author-blindness is why it exists.
 
 ### 5. AI-tell scan (once)
 
-Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize`) once, in **report** mode, on the target. Do not also run its Detect greps by hand: that is the same check twice. Merge its findings with the scan: anything banned_scan already reported stays under step 4; the rest (triads, signposting, decorative formatting) are WARNING. Its survival check flags inline links converted to reference-style as LOST; writing-style requires reference-style, so that is noise. If ai-sanitize is not installed, mark the stage NOT RUN.
+Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize`) once, in **report** mode, on the target. Do not also run its Detect greps by hand: that is the same check twice. Merge its findings with the scan: anything banscan already reported stays under step 4; the rest (triads, signposting, decorative formatting) are WARNING. Its survival check flags inline links converted to reference-style as LOST; writing-style requires reference-style, so that is noise. If ai-sanitize is not installed, mark the stage NOT RUN.
 
 ### 6. Links (external only)
 
