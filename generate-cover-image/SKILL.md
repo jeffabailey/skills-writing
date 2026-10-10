@@ -12,8 +12,10 @@ The prompt ends with `Use the text below as the central inspiration:` and a `---
 ## Inputs
 
 - **Article**: a Markdown file path, or the draft in the conversation.
-- **Output**: for jeffbaileyblog, `<page bundle>/<slug>.png` beside the bundle's `index.md`, where the slug is the front matter `slug:`. Elsewhere, ask.
-- **Category pages** (jeffbaileyblog `hugo/content/categories/<slug>/_index.md`) take covers too. The slug is the directory name, the output is `<slug>.png` beside `_index.md`, and the cover title is the bundle's `title`. A category has no body, so read its `description` and the titles and descriptions of up to ten of its newest posts (on its built page, or in the posts that list it) for the inspiration text. Ten is enough to find what the category is about; reading every post in a large one adds nothing to the picture.
+- **Output**: for jeffbaileyblog, `<page bundle>/<slug>.png` beside the bundle's `index.md`. Elsewhere, ask.
+- **Slug**: resolve it with `python3 scripts/cover-target.py <index.md>` (read-only, one JSON line per file, several files at once). Most posts (949 of 1278) have no `slug:`, so it falls back to the last segment of `url:`, then the bundle directory name. It also reports the current `cover.image`, whether a PNG already exists (an overwrite), any body `cover-inline` shortcodes, and the category's `prompts.md`. When it warns that `cover.image` differs from `<slug>.png` (about 20 posts, e.g. `21-laws-of-leadership-book-review.png` in `a-21-laws-of-leadership-book-review`), ask which name to keep; recommend the existing name when that file exists, since renaming orphans the old PNG and changes the shared `og:image` URL. Use the kept name for the PNG and front matter, and look up the design under both names: older designs are named after their PNG (the 21 Laws review's design is `21-laws-of-leadership-book-review`), so with the existing name kept the design name is its stem (`keep_existing` in the script's output).
+- **Category pages** (jeffbaileyblog `hugo/content/categories/<slug>/_index.md`) take covers too. The slug is the directory name, the output is `<slug>.png` beside `_index.md`, and the cover title is the bundle's `title`. A category has no body, so read its `description` and the titles and descriptions of up to ten of its newest posts for the inspiration text: find them with `grep -rlE '^\s*- "?<Title>"?\s*$' hugo/content/blog --include=index.md`, keep the files where that line sits under `categories:` (the same line can be a tag or keyword), and sort by front matter `date:`. Ten is enough to find what the category is about; reading every post in a large one adds nothing to the picture. If the category has no `description` and only a few posts, say the text rests on thin input.
+- **Stored inspiration text**: each category keeps its current cover's text in `prompts.md` under `## Cover Image` (all 78 categories have one). `scripts/prompt-store.py get <dir>` prints it; `set <dir> <file>` replaces it. Articles have no store; their text goes in the report.
 
 For jeffbaileyblog, the generated artwork is only the background. The published PNG is the export of a Canva design with the title on it; the artwork stays in Canva as a media ID.
 
@@ -21,15 +23,19 @@ For jeffbaileyblog, the generated artwork is only the background. The published 
 |------|-------|
 | Brand template (source, read-only) | `jbb-feature-image-template`, ID `EAHXEEDJKs0`, brand kit `kAEqeQflWyc` |
 | Destination folder | `FAFgCl26Zkg` |
-| Design name | the article's `slug:`; for a category, `category-<slug>`, so it never collides with an article cover |
+| Design name | the stem of the article's PNG name (normally the resolved slug); for a category, `category-<slug>`, so it never collides with an article cover |
 
 Never open, edit, or publish the brand template: every cover on the blog is built from it. Edits go to the cover's own design, found by its design name, or to a new one made with `create-design-from-brand-template`.
+
+## Preflight
+
+Check the local tools before the first Canva call: `for t in python3 curl pngquant magick hugo; do command -v $t >/dev/null || echo "missing: $t"; done`. `pngquant` and `magick` are optional (`brew install pngquant imagemagick`); without them the PNG stays uncompressed and the contact sheet is skipped. Report a missing tool as "tool missing", separately from a failed step.
 
 ## Workflow
 
 0. **When the complaint is about a share preview** ("the preview looks off when I share it", "the card is wrong"), find out what is wrong before drawing anything, because a new image fixes only one of the causes. Check the built page's `og:image` and `twitter:image` (do they point at the bundle's PNG?) and the PNG's size (1200x630?). If both are right, ask the user what looks off: the artwork, the title, or the crop. If they are fine with the cover itself, the likely cause is a cached card: sites cache link previews, and jeffbaileyblog serves HTML with a long cache lifetime and deploys by hand, so a new image shows only after a deploy and a re-share. Say so rather than regenerating. If the user says the artwork or title itself is the problem, go on to step 1.
 
-1. **Read the article.** Take its title, description, and body. When replacing a cover, look at the old one too, so the new picture does not repeat it.
+1. **Read the article.** Take its title, description, and body. When replacing a cover, look at the old one too, so the new picture does not repeat it: for a category, read the stored text with `prompt-store.py get` before writing a new one, and look at the old PNG.
 
 2. **Write the inspiration text.** In 80 to 150 words of plain prose, state the article's core idea, its emotional tone, and the metaphors, contrasts, or tensions it uses, carried by one central scene: a person doing something in a place that embodies the idea (for example, a crew building a bridge whose shape mirrors the crews). A single concrete scene gives the model something to compose; a list of abstract metaphors gets a generic figure in front of a glowing network. Describe the meaning of the scene, not the layout of the image. Leave out product names, logos, commands, and quoted code: the prompt forbids text in the image, and names pull the model toward literal renderings. Show it to the user only if they asked to review prompts.
 
@@ -37,20 +43,20 @@ Never open, edit, or publish the brand template: every cover on the blog is buil
 
    Use only Canva; do not call the OpenAI Images API or any other image service. If Canva is not connected or the job fails, write the joined prompt to `<output>.prompt.txt`, tell the user why, and stop. Never draw a placeholder or substitute graphic.
 
-4. **Judge the artwork from the job's preview,** before building anything on it. Regenerate once with a sharper inspiration text if it shows letters, numbers, code, or UI chrome (icons in circles count), or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it. Checking here, not after export, means a bad image costs one generation instead of a whole design. The job preview is small (about 200 px wide), so small marks such as symbols on coins can slip past it: look again at the larger thumbnail the edit returns in step 5, before committing. If the miss shows there, regenerate and send another `update_fill` in the same open transaction; nothing is lost. For subjects that invite emblems (money, flags, sports, brands), say in the inspiration text that surfaces are plain and unmarked.
+4. **Judge the artwork from the job's preview,** before building anything on it. Regenerate once with a sharper inspiration text if it shows letters, numbers, code, or UI chrome (icons in circles count), or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it. Checking here, not after export, means a bad image costs one generation instead of a whole design. The job preview is small (about 200 px wide), so small marks such as symbols on coins can slip past it: look again at the larger thumbnail the edit returns in step 5, before committing. If the miss shows there, regenerate and send another `update_fill` in the same open transaction; nothing is lost. For subjects that invite emblems or lettering (money, flags, sports, brands, and type, writing, books, or code), say in the inspiration text that surfaces are plain and unmarked.
 
    Write the alt text now, from the preview you are looking at: the `update_fill` in step 5 needs it. Canva's `alt_text` always describes the artwork itself. The front matter alt in step 6 follows its own rule.
 
 5. **Build the cover design in Canva (jeffbaileyblog).** Follow `references/canva-brand-template.md`, which has the locators, the title split and size rules, and the exact operations. In outline:
 
-   1. Find the design by name in folder `FAFgCl26Zkg`, or create one from template `EAHXEEDJKs0`.
+   1. Find the design by exact title with `search-designs` (not by paging folder `FAFgCl26Zkg`, which is slow and misses covers filed elsewhere, such as the `category-*` designs), or create one from template `EAHXEEDJKs0`.
    2. In one `edit-design` call, set the artwork as the page background, set the short cover title (split and sized per the reference), and name a new design.
    3. Show the user the preview and edit URL, and commit once they approve. When overwriting, say so: the commit cannot be undone through the connector. A bundle that already has a `<slug>.png` but no design by that name is an overwrite too, because the export replaces its PNG: ask before creating its design.
    4. Move a new design to the folder, export it as a 1200x630 PNG, and fetch it with `scripts/fetch-covers.sh`, which compresses it with `pngquant`. Look at the result.
 
    Leave the background's brightness alone: no shade layer, no vignette. If a Canva step fails, stop, tell the user which step and why, and leave any existing PNG in place. Outside jeffbaileyblog, skip this step and give the user the generated image's "Open generated image" link and media ID.
 
-6. **Set the front matter (jeffbaileyblog)** with `scripts/set-cover-frontmatter.py <bundle file> <png name> "<alt>"`. It writes the cover block unquoted, as `hugo/AGENTS.md` requires, replacing any old one:
+6. **Set the front matter and store the text (jeffbaileyblog),** only after the commit and export succeed, so the files never describe a cover that was not published. Run `scripts/set-cover-frontmatter.py <bundle file> <png name> "<alt>"`. It writes the cover block unquoted, as `hugo/AGENTS.md` requires, replacing any old one, and gives every body `{{< cover-inline src=... alt=... >}}` that showed the old cover the new src and alt (38 posts repeat the cover inline; a stale alt there would describe the old picture):
 
    ```yaml
    cover:
@@ -60,16 +66,18 @@ Never open, edit, or publish the brand template: every cover on the blog is buil
 
    For an article, the alt text is one sentence describing the picture itself, including the title as written, not in the capitals the font draws. The script keeps an existing alt's quotes and the block's other keys. For a category, pass `--category`: the alt text is the category `title` and the script adds `caption: ""`.
 
-   Then build the site (`hugo --quiet -D -d /tmp/<dir>` from `hugo/`; `-D` renders drafts) and check that the page's `og:image` is the new PNG.
+   For a category, then write the new inspiration text back: `python3 scripts/prompt-store.py set <category dir> <inspiration.txt>`.
 
-7. **Report** the image path and size, the alt text, the artwork's media ID, and the design's name, edit URL, and folder. Include the inspiration text so the cover can be regenerated later.
+   Then build the site from `hugo/` (config is `hugo/config.toml`): `out=$(mktemp -d); hugo --quiet -D -d "$out"`. New posts are `draft: true`, and only `-D` renders them. Confirm the page's HTML exists in `$out` and that its `og:image` is the new PNG.
+
+7. **Report** the image path and size, the alt text (and how many `cover-inline` shortcodes changed), the artwork's media ID, and the design's name, edit URL, and folder. Include the inspiration text so the cover can be regenerated later, and say whether `prompts.md` was updated.
 
 ## Batch mode
 
-Use this for more than about three covers, such as every category. It needs about eight connector calls per cover (generate, poll, create, read, edit, commit, move, export) instead of a dozen, and one review per batch instead of one per cover. The steps above still apply to each cover; batch mode changes their order and grouping, not the checks.
+Use this for more than about three covers, such as every category. It needs about eight connector calls per cover (search, generate, poll, create, read, edit, commit, move, export) instead of a dozen, and one review per batch instead of one per cover. The steps above still apply to each cover; batch mode changes their order and grouping, not the checks.
 
 1. **Agree on review first.** Batch mode commits new designs without showing each preview, so get the user's go-ahead for that up front. It never overwrites an existing cover without asking: before creating anything, list the covers that already have a design or a PNG, and get approval for those separately.
-2. **List the folder once.** Build a title-to-ID map with `list-folder-items` and reuse it for the run, adding each new design to it.
+2. **Resolve every target, then look up designs once.** Run `scripts/cover-target.py` on all the bundle files in one call. Then look up every design name as in `references/canva-brand-template.md` step 1 (one exact-title `search-designs` per name, all in one turn, cached in `<scratch>/canva-titles.tsv`) and reuse that map for the run, adding each new design to it.
 3. **Write every inspiration text before generating,** one scratch file per cover, named by slug. Then read them side by side. Texts written in one sitting drift toward the same picture (a lone figure before a glowing network), and a page of identical covers is a quality failure even when each one is fine alone. Give each cover its own central image, drawn from what that article or category is about, and rewrite any two that would produce the same composition.
 4. **Work in batches of five.** Five fit in one turn, can be judged together, and are fetched long before their export URLs expire (about an hour). For each batch:
    1. Start five `generate-image` calls in one turn, and create the five designs from the template while they run.
@@ -77,7 +85,7 @@ Use this for more than about three covers, such as every category. It needs abou
    3. For each cover: read the design without thumbnails, make the single `edit-design` call, check the returned `document` and thumbnail, then commit, move, and export.
    4. Pipe the five `<output> <url>` lines to `scripts/fetch-covers.sh`.
    5. Look at all five on one sheet: `magick <pngs> -resize 600x -background '#111' -splice 0x8 -append /tmp/covers-sheet.png`. Redo any cover whose title is cramped or overlaps the logo, or that repeats an earlier cover's composition.
-   6. Set the front matter for the five with `scripts/set-cover-frontmatter.py --batch` (one `path<TAB>png<TAB>alt[<TAB>category]` line each), build the site, and check that each page's `og:image` is its cover.
+   6. Set the front matter for the five with `scripts/set-cover-frontmatter.py --batch` (one `path<TAB>png<TAB>alt[<TAB>category]` line each; a category whose cover block already matches comes out unchanged), write each category's text back with `prompt-store.py set`, build the site, and check that each page's `og:image` is its cover.
 
    Canva limits `generate-image` to 20 calls a minute and also throttles design creation, and the limits are shared by everything using the connector. A batch of five fits; several batches started in the same minute do not. When running batches in parallel (for example, one agent per batch), run at most two or three at once and stagger their starts by a minute. A "rate limited", "too many requests", or `quota_cooldown` ("credit usage is cooling down") error means wait about a minute and retry that call; reuse any designs already created rather than creating them again. A refusal for quota is different: stop and tell the user how many covers are left.
 

@@ -1,6 +1,6 @@
 You are a technical documentation writer. Create a fact-based reference article using one of the available frameworks based on the provided topic and requirements.
 
-Fact-based reference articles are frameworks for authoritative, lookup-oriented documentation and reference content. Available frameworks: Diátaxis (Reference Mode), Topic + Definition + Context + Examples + Caveats, TEA (Topic, Evidence, Analysis), FAQ Pattern, and Cornell Note Style (adapted). Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+Fact-based reference articles are frameworks for authoritative, lookup-oriented documentation and reference content. Available frameworks: Diátaxis (Reference Mode), Topic + Definition + Context + Examples + Caveats, TEA (Topic, Evidence, Analysis), FAQ Pattern, and Cornell Note Style (adapted).
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "API parameters", "Configuration options", "Error codes", "Terminology". -->
 

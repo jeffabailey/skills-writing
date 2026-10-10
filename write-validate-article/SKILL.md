@@ -1,83 +1,128 @@
 ---
 name: write-validate-article
-description: Validates a Markdown article for the jeffbaileyblog Hugo site by enforcing AGENTS.md + writing-style.md compliance (read top to bottom, including nested AGENTS.md), running a banned-phrase scan and an AI-tell scan (via the ai-sanitize skill), verifying the Hugo build, then running link checking (lychee) and Markdown linting (markdownlint). Use when the user says /write:validate-article or /hugo:agents, wants to validate an article, check article quality, run all checks on a Markdown file, "apply AGENTS.md", "Hugo blog rules", "compliance with hugo AGENTS", drafting blog posts, or fixing Hugo build errors.
+description: Validates one Markdown article for the jeffbaileyblog Hugo site before it ships and returns a three-level verdict (blocking / warning / noise). Runs the Hugo build first as the gate (drafts included, into a temp dir), then a front-matter check, a banned-phrase scan read live from writing-style.md, an AGENTS.md compliance pass, one ai-sanitize report, link checking (lychee), and Markdown linting (markdownlint-cli2). Report-only unless the user asks for fixes. Use when the user says /write:validate-article, wants to validate an article, check an article before publishing, "run all the checks" on a Markdown file, or asks whether a post is ready to publish.
 ---
 
 # Validate Article
 
-Run every validation check against a Markdown article for the **jeffbaileyblog** Hugo site: AGENTS.md compliance, a banned-phrase scan, an AI-tell scan, Hugo build verification, link checking, and Markdown linting. The goal is one publishable file that passes all gates.
+Run every check on one article for the **jeffbaileyblog** Hugo site and say, without noise, whether it can ship. The output is a report with a verdict; this skill does not edit unless the user asks (see "Fixing").
 
-## Workflow (always in this order)
+To *write or repair* a post to the AGENTS.md rules, use `hugo-agents-compliance`. This skill is the read-only gate.
 
-1. **Identify the target file** -- The user provides a file path as the argument. If none is given, ask which file to validate.
+Scripts (relative to this skill): `scripts/hugo_build.sh`, `scripts/check_front_matter.py`, `scripts/banned_scan.py`.
 
-2. **Apply AGENTS.md + writing-style.md compliance** -- See "AGENTS.md compliance" below. Read the rules each session and apply them in document order. Do not rely on memory or summaries alone.
+## Severity: three levels
 
-3. **Run the banned-phrase scan** -- Mandatory, not optional. See "Banned phrase scan" below. Re-run it after every editing pass.
+Every finding goes in exactly one bucket. A report that lists noise as errors teaches the user to ignore it, so triage is part of the job.
 
-4. **Run the AI-tell scan** -- Invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode on the target file. The banned-phrase scan catches exact tokens; this catches the patterns around them (contrast framing, triads, signposting, fake engagement, formatting as personality, decorative Mermaid and cover images). Report its findings with the other checks and offer to fix them. If it is not installed, note the skipped check in the report.
+* **BLOCKING:** the article must not ship. Hugo build errors (including `REF_NOT_FOUND`) or the page not rendering; front-matter BLOCKING lines; any banned-phrase hit; a `{{< ref >}}` to a post that is `draft: true` while this one is not; an external link confirmed dead (404/410, DNS failure) after a second look; markdownlint MD040 (writing-style requires a fence language).
+* **WARNING:** worth fixing, does not stop publishing. Front-matter WARNING lines (description over 160 chars, slug/dir/url mismatch, missing cover file); ai-sanitize findings not already caught by the scan; AGENTS.md judgment items (voice, structure, cards vs tables); other markdownlint findings under the applied config; external links that timed out (unverified).
+* **NOISE:** shown in one line, never counted. MD013 or MD052 firing (proof the lint config was not applied, not an article problem); lychee 404 on the cover image when the file exists beside `index.md` (lychee resolves bundle images against the site root); 403/429/999 that `lychee.toml` already accepts.
 
-5. **Verify the Hugo build** -- From the Hugo site root run `hugo --gc --minify` (add `-D` when the post is `draft: true`, so `{{< ref >}}` links still resolve). Fix all reported issues, including `REF_NOT_FOUND` from an invalid `{{< ref >}}`.
+Verdict: **FAIL** if anything is blocking; **PASS WITH WARNINGS**; or **PASS**. If a tool was missing, the stage reads `NOT RUN (tool missing)` and the verdict carries `(incomplete: <stage>)`. A missing tool is never "check failed" and never "passed".
 
-6. **Run link checking** -- Invoke the `write-check-links` skill against the target file (lychee with the Hugo site's `lychee.toml`).
+## Workflow
 
-7. **Run Markdown linting** -- Invoke the `write-run-markdown-lint` skill against the target file (markdownlint-cli2 with the user's config).
+### 0. Preflight and paths
 
-8. **Report results** -- Summarize the combined results across all checks. If everything passes, confirm the article is valid. If anything fails, present all errors together, grouped by check, and offer to fix them.
+* Target: the path the user gave. If none, ask. Validate the file in place.
+* Site root: the nearest parent holding `config.toml` and `content/` (this site uses `hugo/config.toml`, not `hugo.toml`). Repo root: `git rev-parse --show-toplevel`.
+* Tools: `command -v hugo python3 lychee markdownlint-cli2 npx`. Missing installs: `brew install hugo lychee python`, `npm i -g markdownlint-cli2@0.18.1` (or use `npx -y markdownlint-cli2@0.18.1`). Do not substitute `markdownlint` (cli v1): it ignores the user's cli2 config.
+* Read the front matter now. `draft: true` decides the build flags in step 1.
 
-## AGENTS.md compliance
-
-When you create or edit Markdown for the jeffbaileyblog Hugo site, treat the rules in **`AGENTS.md`** as mandatory. Read the file each session and work through it **from the first line to the last**, in the order its headings appear.
-
-### Where the rules live
-
-- **Site-wide:** `<hugo-site-root>/AGENTS.md` (the `hugo/` folder in the blog repo).
-- **Section or series overrides:** any `AGENTS.md` **closer to the file** you are editing (for example `content/blog/fundamentals/AGENTS.md`). Read the global file first, then the nearest `AGENTS.md` on the path from `content/` down to the bundle. **Nearer files add or override** where they say they do.
-
-### How to apply
-
-1. **Open and read** `<hugo-site-root>/AGENTS.md` top to bottom. Note every `##` section; your compliance pass must cover each section that applies to the task.
-2. **If the target path sits under a subtree that has its own `AGENTS.md`**, read that file the same way (top to bottom) and merge its requirements with the global rules.
-3. **Apply rules in the same order they appear in `AGENTS.md`** (front matter → cover → writing style → post structure → content guidelines → formatting → links → build verification → SEO checklist → publishing checklist). If a section does not apply (e.g. no cover image), skip it explicitly in your reasoning or checklist.
-4. **`## Writing style` in `AGENTS.md`** points at **`content/prompts/writing-style.md`**. Read and follow that file for voice, tone, formatting, SEO prose rules, and pitfalls. **When `AGENTS.md` and `writing-style.md` disagree, follow `writing-style.md`.**
-
-### Compliance habits
-
-- **Front matter:** Match the shape, date format, slug/url alignment, and fields `AGENTS.md` specifies unless a nearer `AGENTS.md` overrides them.
-- **Front matter — NEVER quote `url` or `slug`:** Write `url: /blog/YYYY/MM/DD/my-slug` and `slug: my-slug` (bare, no double quotes). Quoted values like `url: "/blog/..."` or `slug: "my-slug"` are forbidden. Other string fields (`title`, `description`) may still be quoted per the usual YAML rules.
-- **Front matter — ALWAYS include `cover.image`, unquoted, slug-matched, `.png`:** Every post's front matter must have:
-
-  ```yaml
-  cover:
-      image: my-slug.png
-  ```
-
-  Where `my-slug` matches the `slug` value exactly, the extension is `.png`, and the value is bare (no double quotes). Example: for `slug: how-long-should-a-function-be`, use `image: how-long-should-a-function-be.png`.
-- **Voice — Diátaxis articles use no first person:** For tutorials, how-to guides, reference, and explanation content, `writing-style.md` requires second person ("you") and imperative voice, not "I"/"my". This overrides any create-prompt that asks for first person.
-- **Formatting:** No Markdown tables for comparisons or structured lists where `AGENTS.md` requires the `cards` shortcode; no `` ```text `` diagrams — use Mermaid as specified (prefer `graph TB`).
-- **Links:** Internal links use **`{{< ref "slug" >}}`** with slug only unless the file already follows another established pattern; external links and **`## References`** follow the reference rules at the end of the doc. Verify link targets are not `draft: true` (linking to a draft fails the build).
-- **Checklists:** Before you consider the work done, run through the **SEO** and **Publishing** checklists in `AGENTS.md` for anything user-visible or publish-related.
-
-## Banned phrase scan
-
-`writing-style.md` enumerates banned phrases in two places: a "**## Writing Style: Things to NOT Do**" section near the bottom, AND inline `Skip "..."` / `Using these words: "..."` markers scattered earlier in the file. **"Read and follow" is not enough** — extract every banned token from the current version of `writing-style.md`, then `grep` the edited content for each. Treat any hit as a blocker, not a suggestion. Categories to extract:
-
-- **Inline `Skip "..."` markers** (e.g. `load bearing` / `load-bearing`, `the whole trick`, `nightmare scenarios`, `gets really ugly`, `failure modes` when talking about possible failures).
-- **"Do NOT use performative or AI-coded phrases"** list (e.g. `no fluff`, `shouting into the void`, `and honestly`, `you're not imagining this`, `that's rare`, `here's the kicker`, `the best part?`, `the important part is this`, `read this twice`, `quietly [doing something]`, `key takeaway`, `let me ground you`, `you're thinking about this exactly the right way`).
-- **"Using these words:"** entries (e.g. `fostering`).
-- **Contrast-framing patterns** in "Do NOT rely on contrast framing as a crutch" (`it's not X, it's Y`, `not chaos. clarity.`).
-- **Banned punctuation/markup:** emdashes (`—`), HTML `<a href>` tags, inline `[text](url)` for internal refs, bare `{{< ref >}}` in body.
-
-**Re-run this scan after every editing pass**, including external prose tools, AI rewriters, and human revisions. Those workflows reliably reintroduce banned phrases because they optimize for fluency over the project's specific bans.
-
-Example grep catching common bans in one pass (extract the live list from `writing-style.md`; this is illustrative only):
+### 1. Hugo build (the gate, runs first)
 
 ```bash
-grep -niE "—|load.bearing|the whole trick|fostering|no fluff|key takeaway|here'?s the kicker|the best part\?|read this twice|quietly |shouting into the void|nightmare scenario|and honestly|you'?re not imagining this|that'?s rare|let me ground you|the important part is this|gets really ugly" path/to/index.md
+bash scripts/hugo_build.sh <index.md>
 ```
 
-Do NOT skip this step on the grounds that the prose "looks fine" or that you wrote it yourself this session. Author-blindness is exactly why this step exists.
+It builds the whole site with `hugo --gc --minify` into `mktemp -d` (never the repo's `public/`), adds `--buildDrafts` when the target is a draft (new posts are `draft: true` and the config does not build drafts, so a plain build "passes" without rendering the page), greps the log for `ERROR`/`REF_NOT_FOUND`, and confirms `<url>/index.html` exists. Results: `BUILD OK` (exit 0); `BUILD FAILED` (exit 1: an error names this file, or its page did not render) is BLOCKING; `SITE BUILD BROKEN by other files` (exit 3: no error names this file) is a WARNING for this article, but say plainly that the site cannot deploy until those files are fixed, and name them. The full build takes 10-60 seconds.
 
-## When the compliance rules do not apply
+It runs first because it is the only check that resolves internal links and the one that decides pass/fail. Keep going after a failure: the other checks are independent, and the user wants every problem in one report.
 
-Skip AGENTS.md compliance for non-Hugo repos, non-Markdown assets with no `AGENTS.md` expectations, or tasks the user limits to unrelated files. The link-check and Markdown-lint steps still apply to any Markdown file the user asks to validate.
+When `REF_NOT_FOUND` fires, name the fix: `ref` resolves by content path or bundle folder name, not front-matter `slug`. Find the real target with `cd hugo && hugo list all` (the `path` column; filter `draft` = `false` for published posts) and give the corrected ref.
+
+Draft links: a draft built with `--buildDrafts` resolves refs to other drafts, so the build cannot catch them. For each `{{< ref "x" >}}` in the file, check the target's `draft` column in `hugo list all`; a link from a post that will publish to a draft is BLOCKING.
+
+### 2. Front matter
+
+```bash
+python3 scripts/check_front_matter.py <index.md>
+```
+
+Checks what the build lets through: bare `url`/`slug`/`cover.image`; `date`/`lastmod` as `YYYY-MM-DD` (no ISO timestamps); `description` present, quoted, ≤160 chars; `slug` = bundle dir = `url` tail; `cover.image` = `<slug>.png` and the file exists beside `index.md`; `cover.alt`; `type: post`, `author: Jeff Bailey`; 4-7 keywords. Its BLOCKING/WARNING/INFO labels map straight onto the severity buckets. Many legacy posts have no `slug:`; the script falls back to the url tail, then the bundle dir.
+
+### 3. AGENTS.md compliance pass (read the live rules)
+
+Read the files every run; they change.
+
+1. `hugo/AGENTS.md` top to bottom. Walk its `##` headings **as they appear in the file**, writing one line per heading: checked / not relevant (why). Do not use a remembered list of sections; if a heading is new or gone, the file wins. (There is no "SEO checklist" or "Publishing checklist" section; do not look for one.)
+2. Every `AGENTS.md` on the path from `content/` to the bundle (`find hugo/content -name AGENTS.md`). Nearer files add to or override the global one.
+3. `content/prompts/writing-style.md`. It wins over AGENTS.md on conflicts. It pulls in `content/prompts/seo-front-matter.md` through an `include-prompt` shortcode; read that too, since it holds the `title`/`description`/`keywords` rules.
+
+Scripts cover the mechanical rules. Spend this pass on the ones that need judgment: voice (Diátaxis how-to/tutorial/reference/explanation use "you", never "I"); post structure (intro, main, conclusion); cards shortcode instead of comparison tables; Mermaid (prefer `graph TB`) instead of ```` ```text ```` diagrams; heading hierarchy with no H1 in the body; alt text on every image; no `{{< partial "category_footer" >}}` in the body (`layouts/_default/single.html` already renders it). Report these as WARNING unless a rule is stated as NEVER/must, then BLOCKING.
+
+### 4. Banned-phrase scan
+
+```bash
+python3 scripts/banned_scan.py <index.md>      # --list prints the extracted bans
+```
+
+It reads the ban list from the live `writing-style.md` every run: inline `Skip "..."` bullets (the phrase, not the suggested replacement), quoted bullets under `## Writing Style: Things to NOT Do`, `Using these words:`, and contrast-framing templates (`it's not X, it's Y`, `This isn't A. It's B.`, `Not X. Y.`). It also flags emdashes, `<a href>`, inline `[text](url)`, and bare `{{< ref >}}` in body text. It skips code fences and front matter other than `title`/`description`. Every hit is BLOCKING; quote the line and give the rewrite.
+
+Do not skip it because the prose "looks fine". Author-blindness is why it exists.
+
+### 5. AI-tell scan (once)
+
+Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize`) once, in **report** mode, on the target. Do not also run its Detect greps by hand: that is the same check twice. Merge its findings with the scan: anything banned_scan already reported stays under step 4; the rest (triads, signposting, decorative formatting) are WARNING. Its survival check flags inline links converted to reference-style as LOST; writing-style requires reference-style, so that is noise. If ai-sanitize is not installed, mark the stage NOT RUN.
+
+### 6. Links (external only)
+
+Invoke the `write-check-links` skill on the target. If you run lychee yourself, run it **from the repo root** so the repo-root `.lycheeignore` applies (lychee reads it only from the cwd):
+
+```bash
+cd "$(git rev-parse --show-toplevel)" && lychee --config hugo/lychee.toml hugo/content/.../index.md
+```
+
+lychee checks only external `http(s)` URLs. It cannot resolve `{{< ref >}}` links; write-check-links adds a ref table checked against `hugo/content`, but step 1 is the authority, so count a broken ref once, under the build. Triage per the severity list: a cover-image 404 is noise once you confirm the PNG sits beside `index.md`; re-check a 404 in a second request before calling it BLOCKING.
+
+### 7. Markdown lint
+
+Invoke the `write-run-markdown-lint` skill on the target (it runs `markdownlint-cli2` with the project or `~/Shell` `.markdownlint-cli2.jsonc`, falling back to `npx -y markdownlint-cli2@0.18.1`). Use its result as-is. If MD013 or MD052 fire, the config was not applied: report that as NOISE plus a one-line note, and do not count those findings.
+
+### 8. Report
+
+Keep it scannable:
+
+```
+VERDICT: FAIL | PASS WITH WARNINGS | PASS  [(incomplete: <stage>)]
+Target: <path>  draft: <true/false>  page: <rendered path or "not rendered">
+
+| Stage | Result | Blocking | Warning | Noise |
+| Hugo build | BUILD OK / FAILED / NOT RUN | n | n | n |
+| Front matter | ... |
+| AGENTS.md pass | ... |
+| Banned phrases | ... |
+| ai-sanitize | ... |
+| Links (lychee, external only) | ... |
+| Markdown lint (cli2) | ... |
+
+BLOCKING
+- <stage> <file>:<line> <what> -> <exact fix>
+WARNING
+- ...
+NOISE (not counted): <one line each>
+AGENTS.md headings walked: <heading: checked / n/a (why)>
+```
+
+Every BLOCKING item names the line and the concrete fix (the rewritten sentence, the bare value, the corrected ref).
+
+## Fixing
+
+Validation is report-only. After the report, offer to fix the BLOCKING items (and warnings the user picks). Edit only after the user says yes, or when the original request already asked to fix ("validate and fix", "make it pass"). After any edit, re-run steps 1, 2, and 4 on the changed file; rewriting reintroduces banned phrases.
+
+When fixing, change only what the finding names. Profanity is the author's voice, not a defect: never remove or soften it. Do not rewrite a published post's title, description, or keywords unless asked; list those as suggestions.
+
+## Outside jeffbaileyblog
+
+For Markdown outside this Hugo site, skip steps 1-5 and run only links (step 6) and lint (step 7), and say which checks did not apply.

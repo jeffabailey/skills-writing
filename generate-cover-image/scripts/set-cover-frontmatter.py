@@ -10,10 +10,16 @@ Writes, unquoted as hugo/AGENTS.md requires:
 
 It replaces `image` and `alt` (and `caption` with --category) in an existing
 top-level `cover:` block, keeping its other keys such as `relative` or
-`hidden`, or appends a new block at the end of the front matter. Every other line is left byte for byte. The alt text is
+`hidden`, or appends a new block at the end of the front matter. Every other front matter line is left byte for byte. The alt text is
 written bare unless YAML would misread it (a colon-space, a leading special
 character, or a value such as "yes"), in which case it is double-quoted. A
 replaced block keeps its indentation, and a quoted alt stays quoted.
+
+In the body, every `{{< cover-inline src="..." alt="..." >}}` whose src is the
+old cover.image or the new png gets the new src and alt too (38 posts repeat
+the cover inline; leaving them would show the old alt under the new picture).
+Double quotes in the alt become single quotes there, since the shortcode
+parameter is double-quoted.
 
 Usage:
     set-cover-frontmatter.py <index.md|_index.md> <png name> "<alt text>" [--category]
@@ -76,8 +82,16 @@ def set_cover(path: str, png: str, alt: str, category: bool) -> None:
     if not replaced:
         out.append("cover:")
         out.extend(f"  {k}: {value(k, False)}" for k in ("image", "alt", "caption") if k in ours)
-    open(path, "w", encoding="utf-8").write("---\n" + "\n".join(out) + text[end:])
-    print(f"{path}: cover {'replaced' if replaced else 'added'} ({png})")
+    old = re.search(r"^cover:[ \t]*\n(?:[ \t]+.*\n)*?[ \t]+image:[ \t]*\"?([^\"\n]+)", text[4:end] + "\n", re.MULTILINE)
+    names = {png} | ({old.group(1).strip().split("/")[-1]} if old else set())
+    body, n = re.subn(
+        r'(\{\{<\s*cover-inline\s+src=")([^"]*)("\s+alt=")([^"]*)(")',
+        lambda m: (m.group(1) + png + m.group(3) + alt.replace('"', "'") + m.group(5))
+        if m.group(2).split("/")[-1] in names else m.group(0),
+        text[end:])
+    open(path, "w", encoding="utf-8").write("---\n" + "\n".join(out) + body)
+    inline = f", {n} cover-inline updated" if n else ""
+    print(f"{path}: cover {'replaced' if replaced else 'added'} ({png}){inline}")
 
 
 def main() -> None:

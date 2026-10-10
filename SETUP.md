@@ -41,11 +41,11 @@ Or add the individual skill directories you want to your project's `.claude/skil
 ```
 /write:article    # Create an article (recommends a framework)
 /write:review     # Review an article against its framework
-/write:ideate     # Brainstorm article ideas
-/write:strategy   # Competitor analysis or growth planning
-/write:copy       # Landing page / marketing copy
+/write:ideate     # Brainstorm article ideas (alias: /write:idea-storm), deduped against the blog
+/write:strategy   # Content strategy, competitor analysis, or growth audit
+/write:copy       # Landing page, CTA, email, ad, or tagline copy (also /write:landing-page-copy)
 /write:debug      # Structured bug analysis
-/write:seo        # Internal link optimization
+/write:seo        # Internal links + SEO front matter (alias: /write:internal-link-optimize)
 /hugo:agents      # Hugo blog AGENTS.md compliance (read site AGENTS.md in order)
 ```
 

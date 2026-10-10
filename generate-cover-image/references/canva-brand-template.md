@@ -49,7 +49,12 @@ It weights each character, fits the widest line to the 1087 px title box with a 
 
 ## Steps
 
-1. **Find or create the design.** `list-folder-items` with `folder_id: FAFgCl26Zkg`, `item_types: ["design"]`, and follow `continuation` until a design titled exactly `<design name>` turns up or the pages run out. For more than one cover, list the folder once, keep a title-to-ID map for the whole run, and add each new design to it; do not list or search per cover.
+1. **Find or create the design.** Look it up by exact title with `search-designs`, not by paging the folder. The folder holds 200+ designs at 50 a page (about 12k tokens a page) and most titles sit mid-alphabet (`fundamentals-of-*`, `how-*`), so a folder walk costs three or more pages per title; and some covers are not in the folder at all (the `category-*` designs, such as `category-git`, live elsewhere), so a folder walk reports them missing and the run would create duplicates.
+
+   * **Cache first:** if `<scratch>/canva-titles.tsv` (`title<TAB>design id`) exists from earlier in the session, look the name up there. A cached ID is still checked by step 2's `read-design`: if that fails or shows another title, drop the entry and search again.
+   * **Search:** `search-designs` with `query: "<design name>"`, `ownership: "owned"`, `limit: 5`, and keep only results whose title is exactly the design name. An exact match ranks first when it exists (checked for `21-laws-of-leadership-book-review` and `category-git`). One call per name, about 1.5k tokens; for a batch, run the searches in one turn. No exact match means there is no design by that name: the cover is new (and still an overwrite if its PNG exists).
+   * **Fallback, only if search is unavailable:** `list-folder-items` with `folder_id: FAFgCl26Zkg`, `item_types: ["design"]`, and `sort_by: "title_ascending"` for names starting with a digit or a to f, `"title_descending"` otherwise. Titles sort case-insensitively; stop as soon as a page's last title sorts past the name. Say that designs outside the folder were not checked.
+   * Append every title and ID you found to the cache file, and each new design as you create it.
 
    * **Found:** keep its design ID (`D...`) and overwrite it. If more than one design has that title, use the most recently modified one and tell the user about the others.
    * **Not found:** `create-design-from-brand-template` with `brand_template_id: EAHXEEDJKs0`. It returns the new design directly (no job to poll). Keep the returned design ID.
@@ -79,7 +84,7 @@ It weights each character, fits the widest line to the 1087 px title box with a 
 
 5. **Commit.** Show the user the thumbnail and the draft's edit URL, and commit with `edit-design` `finalize: "commit"` once they approve (or straight away if they said to skip review). When overwriting, say so: the commit replaces the existing cover and cannot be undone through the connector (Canva's version history in the editor still has the old one). To abandon, use `finalize: "cancel"`.
 
-6. **File it.** For a new design, `move-item-to-folder` with the design ID and `to_folder_id: FAFgCl26Zkg`. An existing cover is already there; skip this step.
+6. **File it.** For a new design, `move-item-to-folder` with the design ID and `to_folder_id: FAFgCl26Zkg`. Leave an existing design where it is, even outside that folder: the category covers may be filed elsewhere on purpose, and moving them is the user's call.
 
 7. **Export and compress.** `export-design` with `format: {type: png, width: 1200, height: 630}`. It returns the download URL directly; no `get-export-formats` check is needed for these designs. Keep Canva's default lossless export; do not set `lossless: false`, because `pngquant` compresses better from the lossless source and Canva's lossy pass only adds a second round of loss. Download the returned URL over the bundle's `<slug>.png`, quantize it in place, and check the size:
 

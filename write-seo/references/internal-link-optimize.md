@@ -9,7 +9,7 @@ You will be provided with a list of published blog posts from the `hugo list all
 - `permalink`: The published URL (e.g., "/blog/post-slug/")
 - `title`: The post title
 
-This list is the only source of truth for what is published. A post absent from it is unpublished, however relevant it looks, and gets no link. Filter to `draft=false`, focus on `content/blog`, exclude `_index.md`, and work from a reasonable subset (the 50-100 most recent published posts, or the last six months).
+This list is the only source of truth for what is published. A post absent from it is unpublished, however relevant it looks, and gets no link. Filter to `draft=false`, focus on `content/blog`, and exclude `_index.md`. Search the whole published list by topic, not by date: older cornerstone posts are often the best targets.
 
 ## Link format
 
@@ -23,9 +23,9 @@ Containers solve this by [isolating dependencies][what-is-containerization].
 [what-is-containerization]: &#123;&#123;&lt; ref "what-is-containerization" &gt;&#125;&#125;
 ```
 
-The `ref` value is the target post's slug only, without the date or `/blog` prefix. (In actual usage, write `&#123;&#123;&lt; ref "post-slug" &gt;&#125;&#125;` without HTML entities.)
+The `ref` value is the target's **bundle folder name** (the last directory in its `path` column), without the date or `/blog` prefix. Hugo resolves `ref` by content path, not by the front-matter `slug`; for posts whose slug differs from the folder, the slug fails with REF_NOT_FOUND. (In actual usage, write `&#123;&#123;&lt; ref "folder-name" &gt;&#125;&#125;` without HTML entities.)
 
-Before adding a link, confirm the target appears in the supplied list with `draft=false` and that its front-matter slug matches its URL structure.
+Before adding a link, confirm the target appears in the supplied list with `draft=false`. After editing, a Hugo build must finish with no REF_NOT_FOUND.
 
 ### External links
 
@@ -47,7 +47,9 @@ The blog's folders under `content/blog/` match its format categories: `learn-x/`
 
 ## How many links
 
-There is no target count and no penalty threshold. Add a link where it genuinely helps a reader move forward, and stop there. A long reference or hub page legitimately carries many more than a short narrative post. Prefer contextual in-body links over navigational ones, keep them topically tight, and never add a link a human reader would not follow. If a page starts to read as a list of links rather than prose, cut back.
+Add a link where it genuinely helps a reader move forward, and stop there. A long reference or hub page legitimately carries many more than a short narrative post. For a short post (under about 1,500 words), add at most one new link per ~400 words and keep total internal links at or below one per 200 words. Link each target once, and never inside code blocks, headings, or command tables.
+
+Anchor on wording already in the prose; do not write new body sentences to carry a link. A strong target with no natural anchor may get one bullet in an existing Related / Further reading / Next steps list, or go in the summary as a suggestion. Prefer contextual in-body links over navigational ones, keep them topically tight, and never add a link a human reader would not follow. If a page starts to read as a list of links rather than prose, cut back.
 
 ## Constraints
 
@@ -67,7 +69,7 @@ After processing, provide a summary:
 2. For each file, the links added: source context, target post, anchor text, and the complete reference-style link plus its definition.
 3. External references added, with reference name, full URL, and placement at the bottom of the file.
 4. Slug mismatches or missing targets found, without changes made.
-5. Total links added across all posts.
+5. Total links added across all posts (0 is a valid answer), with the post's word count and the link budget applied.
 
 ## Example
 
@@ -75,4 +77,4 @@ Processing a post about "Docker Basics", you might link "containerization" to *W
 
 ## Front matter stays out of scope
 
-Add links and their definitions only. Leave `title:`, `description:`, and `keywords:` alone, even when a target post's front matter looks weak. Those fields follow the SEO Considerations section of the writing style guide, which front-loads the primary keyword and places any type or series label after it. Changing them belongs to a separate pass, so note the problem in the summary rather than fixing it here.
+Add links and their definitions only. Leave `title:`, `description:`, and `keywords:` alone, even when a target post's front matter looks weak. Those fields follow `content/prompts/seo-front-matter.md` and are handled by this skill's front-matter mode, so note the problem in the summary rather than fixing it here.

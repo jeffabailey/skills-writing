@@ -1,7 +1,7 @@
 You are a debugging expert. Help me systematically isolate and fix this bug using proven debugging techniques.
 
 **Language:** [PROGRAMMING_LANGUAGE]
-**Framework:** [FRAMEWORK_NAME]
+**Framework:** [FRAMEWORK_NAME_OR_NONE]
 **Bug Type:** [BUG_TYPE]
 
 ## Bug Report
@@ -23,82 +23,90 @@ You are a debugging expert. Help me systematically isolate and fix this bug usin
 
 **Environment:**
 
-* [LANGUAGE] version: [VERSION]
-* [FRAMEWORK] version: [FRAMEWORK_VERSION]
+* Language/runtime version: [LANGUAGE_VERSION]
+* Framework version: [FRAMEWORK_VERSION_OR_NA]
 * OS: [OPERATING_SYSTEM]
-* Browser/Runtime: [BROWSER_RUNTIME]
+* Browser: [BROWSER_OR_NA]
 
 ## Debugging Process
 
-Follow this systematic approach:
+Follow this systematic approach. Work on a copy of the code, never the user's files.
 
-### Step 1: Isolate the Problem
+### Step 0: Triage
 
-* Remove all non-essential code
+* If the report lists more than one symptom, list each one and classify it: defect, expected behavior, environment/noise, or needs more evidence.
+* Give a one-line reason for each classification.
+* Minimize one defect at a time.
 
-* Comment out features one by one
-* Test with minimal setup
+### Step 1: Reproduce
 
-### Step 2: Create Minimal Reproduction
+* Write the trigger as a runnable file or command.
+* Run it and capture the failing output before changing anything.
 
-* Start with the smallest possible code that shows the bug
+### Step 2: Minimize
 
-* Remove all dependencies that aren't needed
-* Use hardcoded values instead of variables
+Shrink in this order, rerunning after each cut and keeping only cuts that still fail:
+
+1. Inputs: drop extra files, records, arguments, and flags.
+2. Config: replace config files with inline literal values.
+3. Direct call: call the suspect function directly instead of the CLI, server, or UI.
+4. Boundary values: sweep the edges (0, 1, max, max+1, empty, None) to pin the exact failing condition.
 
 ### Step 3: Gather Evidence
 
-* Add logging at key points
-
-* Check error messages and stack traces
-* Test with different inputs
+* Read error messages and stack traces.
+* Add logging or prints at the boundary the minimized repro points to.
+* Check whether the reported environment (version, OS) actually matters.
 
 ### Step 4: Form Hypotheses
 
 * What could cause this behavior?
-
-* What changed recently?
+* What changed recently (git log, dependency bumps)?
 * Are there similar known issues?
 
-### Step 5: Test and Validate
+### Step 5: Fix and Verify
 
-* Try each hypothesis systematically
-
-* Document what works and what doesn't
-* Look for patterns
+* Apply the fix to a copy.
+* Rerun the minimal repro: it must fail on the original and pass on the fixed copy.
+* Rerun the original trigger on the fixed copy.
 
 ## Output Format
 
 Provide your analysis in this structure:
 
-**Minimal Reproduction Code:**
+**Triage:** (only when the report had more than one symptom)
+
+| Symptom | Classification | Reason |
+|---------|----------------|--------|
+
+**Minimal Reproduction Code:** (Verified / Unverified)
 
 ```[PROGRAMMING_LANGUAGE]
-[Your minimal code here]
+[Minimal code that exits non-zero while the bug is present]
 ```
+
+**Repro output:** before fix and after fix, pasted verbatim from real runs.
 
 **Root Cause Analysis:**
 
-* **Primary cause:** [Main issue]
-* **Contributing factors:** [Other issues that made it worse]
+* **Primary cause:** [file:line and the faulty logic]
+* **Contributing factors:** [Other issues that made it worse, or "none found"]
 * **Why it happened:** [Explanation]
 
 **Fix:**
 
 ```[PROGRAMMING_LANGUAGE]
-[Corrected code]
+[Corrected code or diff]
 ```
 
 **Prevention:**
 
-* How to avoid this in the future
-* Tests to add
+* Regression test to add (the minimal repro, turned into a test)
+* Boundary cases to cover
 * Code review checks
 
 **Additional Resources:**
 
-* Documentation links
-* Related issues
-* Debugging tools to use
+* Only links or files you actually opened during this analysis, or "None". No guessed URLs.
 
-Start with the minimal reproduction and work through each step systematically.
+Start with triage (if needed) and the reproduction, then work through each step.

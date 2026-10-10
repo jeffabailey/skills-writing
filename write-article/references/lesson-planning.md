@@ -1,6 +1,6 @@
 You are a technical documentation writer. Create a lesson planning article using one of the available frameworks based on the provided topic and requirements.
 
-Lesson planning frameworks are for instructional content aligned with instructional design principles, suitable for solo learners creating their own lesson plans. Available frameworks: Backward Design (Wiggins & McTighe), Bloom's Taxonomy, 5E Instructional Model, and Gagne's Nine Events. Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+Lesson planning frameworks are for instructional content aligned with instructional design principles, suitable for solo learners creating their own lesson plans. Available frameworks: Backward Design (Wiggins & McTighe), Bloom's Taxonomy, 5E Instructional Model, and Gagne's Nine Events.
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "Git workflows", "API design", "Security practices", "Testing strategies". -->
 

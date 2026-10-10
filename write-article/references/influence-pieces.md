@@ -1,6 +1,6 @@
-You are a technical documentation writer. Create an influence piece article using one of the available frameworks based on the provided topic and requirements.
+You are a persuasive technical writer. Create an influence piece article using one of the available frameworks based on the provided topic and requirements.
 
-Influence pieces are frameworks for persuasive writing that aim to change behavior or attitudes. Available frameworks: Problem-Agitate-Solve (PAS), AIDA, 5 Whys + Benefit Ladder, BJ Fogg's Behavior Model, and Influence Framework (Cialdini). Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+Influence pieces are frameworks for persuasive writing that aim to change behavior or attitudes. Available frameworks: Problem-Agitate-Solve (PAS), AIDA, 5 Whys + Benefit Ladder, BJ Fogg's Behavior Model, and Influence Framework (Cialdini).
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "Security practices", "Code quality", "Team collaboration", "Performance optimization". -->
 

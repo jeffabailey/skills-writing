@@ -1,15 +1,15 @@
 <!-- Site override. Preserved from the standalone write-fundamentals-article-create skill during consolidation.
      This block outranks the prompt that follows it. -->
 
-## CRITICAL: No first person (voice override)
+## Voice for Fundamentals (site rule)
 
-Fundamentals articles are **Diátaxis explanation** content (`diataxis: explanation`). They MUST be written in **second person and imperative voice**, never first person.
+Fundamentals articles are **Diátaxis explanation** content (`diataxis: explanation`), but the site's `writing-style.md` exempts them from the Diátaxis no-first-person override:
 
-- Do NOT use "I", "I'm", "I've", "I'll", "my", "me", "we", "our", "us" in the article's own voice.
-- Use "you" for outcomes ("you can rebuild any transformation") and bare imperatives for actions ("Pick one source", "Add a few tests").
-- This applies even inside illustrative quotes where first person is incidental — neutralize them.
+- The author may use first person ("I") for judgments and real experience ("I've watched teams underinvest in X"). Never invent experiences: if you don't have the author's real story, write the claim directly or leave a `TODO(author)` placeholder.
+- Reader-facing scaffolding stays second person (see the list under Voice below).
+- No "we", "our", or "us" anywhere.
 
-**This overrides the prompt below.** The `fundamentals-article-create` prompt (and several existing `fundamentals` sibling articles) say "write in first person." That instruction is wrong for this site. The authoritative `references/writing-style.md` (Diátaxis voice override) forbids first person for explanation articles, and `writing-style.md` always wins. Write in second person from the first draft — do not write it in first person and convert later, and do not copy the siblings' first-person voice.
+The live rule is in the blog's `hugo/content/prompts/writing-style.md` (Voice override for Diátaxis articles); it wins if this file disagrees.
 
 ---
 
@@ -21,15 +21,11 @@ This prompt is for creating new articles in `content/blog/fundamentals/`. These 
 
 **CRITICAL:** Follow these guidelines strictly:
 
-**Precedence:** Follow the writing style guide above in full, with one deliberate exception. Where this prompt and the writing style guide conflict, this prompt wins. The only conflict today is Voice, item 2 below.
+**Precedence:** Follow the writing style guide in full. The voice rule at the top of this file outranks everything below it.
 
 1. **Diátaxis Type:** These are Explanation articles. Focus on understanding and answering "why" questions, not step-by-step tutorials.
 
-2. **Voice (intentional override):** Use a conversational, direct tone. Avoid "we"/"our" everywhere. Two voices apply, and mixing them up is the most common failure in this series:
-
-    **First person ("I") for authorial content.** When speaking as the author, use "I": opinions, judgments, lived experience, and the reasoning behind a recommendation. Example: "I have spent most of my career on teams where the technical leader either lifted everyone up or quietly capped what the group could do."
-
-    This overrides the "Voice override for Diátaxis articles" rule in `content/prompts/writing-style.md`, which bans first person for all Diátaxis content. Fundamentals articles are the exception. They explain concepts through a personal perspective, so authorial first person is correct here even though the front matter declares `diataxis: explanation`. This is intentional, not drift. Do not "fix" authorial first person, and do not flag it as a style violation.
+2. **Voice:** Use a conversational, direct tone. First person ("I") is fine for the author's judgments and real experience; avoid "we" and "our" everywhere (see the rule at the top). Write outcomes in second person.
 
     **Second person ("you") for reader-facing scaffolding.** The reader is the subject of every sentence about the reader. NEVER convert these to "I" — doing so makes the author the subject of the reader's experience, which is nonsense ("By the end of this article, I will be able to..." is wrong; you wrote it, you already can). Keep the template's wording:
 
@@ -41,7 +37,7 @@ This prompt is for creating new articles in `content/blog/fundamentals/`. These 
     * Self-Assessment: "see if **you** can explain these concepts in **your** own words"
     * Getting Started: "If **you're** new to [topic], start with..."
 
-    Rule of thumb: if the sentence describes what the reader will know, do, or need, it takes "you". If it describes what the author thinks or has lived, it takes "I".
+    Rule of thumb: if the sentence describes what the reader will know, do, or need, it takes "you". If it states the author's judgment, a direct claim or "I" both work.
 
 3. **No H1 in body:** The article should NOT include a `#` heading. Hugo auto-generates the H1 from front matter. Use `##` and lower-level headings.
 
@@ -468,14 +464,14 @@ When working with specialists:
 6. **Use concrete examples** - avoid abstract explanations
 7. **Focus on "why"** - this is an Explanation article, not a tutorial
 8. **Include code examples** where relevant, but explain the concepts behind them
-9. **Link to related articles** using Hugo shortcodes: `&#123;&#123;&lt; ref "article-slug" &gt;&#125;&#125;`
+9. **Link to related articles** with reference-style definitions whose target is the bundle folder name: `[label]: &#123;&#123;&lt; ref "folder-name" &gt;&#125;&#125;`
 
 ## Quality Checklist
 
 Before finalizing the article:
 
-- [ ] Follows writing style guide (`content/prompts/writing-style.md`), except the Voice override above
-- [ ] Authorial content (opinions, experience, judgments) is first person ("I"), not the second person the style guide requires for Diátaxis
+- [ ] Follows writing style guide (`content/prompts/writing-style.md`)
+- [ ] First person ("I") only for the author's real judgments or experience, never invented
 - [ ] Reader-facing scaffolding is second person: Learning Outcomes, TL;DR, Prerequisites, Escape routes, Quick Check, Self-Assessment, and Getting Started all say "you", never "I"
 - [ ] No "we"/"our" anywhere
 - [ ] No H1 headings in body (only `##` and below)

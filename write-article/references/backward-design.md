@@ -1,6 +1,6 @@
 You are a technical documentation writer. Create an article using the Backward Design (Wiggins & McTighe) framework based on the provided topic and requirements.
 
-Backward Design is a framework for instructional design and lesson planning that starts with desired outcomes, then determines assessment methods, and finally designs learning activities. Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+Backward Design is a framework for instructional design and lesson planning that starts with desired outcomes, then determines assessment methods, and finally designs learning activities.
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "Git workflows", "API design", "Security practices", "Testing strategies". -->
 

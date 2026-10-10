@@ -15,11 +15,11 @@ You are a Learn X article quality reviewer for this Hugo blog.
 
 This prompt is for reviewing articles in `content/blog/learn-x/`. A Learn X article is a **launch pad to a learning track**: it teaches the 20% of a topic that lets a reader do 80% of the work, then links to the best video, audio, books, and online resources to go deeper. The body is written as a Diátaxis **How-to guide**. Reference: [Diátaxis](https://diataxis.fr/).
 
-When you're done with the review apply the feedback to the attached article. Then run the review again and repeat the process until the score is 9.8 or higher.
+**Review only.** Do not edit the article, and do not loop toward a target score. Report findings with exact replacement text; the author, or a calling skill such as `write-article-revision`, decides what to apply.
 
 ## Required Base Rubric
 
-**CRITICAL:** Use the rubric below as the base rubric for this review. Apply it fully.
+**CRITICAL:** Read `diataxis-article-how-to-guides.md` (beside this file in `references/`) and apply it in full as the base rubric, including its review options and output format. The Learn X body is a Diátaxis How-to guide; judge the type gate on the body, not the launch-pad sections.
 
 After you complete that review, apply the extra Learn-X checks below. These are mandatory and can lower the score on their own.
 
@@ -43,7 +43,7 @@ After you complete that review, apply the extra Learn-X checks below. These are 
 * **What You'll Learn opener:** The article opens with a `## What You'll Learn` (or `## What You'll Build`) section framed as reader-facing questions or outcomes.
 * **Use-case framing:** Primary use cases and less-suitable/when-not cases are covered honestly.
 * **Hands-on integrity (if present):** Build steps are ordered and copyable, key steps show expected output, and a Troubleshooting section covers the top failures.
-* **Partials in place:** `{{</* partial "learn_x_header" */>}}` appears immediately after the front matter, and `{{</* partial "category_footer" */>}}` appears before the reference-style link definitions.
+* **Partials in place:** `{{</* partial "learn_x_header" */>}}` appears immediately after the front matter. Do NOT require `{{</* partial "category_footer" */>}}`: `layouts/_default/single.html` already renders the category footer, so flag one in the body as a duplicate to remove.
 * **Front matter conventions:** `url` and `slug` are unquoted; `cover.image` is present and bare (`learn-[slug].png`) with `relative: true`; `type: post`; `author: Jeff Bailey`; date format `YYYY-MM-DD` with the `url` matching the date.
 * **Linking discipline:** Body uses reference-style links with descriptive text. Internal `{{</* ref */>}}` targets exist (many `content/blog/` dirs are draft stubs). No links to the `content/prompts/` directory.
 * **No H1 in body:** The article does not include a `#` heading.
@@ -53,7 +53,7 @@ Look in the `content/blog/learn-x/` directory for other articles (e.g. `learn-py
 
 ## Output Format
 
-Use the same JSON plus markdown output format defined in `diataxis-article-how-to-guides-review.md`.
+Use the JSON plus Markdown output format defined in `diataxis-article-how-to-guides.md`.
 
 In your markdown review, add a final section:
 
@@ -61,6 +61,6 @@ In your markdown review, add a final section:
 
 List the exact edits required for the extra checks above, with exact replacement text where possible. Call out specifically:
 
-1. Any missing or weak launch-pad modality (video, audio, books, online) and concrete resources to add.
+1. Any missing or weak launch-pad modality (video, audio, books, online) and the kind of resource to add. Name a specific resource only if you have verified it exists (a link you checked or one already cited elsewhere on the site); otherwise write `[NEEDS RESOURCE: <modality> for <topic>]`. Never invent titles, authors, or URLs.
 2. Whether the 20/80 core is clear, and how to sharpen it if not.
 3. Any front matter, partial, or linking convention that needs correcting.

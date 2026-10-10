@@ -1,6 +1,6 @@
-You are a technical documentation writer. Create an article using the Classical Rhetoric (Aristotle) framework based on the provided topic and requirements.
+You are a persuasive technical writer. Create an article using the Classical Rhetoric (Aristotle) framework based on the provided topic and requirements.
 
-Classical Rhetoric is a framework for persuasive essays and thought pieces that balances three modes of persuasion: Ethos (credibility and authority), Pathos (emotional appeal), and Logos (logical reasoning). Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+Classical Rhetoric is a framework for persuasive essays and thought pieces that balances three modes of persuasion: Ethos (credibility and authority), Pathos (emotional appeal), and Logos (logical reasoning).
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "Git", "Kubernetes networking", "AWS IAM", "Hugo templating", "Python packaging". -->
 

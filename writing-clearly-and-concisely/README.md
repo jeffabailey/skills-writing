@@ -1,6 +1,6 @@
 # Writing Clearly and Concisely
 
-A skill that applies William Strunk Jr.'s timeless writing principles to produce clearer, stronger, more professional prose while avoiding common AI writing patterns.
+A skill that applies William Strunk Jr.'s timeless writing principles to produce clearer, tighter prose that keeps the author's voice, while avoiding common AI writing patterns.
 
 ## Purpose
 
@@ -31,17 +31,18 @@ Use this skill whenever you write prose for humans:
 
 ## How It Works
 
-1. **Load the skill** when writing prose for human readers
-2. **Apply Strunk's core principles** - active voice, positive form, concrete language, cut needless words
-3. **Avoid AI patterns** - no puffery, no empty phrases, no promotional adjectives
-4. **Reference detailed guides** when needed for specific rules
+1. **Load the skill** when writing or editing prose for human readers
+2. **Keep the author's voice** - register, profanity, humor, and asides outrank "omit needless words"
+3. **Apply Strunk's core principles** - active voice, positive form, concrete language, cut needless words
+4. **When editing a file** - freeze code, URLs, front matter, shortcodes, and tables; run `scripts/check_edit.py`; return a change list tagged with rule numbers
+5. **Avoid AI patterns** in your own text - no puffery, no empty phrases, no promotional adjectives
 
 ### Context-Efficient Approach
 
 The skill uses progressive disclosure to save context:
 
-- **SKILL.md** (~1,000 tokens) loads first with the core rules
-- **Reference files** (1,000-4,500 tokens each) load only when needed
+- **SKILL.md** (~2,000 tokens) loads first with the voice rule, editing procedure, and core rules
+- **Reference files** (1,200-8,400 tokens each) load only when needed
 - **Most tasks need only one file**: `03-elementary-principles-of-composition.md`
 
 For tight context situations, dispatch a subagent with your draft and the relevant section file.
@@ -75,11 +76,11 @@ The skill identifies and eliminates common LLM writing patterns:
 
 | Section | File | Tokens | Content |
 |---------|------|--------|---------|
-| Grammar & punctuation | `02-elementary-rules-of-usage.md` | ~2,500 | Comma rules, possessives, sentence structure |
-| Composition principles | `03-elementary-principles-of-composition.md` | ~4,500 | Active voice, concision, paragraph structure |
-| Formatting | `04-a-few-matters-of-form.md` | ~1,000 | Headings, quotations, formatting conventions |
-| Word choice | `05-words-and-expressions-commonly-misused.md` | ~4,000 | Common errors, word selection |
-| AI patterns | `signs-of-ai-writing.md` | ~25,000 | Wikipedia editors' field guide to AI detection |
+| Grammar & punctuation | `elements-of-style/02-elementary-rules-of-usage.md` | ~3,000 | Comma rules, possessives, sentence structure |
+| Composition principles | `elements-of-style/03-elementary-principles-of-composition.md` | ~8,400 | Active voice, concision, paragraph structure |
+| Formatting | `elements-of-style/04-a-few-matters-of-form.md` | ~1,200 | Headings, quotations, formatting conventions |
+| Word choice | `elements-of-style/05-words-and-expressions-commonly-misused.md` | ~5,600 | Common errors, word selection |
+| AI patterns | `signs-of-ai-writing.md` | ~24,000 | Wikipedia editors' field guide to AI detection (read one section by line range, not the whole file) |
 
 ## Usage Examples
 
@@ -131,6 +132,8 @@ writing-clearly-and-concisely/
   SKILL.md                 # Main skill definition
   README.md                # This file
   signs-of-ai-writing.md   # AI pattern detection guide
+  scripts/
+    check_edit.py          # verifies an edit kept code, links, shortcodes, tables, numbers, and voice
   elements-of-style/
     01-introductory.md
     02-elementary-rules-of-usage.md

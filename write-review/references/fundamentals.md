@@ -1,15 +1,16 @@
 <!-- Site override. Preserved from the standalone write-fundamentals-article-review skill during consolidation.
      This block outranks the prompt that follows it. -->
 
-## CRITICAL: Enforce second person (voice override)
+## Voice for Fundamentals (site rule)
 
-Fundamentals articles are **Diátaxis explanation** content (`diataxis: explanation`). The correct voice is **second person and imperative**, never first person.
+Fundamentals articles are **Diátaxis explanation** content (`diataxis: explanation`), but the site's `writing-style.md` exempts them from the Diátaxis no-first-person override:
 
-- Treat any first-person author voice ("I", "I'm", "I've", "I'll", "my", "me", "we", "our", "us") as a **defect to flag**, and recommend converting it to "you"/imperative.
-- Do NOT reward, request, or nudge toward first person. A correctly written second-person article must NOT lose points for lacking an "I" voice.
-- Illustrative quotes where first person is incidental are fine only if neutralizing them would lose meaning; otherwise flag them too.
+- First person ("I") in the author's judgments and experience is **allowed**; do not flag it or recommend converting it.
+- Reader-facing scaffolding must be second person (checked below). Flag "I" there.
+- Flag "we", "our", and "us" anywhere.
+- Do not reward or penalize an article for having or lacking an "I" voice.
 
-**This overrides the prompt below.** The `fundamentals-article-review` prompt says to "respect the first-person voice if requested" and its scoring context may assume first person. That is wrong for this site. The authoritative `references/writing-style.md` (Diátaxis voice override) forbids first person for explanation articles, and `writing-style.md` always wins.
+The live rule is in the blog's `hugo/content/prompts/writing-style.md` (Voice override for Diátaxis articles); it wins if this file disagrees. This overrides the base rubric's voice guidance.
 
 ---
 
@@ -17,19 +18,17 @@ You are a fundamentals article quality reviewer for this Hugo blog.
 
 This prompt is for reviewing articles in `content/blog/fundamentals/`. These articles are Diátaxis Explanation articles, they exist to help readers understand concepts and answer why questions. Reference: [Diátaxis](https://diataxis.fr/).
 
-When you're done with the review apply the feedback to the attached article. Then run the review again and repeat the process until the score is 9.8 or higher.
+**Review only.** Do not edit the article, and do not loop toward a target score. Report findings with exact replacement text; the author, or a calling skill such as `write-article-revision`, decides what to apply.
 
 ## Required Base Rubric
 
-**CRITICAL:** Use the rubric below as the base rubric for this review. Apply it fully.
+**CRITICAL:** Read `diataxis-article-explanation.md` (beside this file in `references/`) and apply it in full as the base rubric, including its type gate, review options, and output format. Fundamentals articles are Diátaxis Explanation articles.
 
-After you complete that review, apply the extra blog-specific checks below.
+After you complete that review, apply the extra blog-specific checks below. They can lower the score on their own.
 
 ## Extra Blog-Specific Checks, Fundamentals-x
 
-* **Voice (intentional override), authorial content:** Fundamentals articles use first person ("I") for the author's opinions, judgments, and lived experience. This overrides the "Voice override for Diátaxis articles" rule in `content/prompts/writing-style.md`, which bans first person for Diátaxis content. Fundamentals articles are the exception, even though their front matter declares `diataxis: explanation`. Do NOT score down, flag, or rewrite authorial first person here.
-
-* **Voice, reader-facing scaffolding:** Reader-facing sections stay in second person ("you"). Flag as a FAIL any of these written with "I", because they make the author the subject of the reader's experience:
+* **Voice, reader-facing scaffolding:** Reader-facing scaffolding is second person (see the rule at the top); the author's own judgments may use "I". These sections are where a misplaced "I" does harm. Flag as a FAIL any of these written with "I", because they make the author the subject of the reader's experience:
 
   * Learning Outcomes: must read "By the end of this article, you will be able to", never "I will be able to".
   * TL;DR: "If you only remember one workflow", never "If I only remember one workflow".
@@ -43,11 +42,12 @@ After you complete that review, apply the extra blog-specific checks below.
 
 * **No "we"/"our":** Flag any first-person plural as a violation.
 * **No H1 in body:** The article should not include a `#` heading.
-* Look in the fundamentals directory for other articles and use them as examples.
+* **No body category footer:** `layouts/_default/single.html` already renders the category footer. Flag any `{{</* partial "category_footer" */>}}` in the body as a duplicate to remove.
+* Look in the fundamentals directory for other articles and use them as structural examples, not as voice examples; the override above sets the voice.
 
 ## Output Format
 
-Use the same JSON plus markdown output format defined in `diataxis-article-explanation-review.md`.
+Use the JSON plus Markdown output format defined in `diataxis-article-explanation.md`.
 
 In your markdown review, add a final section:
 

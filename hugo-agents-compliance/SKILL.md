@@ -1,98 +1,66 @@
 ---
 name: hugo-agents-compliance
-description: Enforces jeffbaileyblog Hugo Markdown rules by reading and applying AGENTS.md in document order (top to bottom), including nested AGENTS.md and writing-style.md. Use when editing or creating content under the Hugo site (hugo/content/), drafting blog posts, fixing Hugo build errors, or the user says /hugo:agents, "apply AGENTS.md", "Hugo blog rules", or "compliance with hugo AGENTS".
+description: Enforces jeffbaileyblog Hugo Markdown rules by reading and applying hugo/AGENTS.md section by section as written, plus any nested AGENTS.md and content/prompts/writing-style.md, then proving it with a live ban-list scan, a front-matter check, and a build that actually renders the page (drafts included). Use when editing or creating content under the Hugo site (hugo/content/), drafting blog posts, fixing Hugo build errors such as REF_NOT_FOUND, or the user says /hugo:agents, "apply AGENTS.md", "Hugo blog rules", or "compliance with hugo AGENTS".
 ---
 
 # Hugo site: AGENTS.md compliance
 
-When you create or edit Markdown for the **jeffbaileyblog** Hugo site, treat the rules in **`AGENTS.md`** as mandatory. **Do not rely on memory or summaries alone** — read the file each session and work through it **from the first line to the last**, in the order its headings appear.
+For Markdown in the **jeffbaileyblog** Hugo site (`<repo>/hugo/`), the rules in `AGENTS.md` are mandatory. Read the files every session; they change, and a remembered summary goes stale. This skill adds the mechanics AGENTS.md leaves implicit and three scripts so the checks are one command each.
 
-## Where the rules live
+Scripts (paths relative to this skill): `scripts/banscan.py`, `scripts/fmcheck.py`, `scripts/verify-build.sh`. Preflight: `command -v hugo python3`. If one is missing, print the install command (`brew install hugo` / `brew install python`) and report "tool missing", not "check failed".
 
-- **Site-wide:** `<hugo-site-root>/AGENTS.md` (the `hugo/` folder in the blog repo).
-- **Section or series overrides:** any `AGENTS.md` **closer to the file** you are editing (for example `content/blog/fundamentals/AGENTS.md`). Read the global file first, then the nearest `AGENTS.md` on the path from `content/` down to the bundle. **Nearer files add or override** where they say they do.
+## 1. Scope the task first
 
-## Post shape and categories: no exploration needed
+Decide which mode you are in, because it controls how much you touch:
 
-Do NOT read sibling posts to "establish the shape" of a post, and do NOT grep the content tree to discover categories. Both are already available deterministically:
+- **New post:** apply every rule below, including SEO wording from `seo-front-matter.md`.
+- **Existing post** (a build fix, a link fix, or "make it compliant"): compliance means the *mechanical* rules. Fix what was asked; quote or unquote fields as required (keep the wording); add required fields that are missing (`lastmod` = today, `keywords`, `cover.alt`, a category); and fix banscan BLOCK hits (emdash, banned phrase, inline link, bare ref) with the smallest rewrite of that sentence. Never change `date:`. Do **not** reword an existing title, description, category choice, or untouched prose. That is an editorial or SEO decision the user did not ask for, and many legacy posts predate the current rules. Put those ideas under "suggested, not applied" in your report so the user can opt in.
 
-- **Front-matter shape:** the **`## Front matter (blog posts)`** section of `AGENTS.md` is the canonical, complete shape. Use it directly (plus any nearer `AGENTS.md` overrides). A sibling post adds nothing and may itself be non-compliant.
-- **Categories in use:** run, from the Hugo site root:
+Profanity is the author's voice in either mode. A compliance pass never removes or softens it.
 
-  ```bash
-  ./scripts/generate-site-metadata.py
-  ```
+## 2. Read the rules in their real order
 
-  It prints JSON with every category in use (`categories`) and per-category post counts (`category_counts`, sorted by frequency — prefer higher-count categories when several fit). If you cannot run the script, read `data/site-metadata.json` (its last written output) instead; add `--write` when running the script to refresh that file.
+1. Read `hugo/AGENTS.md` top to bottom. Walk its `##` headings **as they appear in the file** and, for each one, write a one-line note: applied / not relevant to this task (and why). Do not substitute a remembered list of sections; if a heading this skill mentions is gone, or a new one appeared, the file wins.
+2. Find nested rules: every `AGENTS.md` on the path from `content/` down to the bundle (`find content -name AGENTS.md`). Read each top to bottom. Nearer files add to or override the global file. AGENTS.md text may call a folder by an old name (for example `fundamentals-x`); match on the directory that actually holds the file.
+3. Read `content/prompts/writing-style.md` (AGENTS.md's `## Writing style` delegates to it; it wins on conflicts) and, when you set `title`/`description`/`keywords`, `content/prompts/seo-front-matter.md`.
 
-## Workflow (always in this order)
+**Do not explore sibling posts or grep `content/` by default.** The front-matter shape is in AGENTS.md, and categories come from `./scripts/generate-site-metadata.py` (prints `categories` and `category_counts`; fall back to `data/site-metadata.json`). **Exception:** when a nested AGENTS.md tells you to match comparable posts (for example the Fundamentals rules for `series:` and `diataxis:`), read the front matter of one or two of the closest siblings in that directory, only the front matter, and say which posts you matched. For "which posts cover X", use the search index AGENTS.md describes (`scripts/site-search` from the repo root) before any grep.
 
-1. **Open and read** `<hugo-site-root>/AGENTS.md` from top to bottom. Note every `##` section; your compliance pass must cover each section that applies to the task.
-2. **If the target path sits under a subtree that has its own `AGENTS.md`**, read that file the same way (top to bottom) and merge its requirements with the global rules.
-3. **Apply rules in the same order they appear in `AGENTS.md`** (front matter → cover → writing style → post structure → content guidelines → formatting → links → build verification → SEO checklist → publishing checklist). If a section does not apply (e.g. no cover image), skip it explicitly in your reasoning or checklist.
-4. **`## Writing style` in `AGENTS.md`** points at **`content/prompts/writing-style.md`**. Read and follow that file for voice, tone, formatting, SEO prose rules, and pitfalls. **When `AGENTS.md` and `writing-style.md` disagree, follow `writing-style.md`.**
-5. **Banned phrase scan (mandatory, not optional).** `writing-style.md` enumerates banned phrases in two places: a "**## Writing Style: Things to NOT Do**" section near the bottom, AND inline `Skip "..."` / `Using these words: "..."` markers scattered earlier in the file. **"Read and follow" is not enough** — extract every banned token from the current version of `writing-style.md`, then `grep` your edited content for each. Treat any hit as a blocker, not a suggestion. Categories to extract:
+## 3. Apply, then verify with the scripts
 
-   - **Inline `Skip "..."` markers** (e.g. `load bearing` / `load-bearing`, `the whole trick`, `nightmare scenarios`, `gets really ugly`).
-   - **"Do NOT use performative or AI-coded phrases"** list (e.g. `no fluff`, `shouting into the void`, `and honestly`, `you're not imagining this`, `that's rare`, `here's the kicker`, `the best part?`, `the important part is this`, `read this twice`, `quietly [doing something]`, `key takeaway`, `let me ground you`, `you're thinking about this exactly the right way`).
-   - **"Using these words:"** entries (e.g. `fostering`).
-   - **Contrast-framing patterns** in "Do NOT rely on contrast framing as a crutch" (`it's not X, it's Y`, `not chaos. clarity.`).
-   - **Banned punctuation/markup:** emdashes (`—`), HTML `<a href>` tags, inline `[text](url)` for internal refs, bare `{{< ref >}}` in body.
+Front-matter mechanics that runs keep getting wrong (AGENTS.md has the full shape):
 
-   **Re-run this scan after every editing pass**, including external prose tools, AI rewriters, and human revisions. Those workflows reliably reintroduce banned phrases because they optimize for fluency over the project's specific bans.
+- `url`, `slug`, `cover.image` bare (no quotes); `description` quoted (an unquoted colon breaks YAML), ≤160 chars per `seo-front-matter.md`.
+- `slug`, bundle folder, and `url` tail match on new posts. `cover.image: <slug>.png`, `relative: true`, and an `alt` that says what the image shows. Open the PNG before you write `alt`. If the image does not exist yet, write `alt` from the article's subject and flag it for review once the cover is made.
+- `categories:` has at least one entry on every content file, posts and pages alike, picked from existing categories (prefer higher counts). Never restate the site's context: use **Software**, not "Software Development"; **Tools**, not "Development Tools". Invent a new category only when nothing fits, and say so.
+- New posts: `draft: true`, `date` = `lastmod` = today, `YYYY-MM-DD` only.
+- Never add `{{< partial "category_footer" >}}` to a body; `layouts/_default/single.html` already renders it.
 
-   Example grep catching common bans in one pass (extract the live list from `writing-style.md`, this is illustrative only):
+Run all three checks after **every** editing pass, including passes by ai-sanitize, other prose tools, or the user. Rewriters reintroduce banned phrases, and you cannot see your own.
 
-   ```bash
-   grep -niE "—|load.bearing|the whole trick|fostering|no fluff|key takeaway|here'?s the kicker|the best part\?|read this twice|quietly |shouting into the void|nightmare scenario|and honestly|you'?re not imagining this|that'?s rare|let me ground you|the important part is this|gets really ugly" path/to/index.md
-   ```
+1. **Ban scan:** `python3 scripts/banscan.py <index.md>`. It extracts the ban list fresh from the live `writing-style.md` (Skip bullets, the "Things to NOT Do" section, "Using these words") and checks markup: emdash, `<a href>`, inline `[text](url)`, bare `{{< ref >}}`, fences without a language, Markdown tables, body H1, category_footer. BLOCK lines must be fixed; REVIEW lines (contrast framing, "quietly", arrow diagrams) need a judgment call. Add `--list` to see the extracted bans.
+2. **AI tells:** after the scan is clean, run the `ai-sanitize` skill (`jbb-skills:ai-sanitize`) in edit mode on what you wrote or changed, then re-run banscan. If it is not installed, say so and continue. Its survival check flags inline links converted to reference-style as LOST; that is expected, since writing-style.md requires reference-style.
+3. **Front matter:** `python3 scripts/fmcheck.py <index.md>`. FAIL must be fixed. WARN is fine on legacy posts in targeted-fix mode (slug ≠ folder, no keywords). A WARN for a missing cover file means the post needs `generate-cover-image` (step 4).
+4. **Build:** `scripts/verify-build.sh <index.md>`. It runs `hugo --gc --minify` into a temp dir and, when the file is `draft: true`, a second `--buildDrafts` build, because the production build skips drafts and passes even when the draft is broken. It then confirms `<url>/index.html` exists. Any `ERROR` line, including `REF_NOT_FOUND`, is a failure; fix and re-run until `BUILD OK`.
 
-   Do NOT skip this step on the grounds that the prose "looks fine" or that you wrote it yourself this session. Author-blindness is exactly why this step exists.
+## 4. Fixing REF_NOT_FOUND
 
-6. **Remove AI tells.** After the banned-phrase scan passes, invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) in edit mode on the content you created or edited. It catches the patterns a token grep misses (contrast framing, triads, signposting, formatting as personality, decorative Mermaid). `writing-style.md` wins where they disagree, and profanity stays (see *Voice* below). Re-run the banned-phrase scan afterward. If the skill is not installed, say so and continue.
+`{{< ref "x" >}}` resolves by content path or **bundle folder name**, not by front-matter `slug` (several published posts have slug ≠ folder). To find the right target:
 
-7. **After substantive Markdown or content changes**, run from the Hugo site root:
+```bash
+cd hugo && hugo list all | awk -F, 'NR==1 || /blame/'   # columns: path,slug,title,date,...,draft,permalink
+```
 
-   ```bash
-   hugo --gc --minify
-   ```
+Use the folder name from the `path` column (for example `death-by-1000-cuts-3-the-blame-game` from `content/blog/death-by-1000-cuts/death-by-1000-cuts-3-the-blame-game/index.md`). If you only know the topic, query `scripts/site-search "<words>"` from the repo root and read `content_path`. Repoint the ref; do not delete the link. If the target has `draft` = `true`, a published post cannot link to it: the production build will fail. Drop the link or wait until the target is published, and tell the user.
 
-   Fix all reported issues (including **`REF_NOT_FOUND`** from invalid `{{< ref >}}`) before you stop.
+## 5. Cover image handoff
 
-## Compliance habits
+`cover.image` names `<slug>.png` beside `index.md`. If fmcheck reports the file missing, the page's og:image points at nothing. Do not invent an image: tell the user, and offer the `generate-cover-image` skill (it builds the Canva cover and writes the PNG) as the next step.
 
-- **Front matter:** Match the shape, date format, slug/url alignment, and fields `AGENTS.md` specifies unless a nearer `AGENTS.md` overrides them.
-- **Front matter — NEVER quote `url` or `slug`:** Write `url: /blog/YYYY/MM/DD/my-slug` and `slug: my-slug` (bare, no double quotes). Quoted values like `url: "/blog/..."` or `slug: "my-slug"` are forbidden. Other string fields (`title`, `description`) may still be quoted per the usual YAML rules.
-- **Front matter — ALWAYS include `cover.image`, unquoted, slug-matched, `.png`:** Every post's front matter must have:
+## 6. Report
 
-  ```yaml
-  cover:
-      image: my-slug.png
-  ```
-
-  Where `my-slug` matches the `slug` value exactly, the extension is `.png`, and the value is bare (no double quotes). Example: for `slug: how-long-should-a-function-be`, use `image: how-long-should-a-function-be.png`.
-- **Front matter — `categories:` MUST contain at least one entry (never missing, never empty):** Every content file the pass touches — blog posts AND pages under `content/` — must declare a `categories:` list with **at least one** category. A missing `categories:` block, an empty list, or `categories: []` is a compliance failure. Do NOT skip this check because the file is `type: page` instead of `type: post`; "the front-matter shape section only covers posts" is not an exemption. If the file has no categories, add the best fit from categories already in use on the site — get the list with:
-
-  ```bash
-  ./scripts/generate-site-metadata.py
-  ```
-
-  Only invent a new category when nothing existing fits, and say so explicitly in your summary.
-- **Front matter — prefer existing categories, and never restate the site's context in a category name:** The whole site is about software development, so every category already implies it. Category names that spell it out are redundant. When choosing, ALWAYS prefer the short existing form over a "software"/"development"-qualified variant:
-
-  - "Software Development" → use **Software**.
-  - "Development Tools" → use **Tools**.
-
-  Apply the same test to any candidate: strip the words "software" and "development" and check whether an existing category already covers what remains. Pick from the existing category list first; inventing a new category (especially a qualified variant of an existing one) is a last resort.
-- **Front matter — `categories:` and `keywords:` must fit the target article:** On every create or edit pass, review both lists against the article's actual content and update them so they stay relevant. Pick `categories:` from categories already in use on the site (run `./scripts/generate-site-metadata.py` from the site root) rather than inventing new ones. For `keywords:`, follow the single SEO prompt at `hugo/content/prompts/seo-front-matter.md` — primary keyword first, 4–7 long-tail phrases the article substantively covers, no category duplication.
-- **Front matter — `title:` and `description:` follow the SEO prompt:** Apply `hugo/content/prompts/seo-front-matter.md`, the one place SEO rules live (based on Google's SEO Starter Guide) — unique, accurate titles that front-load the primary keyword with any type or series label after it, and a succinct one- or two-sentence description that leads with the same keyword and matches the content.
-- **Front matter — update `lastmod:` when updating an article:** Any substantive edit to an existing post must set `lastmod:` to today's date (same `YYYY-MM-DD` format as `date:`). Leave `date:` unchanged — it records original publication.
-- **Formatting:** No Markdown tables for comparisons or structured lists where `AGENTS.md` requires the `cards` shortcode; no `` ```text `` diagrams — use Mermaid as specified.
-- **Links:** Internal links use **`{{< ref "slug" >}}`** with slug only unless the file already follows another established pattern; external links and **`## References`** follow the reference rules at the end of the doc.
-- **Voice — NEVER sanitize profanity:** A compliance pass fixes structure, front matter, and banned phrases. It does NOT clean up swearing. If the source draft says "fuck", the compliant rewrite says "fuck". Profanity is part of the site's authentic voice per `writing-style.md`; removing or softening it is a compliance failure, not a courtesy.
-- **Checklists:** Before you consider the work done, run through the **SEO** and **Publishing** checklists in `AGENTS.md` for anything user-visible or publish-related.
-- **Banned phrases:** Re-grep against the `writing-style.md` ban list (see workflow step 5) after every edit pass. Author-blindness and prose-tool regression both make this a recurring failure, not a one-time check.
+End with: mode (new / compliance pass / targeted fix); the AGENTS.md headings walked with applied/not-relevant notes; nested AGENTS.md files applied and any siblings matched; banscan, fmcheck, and verify-build results (exit codes, page path); "suggested, not applied" items for legacy posts; cover handoff if needed. Do not commit or push unless asked (AGENTS.md's `## Git` section says how when the user does ask).
 
 ## When this skill does not apply
 
-Skip it for non-Hugo repos, non-Markdown assets with no `AGENTS.md` expectations, or tasks the user limits to unrelated files.
+Non-Hugo repos, non-Markdown assets, or tasks the user limits to unrelated files.

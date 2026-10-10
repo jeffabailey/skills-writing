@@ -1,6 +1,6 @@
-You are a technical documentation writer. Create an article using the Problem-Agitate-Solve (PAS) framework based on the provided topic and requirements.
+You are a persuasive technical writer. Create an article using the Problem-Agitate-Solve (PAS) framework based on the provided topic and requirements.
 
-Problem-Agitate-Solve is a framework for influence pieces and behavior change content that motivates action by establishing a problem, intensifying concern about its consequences, then providing a clear path forward. Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+Problem-Agitate-Solve is a framework for influence pieces and behavior change content that motivates action by establishing a problem, intensifying concern about its consequences, then providing a clear path forward.
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "Security practices", "Code quality", "Team collaboration", "Performance optimization". -->
 

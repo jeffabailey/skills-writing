@@ -41,9 +41,9 @@ Treat the body as a Diátaxis **How-to guide**: task-focused, goal-first, and pr
 
 7. **Front matter conventions:** Leave `url` and `slug` **unquoted**. Always include a `cover.image` set to `learn-[topic-slug].png` (bare, no quotes) with `relative: true`. Set `type: post` and `author: Jeff Bailey`.
 
-8. **Header and footer partials:** Place `{{</* partial "learn_x_header" */>}}` immediately after the front matter, and `{{</* partial "category_footer" */>}}` immediately before the reference-style link definitions.
+8. **Header partial:** Place `{{</* partial "learn_x_header" */>}}` immediately after the front matter. Do not add a `category_footer` partial: `layouts/_default/single.html` already renders it, so a second copy duplicates the footer.
 
-9. **Links:** Use reference-style links (`[text]` in the body, `[text]: URL` defined at the bottom) to match existing Learn X articles. Link text must describe the destination. For internal blog links, use the Hugo ref shortcode: `{{</* ref "article-slug" */>}}`.
+9. **Links:** Use reference-style links (`[text]` in the body, `[text]: URL` defined at the bottom) to match existing Learn X articles. Link text must describe the destination. For internal blog links, use the Hugo ref shortcode with the target bundle's folder name: `[label]: {{</* ref "folder-name" */>}}`.
 
 10. **Verify references before linking internally:** Many `content/blog/` directories are draft stubs. Before adding a `{{</* ref */>}}` to another post, confirm the target exists, or use a plain external URL instead. Do not link to the `content/prompts/` directory from article content.
 
@@ -211,8 +211,6 @@ You've covered the essentials. Here's a curated learning track to go deeper. [On
 * [Cheat sheet or reference]
 * [Adjacent topic worth exploring]
 
-&#123;&#123;&lt; partial "category_footer" &gt;&#125;&#125;
-
 [topic name]: https://example.com/
 [course or talk title]: https://example.com/
 [book title]: https://example.com/
@@ -227,7 +225,7 @@ You've covered the essentials. Here's a curated learning track to go deeper. [On
 5. **Never ship without the launch pad.** The "Beyond the Basics" video/audio/books/online links and the Related Content section are the deliverable.
 6. **Prefer real, current resources.** Link to specific courses, books, and docs, not generic homepages, when you can. Verify URLs resolve.
 7. **Decide `hands_on` and proceed.** Don't ask the user. Include the build walkthrough and troubleshooting when the topic rewards practice; otherwise keep it concept-first.
-8. **Keep internal links honest.** Use `{{</* ref "slug" */>}}` only for posts that exist; otherwise use external URLs.
+8. **Keep internal links honest.** Use `{{</* ref "folder-name" */>}}` only for posts that are published (`draft: false`); otherwise use external URLs.
 
 ## Quality Checklist
 
@@ -235,7 +233,7 @@ Before finalizing:
 
 - [ ] Follows the writing style guide (`content/prompts/writing-style.md`)
 - [ ] No H1 headings in the body (only `##` and below)
-- [ ] `learn_x_header` partial right after front matter; `category_footer` before the link definitions
+- [ ] `learn_x_header` partial right after front matter; no `category_footer` partial in the body
 - [ ] Date format is `YYYY-MM-DD`; `url` matches the date
 - [ ] `url` and `slug` are unquoted; `cover.image` is present and bare with `relative: true`
 - [ ] Description is ≤160 characters and keyword-first

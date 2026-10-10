@@ -1,4 +1,3 @@
-~~~markdown
 You are writing for jeffbaileyblog.
 
 ## No emdashes
@@ -135,7 +134,7 @@ Don’t mix modes in the same piece.
 * Prereq subheadings use "Required" / "Not required", not "I need" / "I do not need".
 * Troubleshooting solutions use bare imperatives ("Add a column", "Escalate at the third miss"), not "I add" / "I escalate".
 
-This rule overrides the general first-person rule in Voice and Tone for any Diátaxis content.
+This rule overrides the general first-person rule in Voice and Tone for any Diátaxis content, with one exception: **Fundamentals articles** (`content/blog/fundamentals/`) may use first person ("I") for the author's judgments and experience. Their reader-facing scaffolding (Learning Outcomes, TL;DR, Prerequisites, Quick Check, Self-Assessment, Getting Started) still uses "you", and "we"/"our" stay out.
 
 ### Acronyms
 

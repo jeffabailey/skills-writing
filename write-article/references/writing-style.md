@@ -135,7 +135,7 @@ Don’t mix modes in the same piece.
 * Prereq subheadings use "Required" / "Not required", not "I need" / "I do not need".
 * Troubleshooting solutions use bare imperatives ("Add a column", "Escalate at the third miss"), not "I add" / "I escalate".
 
-This rule overrides the general first-person rule in Voice and Tone for any Diátaxis content.
+This rule overrides the general first-person rule in Voice and Tone for any Diátaxis content, with one exception: **Fundamentals articles** (`content/blog/fundamentals/`) may use first person ("I") for the author's judgments and experience. Their reader-facing scaffolding (Learning Outcomes, TL;DR, Prerequisites, Quick Check, Self-Assessment, Getting Started) still uses "you", and "we"/"our" stay out.
 
 ### Acronyms
 
@@ -411,3 +411,4 @@ When parenthetical asides break up a sentence's main predicate, split into two s
 > Write plainly. Favor continuity over fragmentation. Let insight emerge from explanation, not cadence. Match tone to substance. Avoid performative empathy, influencer phrasing, and rhetorical shortcuts.
 
 Enforcement rule: if a sentence matches any banned pattern, rewrite it.
+~~~

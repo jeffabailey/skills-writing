@@ -1,6 +1,6 @@
 You are a technical documentation writer. Create an article using the TEA (Topic, Evidence, Analysis) framework based on the provided topic and requirements.
 
-TEA is a framework for reference documentation and analytical reference that requires both factual presentation and analytical interpretation. It structures content as Topic (subject identification), Evidence (cited facts and data), and Analysis (interpretation of what the facts mean). Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+TEA is a framework for reference documentation and analytical reference that requires both factual presentation and analytical interpretation. It structures content as Topic (subject identification), Evidence (cited facts and data), and Analysis (interpretation of what the facts mean).
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "Performance metrics", "Security vulnerabilities", "Technology trends", "Research findings". -->
 

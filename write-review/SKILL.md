@@ -1,140 +1,75 @@
 ---
 name: write-review
-description: Reviews articles against 16 bundled writing framework rubrics. Detects the framework used, loads the rubric from this skill, and evaluates the article. Use when the user says /write:review, asks to review an article, evaluate writing quality, check an article against a framework, or get feedback on a draft. Triggers on "review article", "evaluate writing", "check article", "review draft", "writing feedback", "article quality". With no article specified, reviews the last article created or adjusted.
+description: Reviews articles against 16 bundled writing framework rubrics. Detects the framework from front matter, content directory, and structure (or takes it as an argument), loads the rubric from this skill, and evaluates the article without editing it. Use when the user says /write:review, asks to review an article, evaluate writing quality, check an article against a framework, or get feedback on a draft, and when another skill (such as write-article-revision) needs a framework rubric score. Triggers on "review article", "evaluate writing", "check article", "review draft", "writing feedback", "article quality". With no article specified, reviews the last article created or adjusted.
 ---
 
 # Article Review
 
-Review articles against structured writing framework rubrics. Each review prompt is bundled in `references/` and defines evaluation criteria, scoring dimensions, and quality standards for a specific article type.
+Score an article against the rubric for the framework it was written in, and report findings the author can act on. Every rubric is bundled in `references/`; nothing is fetched at runtime.
 
-## Available Review Frameworks
+**A review never edits.** The article file must be byte-identical before and after. Some rubric text talks about rewrites, diffs, or "conversion"; treat all of it as proposed text in the report, never as edits to the file, and run the review once (no loop toward a target score). Applying changes is the author's job, or a calling skill's (for example `write-article-revision`).
 
-### Documentation (Diataxis)
+## Usage
 
-| Framework | What It Evaluates | File |
-|-----------|-------------------|------|
-| Tutorials Review | Learning flow, setup safety, checkpoints, troubleshooting | `references/diataxis-article-tutorials.md` |
-| How-to Guides Review | Task clarity, execution steps, troubleshooting coverage | `references/diataxis-article-how-to-guides.md` |
-| Reference Review | Accuracy, completeness, structure, consistency | `references/diataxis-article-reference.md` |
-| Explanation Review | Conceptual clarity, learning scaffolding, mental models | `references/diataxis-article-explanation.md` |
-
-### Persuasion and Engagement
-
-| Framework | What It Evaluates | File |
-|-----------|-------------------|------|
-| AIDA Review | Hook strength, value clarity, desire-building, call-to-action | `references/aida.md` |
-| PAS Review | Problem clarity, agitation strength, solution quality | `references/problem-agitate-solve.md` |
-| Influence Pieces Review | Persuasion techniques, evidence quality, framing | `references/influence-pieces.md` |
-
-### Structural and Rhetorical
-
-| Framework | What It Evaluates | File |
-|-----------|-------------------|------|
-| Classical Rhetoric Review | Balance of ethos, pathos, logos | `references/classical-rhetoric.md` |
-| TEA Review | Evidence quality, analysis depth, integration | `references/tea.md` |
-| Thought Pieces Review | Idea development, exploration depth, dialectical quality | `references/thought-pieces.md` |
-
-### Instructional Design
-
-| Framework | What It Evaluates | File |
-|-----------|-------------------|------|
-| Backward Design Review | Outcomes clarity, assessment alignment, activity design | `references/backward-design.md` |
-| Lesson Planning Review | Framework compliance, instructional quality, progression | `references/lesson-planning.md` |
-
-### Reference and Lookup
-
-| Framework | What It Evaluates | File |
-|-----------|-------------------|------|
-| Fact-Based Reference Review | Lookup quality, analytical reference, accuracy | `references/fact-based-reference.md` |
-| List Articles Review | List structure, SEO, search/filter usability | `references/a-list.md` |
-
-### Blog-Specific: Fundamentals Review
-
-| Framework | What It Evaluates | File |
-|-----------|-------------------|------|
-| Fundamentals Review | Diátaxis Explanation + blog-specific checks for `content/blog/fundamentals/`; target score 9.8+ | `references/fundamentals.md` |
-| Learn X Review | Launch-pad structure, 20/80 coverage, and curated resource quality for `content/blog/learn-x/` | `references/learn.md` |
-
-## Loading a Rubric
-
-Every rubric is bundled in this skill. Read the file named in the tables above:
-
-```
-references/<framework>.md
+```text
+/write:review [article] [framework]
 ```
 
-There is no network fetch and no cache. The files on disk are the source of truth.
+* `article`: a file path, pasted text, or URL. Omit it to review the last article created or adjusted (step 1).
+* `framework`: optional. Any key or alias from the table below (`how-to`, `fundamentals`, `diataxis-explanation`, `pas`, `a-list.md`, ...). An explicit framework wins over detection. Callers such as `write-article-revision` pass the article's `articletype` here.
 
-Two shared files apply to every rubric:
+## Frameworks
 
-* `references/writing-style.md` sets voice, tone, formatting, link style, and the banned-phrase list.
-* `references/seo-front-matter.md` sets `title:`, `description:`, and `keywords:` rules.
+| Key (`articletype`) | Aliases | Rubric | Detection signals (after front matter) |
+|---|---|---|---|
+| `fundamentals` | fundamentals-x | `fundamentals.md` + base `diataxis-article-explanation.md` | dir `content/blog/fundamentals/`; `series: Fundamentals`; title "Fundamentals of ..." |
+| `learn` | learn-x | `learn.md` + base `diataxis-article-how-to-guides.md` | dir `content/blog/learn-x/`; "Beyond the Basics" launch-pad section; `learn_x_header` partial |
+| `diataxis-tutorial` | tutorial | `diataxis-article-tutorials.md` | "you will build/learn", one guided path, checkpoints for a beginner |
+| `diataxis-how-to` | how-to, howto | `diataxis-article-how-to-guides.md` | dirs `how-x/`, `troubleshooting/`; "How do I ...", "Fix: ..."; goal, prerequisites, ordered steps |
+| `diataxis-reference` | reference | `diataxis-article-reference.md` | glossary, cheat sheet, uniform entries for lookup |
+| `diataxis-explanation` | explanation | `diataxis-article-explanation.md` | dirs `what-x/`, `why-x/`; "What is ...", "Why ..."; mental models, trade-offs |
+| `aida` | | `aida.md` | hook, value, desire, explicit call to action |
+| `problem-agitate-solve` | pas | `problem-agitate-solve.md` | problem, consequences intensified, then the fix |
+| `influence-pieces` | influence | `influence-pieces.md` | aims to change behavior; Cialdini, Fogg, benefit ladder |
+| `classical-rhetoric` | rhetoric | `classical-rhetoric.md` | argued thesis balancing ethos, pathos, logos |
+| `tea` | | `tea.md` | Topic, Evidence, Analysis sections; cited data with interpretation |
+| `thought-pieces` | thought-piece, opinion | `thought-pieces.md` | dir `think-x/`; first-person exploration, multiple perspectives |
+| `backward-design` | | `backward-design.md` | outcomes first, then assessments, then activities |
+| `lesson-planning` | lesson-plan | `lesson-planning.md` | lesson structure (Bloom's, 5E, Gagne's nine events) |
+| `fact-based-reference` | fact-reference, faq | `fact-based-reference.md` | dir `reference/` without `diataxis*`; definitions, FAQ, Cornell notes |
+| `a-list` | list, list-x | `a-list.md` | dir `lists/`; title "A List of ..." or "A Big List of ..." |
 
-Read them when reviewing anything destined for jeffbaileyblog.
+`references/prompt-index.md` is a one-line summary of what each rubric evaluates.
 
 ## Workflow
 
-1. **Resolve the target article** -- Use the article the user specified, as text, a file path, or a URL.
+1. **Resolve the target article.** Use what the user or caller gave you. Convert any path to an absolute path. If no article was given, stop at the first hit:
 
-   **If the user specified no article, review the last article created or adjusted.** Resolve in this order and stop at the first hit:
+   1. **This conversation:** the article file (a `content/**/index.md`, or Markdown with front matter) you created or edited most recently in this session. If you touched several, pick the last one edited and list the others so the user can redirect.
+   2. **The blog repo:** run `scripts/last-article.sh` (in this skill). It finds the blog repo even when the current directory is elsewhere (`$BLOG_ROOT`, the current git root if it has `content/`, else `~/Projects/websites/jeffbaileyblog`), considers only `content/**/index.md`, checks the working tree first (newest uncommitted or untracked by mtime), then the last commit that touched an article (the most-changed article when a commit touched several), and prints an absolute path plus its source.
+   3. **Ask the user** only when both come up empty.
 
-   1. **This conversation.** An article you created or edited earlier in this session.
-   2. **The working tree.** The most recently modified uncommitted or untracked article:
+   State the resolved absolute path and how you found it before reviewing.
 
-      ```bash
-      R=$(git rev-parse --show-toplevel) && git -C "$R" ls-files -m -o --exclude-standard -- '*.md' \
-        | grep -vEi '(^|/)(README|CLAUDE|AGENTS|CONTEXT|MEMORY|notes|links)\.md$' \
-        | sed "s|^|$R/|" | tr '\n' '\0' | xargs -0 ls -t 2>/dev/null | head -1
-      ```
+2. **Determine the framework.** Take the first rule that decides it, and record which signal decided:
 
-   3. **The last commit.** The most recently committed article:
+   1. An explicit `framework` argument (match keys, aliases, or rubric filenames, case-insensitive).
+   2. Front matter `articletype:` (keys above). `comparison` has no dedicated rubric: fall through to the `diataxis` field, then default to explanation, and say so.
+   3. Content directory `fundamentals/` or `learn-x/`. These beat the `diataxis` field: a Fundamentals article also carries `diataxis: explanation`, but it gets the Fundamentals rubric.
+   4. Front matter `diataxis:`, `diataxis_type:`, or `documentation_type:` (`tutorial`, `how-to`, `reference`, `explanation`).
+   5. The other directory and title signals in the table.
+   6. Structure signals in the table.
+   7. Still ambiguous between two rubrics: ask once, naming the two candidates and the signals for each.
 
-      ```bash
-      R=$(git rev-parse --show-toplevel) && git -C "$R" log -1 --name-only --pretty=format: -- '*.md' \
-        | sed '/^$/d' \
-        | grep -vEi '(^|/)(README|CLAUDE|AGENTS|CONTEXT|MEMORY|notes|links)\.md$' | head -1
-      ```
+3. **Load the rubric.** Read the rubric file for the framework. For `fundamentals` also read `diataxis-article-explanation.md`, and for `learn` also read `diataxis-article-how-to-guides.md`: the blog rubric's override block and extra checks apply on top of that base rubric, and the base rubric supplies the type gate and output format.
 
-   4. **Ask the user.** Only when the first three come up empty.
+4. **Fill the template variables.** Rubrics open with fields like `{{subject_area|default="technical concepts"}}`. Pre-fill each from the article (subject from the title, audience from front matter or prerequisites), otherwise use the default. Do not stop to ask: the rubrics say to decide and proceed. The only field with an empty default is `list_topic` in `a-list.md`; take it from the title. List the values you used in one line of the report so the user can rerun with overrides.
 
-   Name the resolved path before applying the rubric, so the user can redirect you if it is wrong.
+5. **Apply the review, read-only.** Follow the loaded rubric: type gate, review mode, section checks, scoring. Quote the passage and give the heading or line number for each finding, with exact replacement text where the rubric asks for it. Do not edit the article and do not re-run the review to chase a score, whatever older copies of a rubric say. Do not invent facts, sources, resources, or URLs in recommendations; when a fix needs one, write `[NEEDS FACT: ...]` or `[NEEDS RESOURCE: ...]`.
 
-2. **Detect the framework** -- Read the article and determine which writing framework it was written against. Look for structural signals:
-   - Step-by-step with "you will learn" → Tutorial
-   - Task-focused with numbered steps → How-to Guide
-   - Lookup-oriented with consistent entry format → Reference
-   - "Why" focused with mental models → Explanation
-   - Hook → value → desire → CTA flow → AIDA
-   - Problem → agitation → solution flow → PAS
-   - Ethos/pathos/logos balance → Classical Rhetoric
-   - Topic + evidence + analysis sections → TEA
-   - Exploratory, multi-perspective → Thought Piece
-   - Curated list with categories → List Article
-   - "Fundamentals of..." title → Fundamentals
+6. **Blog checks (jeffbaileyblog only).** Apply these when the article lives in the jeffbaileyblog repo or has its Hugo front matter (`type: post`, `categories`, `cover`):
+   * Read `references/writing-style.md` and check: no emdashes; the banned-phrase list; voice (Diátaxis types, Fundamentals, and Learn X are second person and imperative; first person is right for thought pieces and opinion posts; never "we"/"our"); link style. Profanity is intentional voice: never flag it.
+   * Check `title:`, `description:` (160 characters or fewer), and `keywords:` against `seo-front-matter.md`. Prefer the blog's own `hugo/content/prompts/seo-front-matter.md` when it exists; the bundled copy is the fallback.
+   * Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode so it lists AI tells without editing. Triage its hits (link titles often trip the Title-Case check) and fold real ones into the issues with locations. If it is not installed, say so and skip it.
 
-   If detection is ambiguous, ask the user which framework applies.
-
-3. **Load the review prompt** -- Read the rubric file for the detected framework, as described in [Loading a Rubric](#loading-a-rubric).
-
-4. **Gather variables** -- If the loaded review prompt contains template variables in the format `{{variable_name|default="value"}}`:
-   - **Has a non-empty default**: Present the default and let the user accept or override it.
-   - **Has an empty default** or **no default**: The user **must** provide a value. Show the HTML comment examples as suggestions to choose from.
-
-   Present all variables at once. Pre-fill any values already clear from context.
-
-5. **Apply the review** -- Substitute all gathered values into the template variables, then follow the loaded review prompt to evaluate the article. The prompt defines scoring dimensions, quality thresholds, and specific checks.
-
-6. **Apply writing style check** -- If the article is for jeffbaileyblog, also read `references/writing-style.md`. Flag any style violations.
-
-   Then invoke the `ai-sanitize` skill (from [jeffabailey/skills](https://github.com/jeffabailey/skills); `jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode, so it lists AI tells (prose, plus any diagrams or images) without editing the article. Fold its findings into the review's issues list with their locations. A review never edits the article. If the skill is not installed, say so and skip it.
-
-7. **Deliver the review** -- Present findings with:
-   - Overall score
-   - Per-dimension scores with evidence
-   - Specific issues with line references where possible, including AI tells from `ai-sanitize`
-   - Prioritized improvement suggestions
-   - Strengths to preserve
-
-## Reference
-
-All rubrics live in `references/` in this skill. Edit them here; nothing is fetched at runtime.
+7. **Deliver the review.** Lead with three lines: article (absolute path), framework and the signal that decided it, rubric file(s) loaded. Then use the rubric's own output format: the JSON summary, the overall score, a PASS / NEEDS_IMPROVEMENT / FAIL status for each rubric section with its evidence, the issues with locations, the prioritized improvement plan, and strengths to keep. Add the blog rubric's extra section when it defines one ("Blog-Specific Fixes" for Fundamentals, "Learn X Launch Pad Fixes" for Learn X). Do not invent numeric per-dimension scores the rubric does not define. End by confirming the article was not modified.

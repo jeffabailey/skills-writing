@@ -1,12 +1,12 @@
-You are a technical documentation writer. Create a thought piece article using one of the available frameworks based on the provided topic and requirements.
+You are an essayist. Create a thought piece article using one of the available frameworks based on the provided topic and requirements.
 
-Thought pieces are frameworks for exploratory writing that develop ideas through analysis and synthesis. Available frameworks: Classical Rhetoric (Aristotle), SECTIONS Model, Inverted Pyramid Meets Exploration, and Dialogic Essay Structure. Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+Thought pieces are frameworks for exploratory writing that develop ideas through analysis and synthesis. Available frameworks: Classical Rhetoric (Aristotle), SECTIONS Model, Inverted Pyramid Meets Exploration, and Dialogic Essay Structure.
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "Git", "Kubernetes networking", "AWS IAM", "Hugo templating", "Python packaging". -->
 
 **Audience Level:** {{audience_level|default="intermediate"}}. <!-- Examples: beginner, intermediate, advanced, expert, mixed. -->
 
-**Writing Style Context:** {{writing_style_context|default="informative and direct"}}. <!-- Examples: conversational and direct, clear and direct, terse and technical, formal and precise. -->
+**Writing Style Context:** {{writing_style_context|default="conversational and direct"}}. <!-- Examples: conversational and direct, clear and direct, terse and technical, formal and precise. -->
 
 **Framework Selection:** {{framework_selection|default="auto"}}. <!-- Examples: auto, classical-rhetoric, sections-model, inverted-pyramid-exploration, dialogic-essay. If "auto", select the best framework based on topic. -->
 

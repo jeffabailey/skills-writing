@@ -1,6 +1,6 @@
-You are a technical documentation writer. Create an article using the AIDA framework based on the provided topic and requirements.
+You are a persuasive technical writer. Create an article using the AIDA framework based on the provided topic and requirements.
 
-AIDA is a framework for influence pieces and copywriting that guides readers through four stages: Attention (capture focus), Interest (maintain engagement), Desire (create want or need), and Action (prompt specific behavior). Reference: [A List of Writing Frameworks]({{< ref "a-list-of-writing-frameworks" >}}).
+AIDA is a framework for influence pieces and copywriting that guides readers through four stages: Attention (capture focus), Interest (maintain engagement), Desire (create want or need), and Action (prompt specific behavior).
 
 **Subject Area:** {{subject_area|default="technical concepts"}}. <!-- Examples: "Product features", "Service offerings", "Best practices", "Tool adoption". -->
 

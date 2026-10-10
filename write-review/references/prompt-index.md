@@ -45,12 +45,13 @@ Every file listed below sits beside this index in `references/`.
 | Fact-Based Reference Review | `fact-based-reference.md` | Lookup quality, accuracy, analytical depth |
 | List Articles Review | `a-list.md` | List structure, SEO, usability |
 
-## Blog-Specific (Private)
+## Blog-Specific (jeffbaileyblog)
 
 | Framework | File | Evaluates |
 |-----------|------|-----------|
-| Fundamentals Review | `fundamentals.md` | Diataxis Explanation + blog checks, target 9.8+ |
+| Fundamentals Review | `fundamentals.md` | Loads `diataxis-article-explanation.md` as base, then second-person and scaffolding checks |
+| Learn X Review | `learn.md` | Loads `diataxis-article-how-to-guides.md` as base, then 20/80 core and launch-pad checks |
 
 ---
 
-All prompts available at: https://jeffbailey.us/prompts/{slug}/
+These files are the source of truth. Nothing is fetched at runtime.
