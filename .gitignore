@@ -1,0 +1,4 @@
+# nWave activation marker (keep .nwave/local-config.json trackable)
+.nwave/*
+!.nwave/local-config.json
+.dual-graph/

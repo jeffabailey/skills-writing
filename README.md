@@ -15,6 +15,7 @@ Claude Code skills for structured article creation, review, ideation, and strate
 | [write-seo](write-seo/SKILL.md) | `/write:seo`, `/write:internal-link-optimize` | Internal links and SEO front matter (title, description, keywords) |
 | [generate-cover-image](generate-cover-image/SKILL.md) | `/write:cover` | 1200x630 article cover image from the article's meaning, titled through a Canva brand template for jeffbaileyblog (called by write-article) |
 | [hugo-agents-compliance](hugo-agents-compliance/SKILL.md) | `/hugo:agents` | Apply Hugo `AGENTS.md` as written for blog Markdown, then verify with a live ban scan, front-matter check, and a drafts-aware build |
+| [create-practice-playground](create-practice-playground/SKILL.md) | `/write:playground` | Build an in-browser practice playground (real program on wasm or v86) for jeffbaileyblog through the nWave waves, plus an optional Learn X article (calls write-article) |
 | [write-article-revision](write-article-revision/SKILL.md) | `/write:article-revision` | Fold new source material into an existing article, with conflicts and provenance listed for you |
 | [write-comparison-article-create](write-comparison-article-create/SKILL.md) | `/write:comparison-article-create` | Decision-first X vs Y comparison pages with sourced claims and a render check |
 | [write-validate-article](write-validate-article/SKILL.md) | `/write:validate-article` | Read-only pre-publish gate: Hugo build first, front matter, live banned-phrase scan, ai-sanitize, lychee, markdownlint-cli2; blocking / warning / noise verdict |
