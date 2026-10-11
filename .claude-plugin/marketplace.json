@@ -1,0 +1,15 @@
+{
+  "name": "jbb-writing",
+  "description": "Jeff Bailey's writing skills.",
+  "owner": {
+    "name": "Jeff Bailey",
+    "url": "https://jeffbailey.us"
+  },
+  "plugins": [
+    {
+      "name": "jbb-writing-skills",
+      "source": "./",
+      "description": "Article creation, review, revision, ideation, strategy, copy, SEO, cover images, playgrounds, and pre-publish validation."
+    }
+  ]
+}

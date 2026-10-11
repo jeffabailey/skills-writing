@@ -15,7 +15,7 @@ Scripts: this skill uses the three checkers that ship with its sibling skill `hu
 S="${CLAUDE_SKILL_DIR}/../hugo-agents-compliance/scripts"   # verify-build.sh, fmcheck.py, banscan.py
 ```
 
-`${CLAUDE_SKILL_DIR}` is this skill's directory. If your agent does not expand it, or `$S` does not exist, use the `hugo-agents-compliance/scripts` folder beside this skill's folder (`~/.claude/skills/hugo-agents-compliance/scripts`, `~/.cursor/skills/...`, or the skills-writing repo). If `hugo-agents-compliance` is not installed, mark steps 1, 2, and 4 `NOT RUN (tool missing)` and say to install it alongside this skill.
+`${CLAUDE_SKILL_DIR}` is this skill's directory. If your agent does not expand it, or `$S` does not exist, use the `hugo-agents-compliance/scripts` folder beside this skill's folder (`~/.claude/skills/hugo-agents-compliance/scripts`, `~/.cursor/skills/...`, or `skills/` in the skills-writing repo). If `hugo-agents-compliance` is not installed, mark steps 1, 2, and 4 `NOT RUN (tool missing)` and say to install it alongside this skill.
 
 ## Severity: three levels
 

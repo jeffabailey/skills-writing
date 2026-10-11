@@ -8,33 +8,37 @@ Each skill bundles its prompts in its own `references/` directory, so the skills
 
 ## Installation
 
-### Claude Code and Cursor (skills + slash commands)
+This repository is an agent-plugin marketplace (`jbb-writing`) with one plugin, `jbb-writing-skills`. The skills live under `skills/`.
 
-From your Shell dotfiles repo, run MCP distribution. It symlinks each skill folder into `~/.claude/skills` and `~/.cursor/skills`, and the slash commands into `~/.cursor/commands`:
+### Claude Code
+
+```bash
+claude plugin marketplace add ~/Projects/skills-writing
+claude plugin install jbb-writing-skills@jbb-writing
+```
+
+Claude Code picks up edits only when `version` goes up in **both** `plugin.json` and `.claude-plugin/plugin.json`. After a bump:
+
+```bash
+claude plugin marketplace update jbb-writing && claude plugin update jbb-writing-skills@jbb-writing
+```
+
+Then restart Claude Code.
+
+### Cursor, Codex, OpenCode, Kilo and Zed
+
+From your Shell dotfiles repo, run MCP distribution. It symlinks each folder under `skills/` into those tools' skill directories, and the slash commands into `~/.cursor/commands`:
 
 ```bash
 ~/Shell/config/configure_mcp.sh distribute
 ```
 
-Because the installs are symlinks, edits to a skill take effect without reinstalling. Run it again after adding or renaming a skill.
+It leaves `~/.claude/skills` alone for plugin repositories, because Claude Code gets the skills from the plugin. Run it again after adding or renaming a skill.
 
-- **Skills** come from this repository’s skill folders (for example `write-article/`).
+- **Skills** come from `skills/<name>/` (for example `skills/write-article/`).
 - **Slash commands** come from `.cursor/commands/*.md` in this repo (for example `/write-article`, `/hugo-agents`).
 
 Override install locations with `SKILLS_REPO_PATH` and `SKILLS_WRITING_REPO_PATH` if your clones live elsewhere.
-
-### As a skill directory
-
-Add this repository as a skill source in your Claude Code project:
-
-```bash
-# Clone the repository
-git clone <repo-url> ~/Projects/writing-skills
-
-# In your project's .claude/settings.local.json, add the skills path
-```
-
-Or add the individual skill directories you want to your project's `.claude/skills/` directory.
 
 ## Usage
 
@@ -59,7 +63,7 @@ Replace the prompt files in a skill's `references/` directory with your own. Kee
 
 To add a new writing framework:
 
-1. Write the create and review prompts, and save them as `write-article/references/<framework>.md` and `write-review/references/<framework>.md`
-2. Add the framework to the tables in `write-article/SKILL.md` and `write-review/SKILL.md`
+1. Write the create and review prompts, and save them as `skills/write-article/references/<framework>.md` and `skills/write-review/references/<framework>.md`
+2. Add the framework to the tables in `skills/write-article/SKILL.md` and `skills/write-review/SKILL.md`
 3. Update `references/prompt-index.md` in both skills
-4. Add framework detection signals to `write-review/SKILL.md` workflow step 2
+4. Add framework detection signals to `skills/write-review/SKILL.md` workflow step 2
