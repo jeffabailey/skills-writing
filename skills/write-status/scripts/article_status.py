@@ -4,6 +4,8 @@
 Usage:
   article_status.py check [ARTICLE] [--json] [--since-days N]
   article_status.py record SKILL ARTICLE [--note TEXT]
+  article_status.py review latest ARTICLE   # newest saved write-review report
+  article_status.py review new ARTICLE      # path to save a new report to
 
 ARTICLE is a path to a page bundle's index.md (or its folder). With no ARTICLE,
 check uses write-review's last-article.sh (the last article created or changed).
@@ -38,6 +40,7 @@ from pathlib import Path
 # Skills that act on one article, in the order an author usually runs them.
 SKILLS = [
     "write-review",
+    "write-review-apply",
     "write-seo",
     "write-validate-article",
     "write-check-links",
@@ -57,6 +60,7 @@ ALIASES = {
 
 STATE = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")) / "jbb-writing"
 LEDGER = STATE / "runs.jsonl"
+REVIEWS = STATE / "reviews"
 PROJECTS = Path.home() / ".claude/projects"
 SKILL_DIR = Path(__file__).resolve().parent.parent
 LAST_ARTICLE = SKILL_DIR.parent / "write-review/scripts/last-article.sh"
@@ -291,6 +295,32 @@ def record(args) -> int:
     return 0
 
 
+def review(args) -> int:
+    """Saved write-review reports live in REVIEWS/<bundle folder>/<UTC stamp>.md."""
+    p = Path(args.article).expanduser().resolve()
+    if p.is_dir():
+        p = p / "index.md"
+    if not p.is_file():
+        sys.exit(f"article not found: {p}")
+    d = REVIEWS / p.parent.name
+    if args.action == "new":
+        d.mkdir(parents=True, exist_ok=True)
+        stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        print(d / f"{stamp}.md")
+        return 0
+    found = sorted(d.glob("*.md")) if d.is_dir() else []
+    if not found:
+        print(f"no saved review for {p.parent.name}", file=sys.stderr)
+        return 1
+    newest = found[-1]
+    ran = dt.datetime.strptime(newest.stem, "%Y%m%dT%H%M%SZ").replace(tzinfo=dt.timezone.utc)
+    changed = last_changed(p)
+    state = "stale" if ran < changed else "current"
+    print(f"{newest}\t{state}\treviewed {ran.isoformat(timespec='minutes')}, "
+          f"article changed {changed.isoformat(timespec='minutes')}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -305,6 +335,10 @@ def main() -> int:
     r.add_argument("article")
     r.add_argument("--note")
     r.set_defaults(fn=record)
+    v = sub.add_parser("review")
+    v.add_argument("action", choices=["latest", "new"])
+    v.add_argument("article")
+    v.set_defaults(fn=review)
     args = ap.parse_args()
     return args.fn(args)
 

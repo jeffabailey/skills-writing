@@ -1,6 +1,6 @@
 ---
 name: write-status
-description: Quick check of which writing skills have already run on a jeffbaileyblog article and which are missing or stale (write-review, write-seo, write-validate-article, write-check-links, write-run-markdown-lint, hugo-agents-compliance, generate-cover-image), then asks y/N before running write-review if the article has never been reviewed. Use when the user says /write:status, asks "has this been reviewed?", "what's left on this article?", "which checks haven't run?", "is this ready to publish?", or wants an article's review/SEO history before deciding what to do next. With no article named, checks the last article created or changed.
+description: Quick check of which writing skills have already run on a jeffbaileyblog article and which are missing or stale (write-review, write-review-apply, write-seo, write-validate-article, write-check-links, write-run-markdown-lint, hugo-agents-compliance, generate-cover-image), then asks y/N before running write-review if the article has never been reviewed. Use when the user says /write:status, asks "has this been reviewed?", "what's left on this article?", "which checks haven't run?", "is this ready to publish?", or wants an article's review/SEO history before deciding what to do next. With no article named, checks the last article created or changed.
 ---
 
 # Article status
@@ -63,4 +63,4 @@ Answer one question fast: which per-article writing skills have run on this arti
 python3 "<write-status dir>/scripts/article_status.py" record <skill> <article> [--note TEXT]
 ```
 
-Skill names are accepted in any form (`write-seo`, `/write:seo`, `jbb-writing-skills:write-seo`). Only the seven skills above are tracked.
+Skill names are accepted in any form (`write-seo`, `/write:seo`, `jbb-writing-skills:write-seo`). Only the eight skills above are tracked.

@@ -74,6 +74,14 @@ Score an article against the rubric for the framework it was written in, and rep
 
 7. **Deliver the review.** Lead with three lines: article (absolute path), framework and the signal that decided it, rubric file(s) loaded. Then use the rubric's own output format: the JSON summary, the overall score, a PASS / NEEDS_IMPROVEMENT / FAIL status for each rubric section with its evidence, the issues with locations, the prioritized improvement plan, and strengths to keep. Add the blog rubric's extra section when it defines one ("Blog-Specific Fixes" for Fundamentals, "Learn X Launch Pad Fixes" for Learn X). Do not invent numeric per-dimension scores the rubric does not define. End by confirming the article was not modified.
 
+8. **Save the review** so `write-review-apply` can act on it later, even from another session. Write the full review you delivered (the three lead lines, JSON summary, and Markdown review) to the path this prints, outside the blog repo:
+
+   ```bash
+   python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" review new <article index.md>
+   ```
+
+   Saving to that path does not touch the article, so the read-only rule still holds. If the script isn't installed, skip this step and say the review wasn't saved. End the reply with one line offering the follow-up: "Run `/write:review-apply` to apply these fixes."
+
 ## Record the run
 
 After finishing on a jeffbaileyblog article, append the run to the ledger that `write-status` reads, so later checks know this skill ran even after transcripts are cleaned up. Do this once per article, even when the result was a failure, and put the outcome in the note:
