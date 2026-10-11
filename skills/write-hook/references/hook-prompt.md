@@ -1,6 +1,6 @@
 # Social media hook prompt
 
-The author's original prompt, kept as the spec. SKILL.md says how to apply it; the output template there wins on format details.
+The author's original prompt, kept as the spec. SKILL.md says how to apply it; the output template there wins on format details. In particular, the "one short line" after each hook is now an unlabeled action line in the imperative (what the reader does in the post), not a description of what the post is about.
 
 > **I want to create highly engaging social media post hooks based on the text below the `---`.**
 >

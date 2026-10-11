@@ -1,6 +1,6 @@
 ---
 name: write-hook
-description: Writes 50 social media post hooks for a piece of text (an article, draft, blog post, or pasted notes), in five groups of ten (funny with pop-culture and tech references, reflective/philosophical, clean/general, edgy/sharp, edgy with pop-culture references), each with a one-line "About" saying what the post covers and why it's worth reading, plus 12-20 hashtags on one paste-ready line for X, LinkedIn, and Threads. Use when the user says /write:hook, wants hooks, opening lines, scroll-stoppers, or teaser lines to promote an article or post, asks "how should I open this LinkedIn/X/Threads post?", wants social copy or hashtags for a jeffbaileyblog post, or pastes text after a dashed separator line asking for hooks. With no text given, uses the last article created or changed.
+description: Writes 50 social media post hooks for a piece of text (an article, draft, blog post, or pasted notes), in five groups of ten (funny with pop-culture and tech references, reflective/philosophical, clean/general, edgy/sharp, edgy with pop-culture references), each followed by a one-line action telling the reader what they'll do in the post, plus 12-20 hashtags on one paste-ready line for X, LinkedIn, and Threads. Use when the user says /write:hook, wants hooks, opening lines, scroll-stoppers, or teaser lines to promote an article or post, asks "how should I open this LinkedIn/X/Threads post?", wants social copy or hashtags for a jeffbaileyblog post, or pastes text after a dashed separator line asking for hooks. With no text given, uses the last article created or changed.
 ---
 
 # Social media hooks
@@ -52,7 +52,9 @@ Text after a `---` line in the user's message is the source. A file path or URL 
    * **Share or solve, don't pitch.** A hook earns attention with an idea, not a sales line ("Order today", "Link in bio", "Sign up now").
    * **Don't preach.** Starting with "Don't forget", "Remember to", "Always", or "You need to" sounds like a lecture. Edgy hooks can be blunt about an idea without wagging a finger at the reader.
 
-4. **Write the About line** under each hook. It answers the reader's "so what?": what the post covers and why it's worth their time, in one sentence of 30 words or fewer. Good content is useful, inspiring, and written with empathy for the reader's problem; the About line shows the useful part. Make it specific to the source ("Shows how fd skips .gitignore'd files, so searches return only your code"), not generic ("A helpful guide for developers").
+4. **Write the action line** under each hook, after a blank line and with no label. It answers the reader's "so what?" by telling them what they'll do in the post, in the imperative, one sentence of 30 words or fewer: "Line up six find commands next to their shorter fd equivalents", not "Lines up six find commands..." or "This post compares...". The hook makes them curious; the action line shows them the payoff is something they get to do. Good content is useful, inspiring, and written with empathy for the reader's problem; the action line shows the useful part. Make it specific to the source ("Search only your own code by letting fd skip everything in .gitignore"), not generic ("Learn a helpful tool").
+
+   Start with a concrete verb the reader would do: line up, swap, search, compare, delete, rename, ask, try, measure, spot. Skip "learn", "discover", "explore", and "find out", which promise a feeling instead of a task.
 
 5. **Pick the hashtags.** Hashtags work by joining conversations people are already having, so use tags people already search and follow, not ones you coin. Pick 12-20, mixed: a few high-traffic broad tags for reach (#SoftwareEngineering, #AI, #Leadership), mid-traffic niche tags for the actual topic (#DevOps, #CommandLine, #TechnicalDebt), and thought-leader / philosophy / self-agency tags for audience quality (#SystemsThinking, #CriticalThinking, #Agency). Use CamelCase so they read well and screen readers can split them. Skip spam tags (#motivation, #success, #hustle, #viral) unless the post is literally about them.
 
@@ -64,7 +66,7 @@ Text after a `---` line in the user's message is the source. A file path or URL 
    * **Questions:** a hook may be a question if the post answers it and the reader can't answer it yet. Cut questions the hook answers itself, and engagement bait ("What's your take?", "Agree?").
    * **Fragments:** one short, punchy fragment is a hook's right. A hook made of three fragments ("Fast. Simple. Done.") is a triad tell; rewrite it as a sentence.
    * **Performed insight:** cut "quiet truth", "the real lesson", "changes everything", "silent revolution", "this is where it gets interesting". Replace with the claim from step 1, or drop the hook and write a new one.
-   * **About lines** are plain prose: no signposting, no hype words, no melodrama. Say what the post covers.
+   * **Action lines** are plain prose: no signposting, no hype words, no melodrama. Say what the reader does.
 
    Keep the author's profanity, humor, and strong opinions; ai-sanitize does the same. If ai-sanitize isn't installed, say so in one line and rely on these calibrations plus the checker in step 7.
 
@@ -74,12 +76,12 @@ Text after a `---` line in the user's message is the source. A file path or URL 
    python3 "${CLAUDE_SKILL_DIR}/scripts/check_hooks.py" <draft.md>
    ```
 
-   It checks the shape (5 groups x 10 hooks, an About line on each, 12-20 hashtags on one line, a 2-3 tag pick drawn from the pool), length, warm-up and preachy openers, sales lines, emdashes and en dashes, cliches and business jargon, AI tells, contrast overuse, duplicates, and spam tags. Fix every flag, rerun until it prints `PASS`, then paste the draft into your reply. A cliche flag is almost always right; if a flagged phrase is genuinely the post's subject (a post about hustle culture can say "hustle"), keep it and say why in one line.
+   It checks the shape (5 groups x 10 hooks, an action line on each, in the imperative, 12-20 hashtags on one line, a 2-3 tag pick drawn from the pool), length, warm-up and preachy openers, sales lines, emdashes and en dashes, cliches and business jargon, AI tells, contrast overuse, duplicates, and spam tags. Fix every flag, rerun until it prints `PASS`, then paste the draft into your reply. A cliche flag is almost always right; if a flagged phrase is genuinely the post's subject (a post about hustle culture can say "hustle"), keep it and say why in one line.
 
 ## Rules that keep hooks honest
 
 - **Tell the truth.** A hook may exaggerate tone, never facts. Claims about the subject (what the tool does, what the post argues, any number) come from the source. Pop-culture references and well-known public facts can come from outside it, as long as they're accurate. Don't promise something the post doesn't deliver, call something surprising that isn't, invent statistics, or put words in a real person's mouth. A pop-culture reference can allude ("This is the Jurassic Park of config files"); it can't quote a line you aren't sure is real. Hype wins one click and costs the next ten.
-- **No emdashes or en dashes anywhere**, in hooks, About lines, or hashtags. Use a period, comma, colon, or parentheses.
+- **No emdashes or en dashes anywhere**, in hooks, action lines, or hashtags. Use a period, comma, colon, or parentheses.
 - **No cliches, platitudes, or engagement bait**: "Let that sink in", "Read that again", "Nobody talks about this", "Here's the thing", "unlock your potential", "game-changer", "the secret to", "move the needle", "at the end of the day", "low-hanging fruit". A cliche was once a fresh image; now it tells the reader nobody thought hard about this. Edgy means a sharp point, not a cheap trick.
 - **Edgy has limits.** Punch at ideas, habits, tools, and institutions, not at groups of people. Profanity is fine when the source uses it or it's the author's voice (jeffbaileyblog posts do); don't add it to a source that has none.
 - **Trust the author's voice: direct and dry.** "Your signature directness" in the prompt means that: say the thing plainly and let the wit come from the observation, not from exclamation points or emoji. A clear idea in an authentic voice is what stands out in a noisy feed.
@@ -94,13 +96,15 @@ Use this template exactly; `check_hooks.py` parses it.
 ## 1. Funny: pop-culture and tech-culture references
 
 1. <hook>
-   About: <what the post covers and why it's worth reading>
+
+   <action line: what the reader does in the post, imperative>
 2. ...
 
 ## 2. Reflective / philosophical
 
 1. <hook>
-   About: ...
+
+   <action line>
 
 ## 3. Clean / general
 
@@ -115,4 +119,4 @@ Use this template exactly; `check_hooks.py` parses it.
 Best for one post: #Tag1 #Tag2 #Tag3
 ```
 
-Number hooks 1-10 inside each group. Don't add a preamble beyond the Source line or a closing summary; the user is going to copy from this.
+Number hooks 1-10 inside each group. Indent each action line three spaces under its hook, with a blank line between them, so it renders as part of the same list item. Don't add a preamble beyond the Source line or a closing summary; the user is going to copy from this.

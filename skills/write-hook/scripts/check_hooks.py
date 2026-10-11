@@ -4,13 +4,17 @@
 Usage: check_hooks.py HOOKS.md [--max-chars N]
 
 Expects five "## <n>. ..." group headings, each with ten numbered hooks
-("1. hook text") followed by an "About:" line, then a "### 🔖 Suggested
+("1. hook text") followed, after a blank line, by an indented action line
+(what the reader does in the post, imperative, no label), then a "### 🔖 Suggested
 High-Traffic Hashtags" section: one pool line of hashtags, then a
 "Best for one post:" line naming 2-3 of them.
 
 Reports:
   - groups that don't have exactly 10 hooks
-  - hooks with no About line, or an About line longer than 30 words
+  - hooks with no action line, an action line longer than 30 words, a
+    leftover "About:" label, or an action line that describes the post
+    ("Shows...", "This post...") or promises a feeling ("Learn...", "Discover...")
+    instead of telling the reader what to do
   - hooks longer than --max-chars (default 140; aim for 120 or fewer)
   - warm-up openers ("I think", "There is a", "According to") and preachy
     openers ("Don't forget", "Remember to"), from Everybody Writes rules 5, 40
@@ -18,7 +22,7 @@ Reports:
   - emdashes and en dashes used as dashes anywhere
   - cliche, platitude, and business-jargon phrases (rule 35)
   - exact duplicate hooks
-  - AI tells from ai-sanitize's prose reference, in hooks and About lines:
+  - AI tells from ai-sanitize's prose reference, in hooks and action lines:
     performed insight, signposting, fake engagement, hype words, melodrama
   - more than 2 contrast-framed hooks ("It's not X, it's Y") in one group
   - fragment triads ("Fast. Simple. Done.")
@@ -32,7 +36,13 @@ import sys
 
 GROUP = re.compile(r"^##\s+(\d)\.\s+(.*)$")
 HOOK = re.compile(r"^(\d{1,2})\.\s+(.+)$")
-ABOUT = re.compile(r"^\s*(?:[-*]\s*)?\*{0,2}About:\*{0,2}\s*(.+)$", re.IGNORECASE)
+ACTION = re.compile(r"^\s+(\S.*)$")  # indented continuation line under a hook
+LABEL = re.compile(r"^\*{0,2}(about|action|why)\s*:", re.IGNORECASE)
+DESCRIPTIVE = re.compile(
+    r"^(shows|explains|covers|compares|walks|lines up|makes|argues|offers|gives|breaks down|"
+    r"introduces|describes|presents|teaches|takes|details|outlines|looks at|"
+    r"(this|the) (post|article|guide|piece)|an? (guide|look|post|deep dive))\b", re.IGNORECASE)
+VAGUE = re.compile(r"^(learn|discover|explore|find out|understand|dive)\b", re.IGNORECASE)
 HASH_HEAD = re.compile(r"^###\s+.*Suggested High-Traffic Hashtags", re.IGNORECASE)
 TAG = re.compile(r"#[A-Za-z0-9_]*[A-Za-z][A-Za-z0-9_]*")  # #100DaysOfCode ok; #2024 is not a tag
 DASH = re.compile(r"[—–]")
@@ -90,7 +100,7 @@ def main() -> int:
         return 2
 
     problems = []
-    groups = {}          # n -> list of [hook, about]
+    groups = {}          # n -> list of [hook, action, line]
     cur = None
     in_tags = False
     tag_lines = []
@@ -119,7 +129,7 @@ def main() -> int:
         if m:
             groups[cur].append([m.group(2).strip(), None, i])
             continue
-        m = ABOUT.match(line)
+        m = ACTION.match(line)
         if m and groups[cur] and groups[cur][-1][1] is None:
             groups[cur][-1][1] = m.group(1).strip()
 
@@ -145,16 +155,25 @@ def main() -> int:
             for m in PITCH.finditer(text + " " + (about or "")):
                 problems.append(f"line {ln}: sales line '{m.group(0)}'; share or solve, don't pitch")
             if not about:
-                problems.append(f"line {ln}: no About line after hook")
-            elif words(about) > 30:
-                problems.append(f"line {ln}: About line is {words(about)} words (max 30)")
+                problems.append(f"line {ln}: no indented action line after hook")
+            else:
+                if LABEL.match(about):
+                    problems.append(f"line {ln}: drop the label; the action line stands on its own")
+                bare = LABEL.sub("", about).strip("*_ ")
+                if words(bare) > 30:
+                    problems.append(f"line {ln}: action line is {words(bare)} words (max 30)")
+                if DESCRIPTIVE.match(bare):
+                    problems.append(f"line {ln}: action line describes the post; tell the reader what to do "
+                                    f"(e.g. 'Line up...' not 'Lines up...')")
+                elif VAGUE.match(bare):
+                    problems.append(f"line {ln}: action line starts with a vague verb; use a concrete task")
             for m in CLICHE.finditer(text):
                 problems.append(f"line {ln}: cliche '{m.group(0)}'")
             for m in AI_TELL.finditer(text):
                 problems.append(f"line {ln}: AI tell '{m.group(0)}' (ai-sanitize prose)")
             if about:
                 for m in AI_TELL.finditer(about):
-                    problems.append(f"line {ln}: AI tell in About line '{m.group(0)}'")
+                    problems.append(f"line {ln}: AI tell in action line '{m.group(0)}'")
             if TRIAD.match(text.strip("*_ ")):
                 problems.append(f"line {ln}: fragment triad; write it as a sentence")
             key = re.sub(r"\W+", " ", text.lower()).strip()

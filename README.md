@@ -23,7 +23,7 @@ See [SETUP.md](SETUP.md) for Cursor and other tools, and for releasing changes.
 | [write-ideate](skills/write-ideate/SKILL.md) | `/write:ideate`, `/write:idea-storm` | Brainstorm article ideas, deduped against existing posts and draft stubs |
 | [write-strategy](skills/write-strategy/SKILL.md) | `/write:strategy` (also `/write:competitor-analysis`, `/write:mckinsey-consultant`) | Content strategy, competitor analysis, and growth audits with evidence-tagged claims |
 | [write-copy](skills/write-copy/SKILL.md) | `/write:copy`, `/write:landing-page-copy` | Landing pages, CTAs, short emails, ads, and taglines, written only from the product's own facts |
-| [write-hook](skills/write-hook/SKILL.md) | `/write:hook [source]` | 50 social media hooks in five tone groups, each with a one-line About, plus 12-20 paste-ready hashtags |
+| [write-hook](skills/write-hook/SKILL.md) | `/write:hook [source]` | 50 social media hooks in five tone groups, each with a one-line reader action, plus 12-20 paste-ready hashtags |
 | [write-debug](skills/write-debug/SKILL.md) | `/write:debug` (alias `/write:bug-minimizer`) | Bug triage, minimal verified repro, root cause, fix |
 | [write-seo](skills/write-seo/SKILL.md) | `/write:seo`, `/write:internal-link-optimize` | Internal links and SEO front matter (title, description, keywords) |
 | [generate-cover-image](skills/generate-cover-image/SKILL.md) | `/write:cover` | 1200x630 article cover image from the article's meaning, titled through a Canva brand template for jeffbaileyblog (called by write-article) |
