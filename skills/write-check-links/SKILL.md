@@ -67,3 +67,13 @@ are checked against the live site. The bundled script runs lychee the way CI doe
 - lychee skips RFC 2606 reserved TLDs (`.invalid`, `.example`, `.test`) as excluded, not broken.
 - Exit codes: 0 nothing broken, 1 broken found, 3 lychee missing, 4 no lychee.toml, 5 lychee produced no report.
 - Outside jeffbaileyblog the script still works: with no `base_url` or `hugo/content` it skips the internal-link and ref checks and says so.
+
+## Record the run
+
+After finishing on a jeffbaileyblog article, append the run to the ledger that `write-status` reads, so later checks know this skill ran even after transcripts are cleaned up. Do this once per article, even when the result was a failure, and put the outcome in the note:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" record write-check-links <article index.md> --note "<one-line result>"
+```
+
+If the script isn't there (`write-status` not installed), skip this step.

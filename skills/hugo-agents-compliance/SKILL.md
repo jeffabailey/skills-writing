@@ -64,3 +64,13 @@ End with: mode (new / compliance pass / targeted fix); the AGENTS.md headings wa
 ## When this skill does not apply
 
 Non-Hugo repos, non-Markdown assets, or tasks the user limits to unrelated files.
+
+## Record the run
+
+After finishing on a jeffbaileyblog article, append the run to the ledger that `write-status` reads, so later checks know this skill ran even after transcripts are cleaned up. Do this once per article, even when the result was a failure, and put the outcome in the note:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" record hugo-agents-compliance <article index.md> --note "<one-line result>"
+```
+
+If the script isn't there (`write-status` not installed), skip this step.

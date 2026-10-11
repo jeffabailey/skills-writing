@@ -73,3 +73,13 @@ Score an article against the rubric for the framework it was written in, and rep
    * Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode so it lists AI tells without editing. Triage its hits (link titles often trip the Title-Case check) and fold real ones into the issues with locations. If it is not installed, say so and skip it.
 
 7. **Deliver the review.** Lead with three lines: article (absolute path), framework and the signal that decided it, rubric file(s) loaded. Then use the rubric's own output format: the JSON summary, the overall score, a PASS / NEEDS_IMPROVEMENT / FAIL status for each rubric section with its evidence, the issues with locations, the prioritized improvement plan, and strengths to keep. Add the blog rubric's extra section when it defines one ("Blog-Specific Fixes" for Fundamentals, "Learn X Launch Pad Fixes" for Learn X). Do not invent numeric per-dimension scores the rubric does not define. End by confirming the article was not modified.
+
+## Record the run
+
+After finishing on a jeffbaileyblog article, append the run to the ledger that `write-status` reads, so later checks know this skill ran even after transcripts are cleaned up. Do this once per article, even when the result was a failure, and put the outcome in the note:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" record write-review <article index.md> --note "<one-line result>"
+```
+
+If the script isn't there (`write-status` not installed), skip this step.

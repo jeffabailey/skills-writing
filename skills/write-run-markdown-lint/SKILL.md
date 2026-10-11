@@ -42,3 +42,13 @@ Use `markdownlint-cli2` only. Never fall back to `markdownlint` (markdownlint-cl
    * If MD004 says `Expected: dash` on `*` items, the config was not applied. Never tell the user to change `*` lists to `-`.
 
 5. **Offer fixes only for rules that fired under the applied config.** Describe each fix, such as "change the two `-` items on lines 35-36 to `*`", and wait for a yes before editing. Prefer targeted edits. If you use `markdownlint-cli2 --fix`, pass the same `--config`, since `--fix` rewrites the file in place. Do not "fix" rules the config disables. Do not touch prose; profanity and wording are the author's voice, not lint.
+
+## Record the run
+
+After finishing on a jeffbaileyblog article, append the run to the ledger that `write-status` reads, so later checks know this skill ran even after transcripts are cleaned up. Do this once per article, even when the result was a failure, and put the outcome in the note:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" record write-run-markdown-lint <article index.md> --note "<one-line result>"
+```
+
+If the script isn't there (`write-status` not installed), skip this step.

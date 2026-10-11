@@ -132,3 +132,13 @@ When fixing, change only what the finding names. Profanity is the author's voice
 ## Outside jeffbaileyblog
 
 For Markdown outside this Hugo site, skip steps 1-5 and run only links (step 6) and lint (step 7), and say which checks did not apply.
+
+## Record the run
+
+After finishing on a jeffbaileyblog article, append the run to the ledger that `write-status` reads, so later checks know this skill ran even after transcripts are cleaned up. Do this once per article, even when the result was a failure, and put the outcome in the note:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" record write-validate-article <article index.md> --note "<one-line result>"
+```
+
+If the script isn't there (`write-status` not installed), skip this step.

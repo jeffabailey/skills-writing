@@ -19,6 +19,7 @@ See [SETUP.md](SETUP.md) for Cursor and other tools, and for releasing changes.
 |-------|---------|---------|
 | [write-article](skills/write-article/SKILL.md) | `/write:article` | Create articles with 16 bundled writing frameworks; for jeffbaileyblog, places the bundle, checks links are published, and verifies the draft build |
 | [write-review](skills/write-review/SKILL.md) | `/write:review [article] [framework]` | Review articles against framework rubrics (read-only) |
+| [write-status](skills/write-status/SKILL.md) | `/write:status [article]` | Which writing skills have run on an article and which are missing or stale; offers write-review (y/N) when it never ran |
 | [write-ideate](skills/write-ideate/SKILL.md) | `/write:ideate`, `/write:idea-storm` | Brainstorm article ideas, deduped against existing posts and draft stubs |
 | [write-strategy](skills/write-strategy/SKILL.md) | `/write:strategy` (also `/write:competitor-analysis`, `/write:mckinsey-consultant`) | Content strategy, competitor analysis, and growth audits with evidence-tagged claims |
 | [write-copy](skills/write-copy/SKILL.md) | `/write:copy`, `/write:landing-page-copy` | Landing pages, CTAs, short emails, ads, and taglines, written only from the product's own facts |

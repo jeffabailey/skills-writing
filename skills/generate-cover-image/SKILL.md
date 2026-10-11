@@ -90,3 +90,13 @@ Use this for more than about three covers, such as every category. It needs abou
    Canva limits `generate-image` to 20 calls a minute and also throttles design creation, and the limits are shared by everything using the connector. A batch of five fits; several batches started in the same minute do not. When running batches in parallel (for example, one agent per batch), run at most two or three at once and stagger their starts by a minute. A "rate limited", "too many requests", or `quota_cooldown` ("credit usage is cooling down") error means wait about a minute and retry that call; reuse any designs already created rather than creating them again. A refusal for quota is different: stop and tell the user how many covers are left.
 
 Report the batch as a table: output path, design name and edit URL, artwork media ID, and size. Keep the inspiration texts in the scratch directory and give its path, so any cover can be regenerated later.
+
+## Record the run
+
+After finishing on a jeffbaileyblog article, append the run to the ledger that `write-status` reads, so later checks know this skill ran even after transcripts are cleaned up. Do this once per article, even when the result was a failure, and put the outcome in the note:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" record generate-cover-image <article index.md> --note "<one-line result>"
+```
+
+If the script isn't there (`write-status` not installed), skip this step.

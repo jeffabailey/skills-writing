@@ -62,3 +62,13 @@ Run `command -v hugo python3`. If one is missing, report "tool missing" with the
 
 * Prompts are published at https://jeffbailey.us/prompts/. The blog source is `hugo/content/prompts/`.
 * Title, description, and keyword rules follow [Google's SEO Starter Guide](https://developers.google.com/search/docs/fundamentals/seo-starter-guide).
+
+## Record the run
+
+After finishing on a jeffbaileyblog article, append the run to the ledger that `write-status` reads, so later checks know this skill ran even after transcripts are cleaned up. Do this once per article, even when the result was a failure, and put the outcome in the note:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" record write-seo <article index.md> --note "<one-line result>"
+```
+
+If the script isn't there (`write-status` not installed), skip this step.
