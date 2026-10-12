@@ -68,7 +68,7 @@ Score an article against the rubric for the framework it was written in, and rep
 5. **Apply the review, read-only.** Follow the loaded rubric: type gate, review mode, section checks, scoring. Quote the passage and give the heading or line number for each finding, with exact replacement text where the rubric asks for it. Do not edit the article and do not re-run the review to chase a score, whatever older copies of a rubric say. Do not invent facts, sources, resources, or URLs in recommendations; when a fix needs one, write `[NEEDS FACT: ...]` or `[NEEDS RESOURCE: ...]`.
 
 6. **Blog checks (jeffbaileyblog only).** Apply these when the article lives in the jeffbaileyblog repo or has its Hugo front matter (`type: post`, `categories`, `cover`):
-   * Read `references/writing-style.md` and check: no emdashes; the banned-phrase list; voice (Diátaxis types, Fundamentals, and Learn X are second person and imperative; first person is right for thought pieces and opinion posts; never "we"/"our"); link style. Profanity is intentional voice: never flag it.
+   * Read the blog's live `hugo/content/prompts/writing-style.md` (the bundled `references/writing-style.md` is only the fallback when the live file is missing; the live one is what the author edits, so the bundled copy drifts) and check: no emdashes; the banned-phrase list; voice (Diátaxis types and Learn X are second person and imperative; Fundamentals may use "I" for the author's judgments and experience, but their reader-facing scaffolding uses "you"; first person is right for thought pieces and opinion posts; never "we"/"our"; when the rubric and the live style guide disagree, the live style guide wins); link style. Profanity is intentional voice: never flag it.
    * Check `title:`, `description:` (160 characters or fewer), and `keywords:` against `seo-front-matter.md`. Prefer the blog's own `hugo/content/prompts/seo-front-matter.md` when it exists; the bundled copy is the fallback.
    * Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode so it lists AI tells without editing. Triage its hits (link titles often trip the Title-Case check) and fold real ones into the issues with locations. If it is not installed, say so and skip it.
 
@@ -79,6 +79,14 @@ Score an article against the rubric for the framework it was written in, and rep
    ```bash
    python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" review new <article index.md>
    ```
+
+   Put the rules stamp right after the three lead lines, before the variables line and the JSON summary. It records which rule files the grades came from, so `write-review-apply` can tell later whether the rubric or style guide changed underneath the findings. Let the script compute it (hand-typed hashes are worse than none); pass the rubric file(s) loaded in step 3, and `--no-blog` when step 6 didn't apply:
+
+   ```bash
+   python3 "${CLAUDE_SKILL_DIR}/scripts/rules_stamp.py" stamp <article index.md> <rubric.md> [<base rubric.md>]
+   ```
+
+   It prints `Rubric: references/<file> @ <hash>` per rubric, plus `Style:` and `SEO:` lines for the `writing-style.md` and `seo-front-matter.md` step 6 reads (live blog copy first, bundled fallback). Paste its output verbatim.
 
    Saving to that path does not touch the article, so the read-only rule still holds. If the script isn't installed, skip this step and say the review wasn't saved. End the reply with one line offering the follow-up: "Run `/write:review-apply` to apply these fixes."
 
