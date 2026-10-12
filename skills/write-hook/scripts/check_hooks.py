@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check a write-hook draft's shape before delivery.
 
-Usage: check_hooks.py HOOKS.md [--max-chars N]
+Usage: check_hooks.py HOOKS.md --source SOURCE.md [--allow TOKEN ...] [--max-chars N]
 
 Expects five "## <n>. ..." group headings, each with ten numbered hooks
 ("1. hook text") followed, after a blank line, by an indented action line
@@ -15,7 +15,8 @@ Reports:
     leftover "About:" label, or an action line that describes the post
     ("Shows...", "This post...") or promises a feeling ("Learn...", "Discover...")
     instead of telling the reader what to do
-  - hooks longer than --max-chars (default 140; aim for 120 or fewer)
+  - hooks longer than --max-chars (default 140); hooks over the 120-char aim
+    print a WARN line but don't fail
   - warm-up openers ("I think", "There is a", "According to") and preachy
     openers ("Don't forget", "Remember to"), from Everybody Writes rules 5, 40
   - sales lines ("Order today", "Link in bio"), rule 61
@@ -25,7 +26,20 @@ Reports:
   - AI tells from ai-sanitize's prose reference, in hooks and action lines:
     performed insight, signposting, fake engagement, hype words, melodrama
   - more than 2 contrast-framed hooks ("It's not X, it's Y") in one group
-  - fragment triads ("Fast. Simple. Done.")
+  - fragment triads ("Fast. Simple. Done.") and contrast framing in action
+    lines ("..., not runes to copy")
+  - with --source (truth checks; pass the article or a scratch copy of pasted
+    text):
+      * numbers, years, versions, dollar figures, and spelled-out counts
+        (three..trillion, dozen) in hooks and action lines that the source
+        doesn't contain (digit or word form): "Clippy 1.0", a guessed "six characters"
+      * outside references (capitalized names not in the source) used in
+        more than one hook: "use each pop-culture reference once"
+      * hashtags that look coined (3+ CamelCase words not in a known list, or
+        joined with Over/Not/Vs/Than/Beats): use tags people already follow
+    --allow TOKEN (repeatable) accepts a number, name, or tag you verified,
+    e.g. a well-known public number (--allow 404) or a derived count.
+    Without --source these checks are skipped and a NOTE says so.
   - hashtag count outside 12-20, hashtags split across lines, spam tags,
     duplicate tags, and a missing or wrong "Best for one post:" pick
 Exit 0 when clean, 1 when anything is flagged, 2 on usage errors.
@@ -79,6 +93,8 @@ PREACHY = re.compile(r"^(don'?t forget|remember to|always remember|you need to|y
                      re.IGNORECASE)
 PITCH = re.compile(r"order (today|now)|link in (bio|comments)|sign up (now|today)|buy now|"
                    r"click (the )?link|dm me|subscribe (now|today)", re.IGNORECASE)
+ACTION_CONTRAST = re.compile(r",? (but |and )?not (an? |the |just )?[\w'-]+( [\w'-]+){0,2}[.]?$",
+                             re.IGNORECASE)
 PICK = re.compile(r"^\s*\*{0,2}best for one post:?\*{0,2}:?\s*(.*)$", re.IGNORECASE)
 SPAM = {"#motivation", "#success", "#hustle", "#inspiration", "#grind", "#mindset",
         "#goals", "#entrepreneurlife", "#viral", "#trending", "#fyp", "#follow"}
@@ -88,11 +104,124 @@ def words(s: str) -> int:
     return len(re.findall(r"\S+", s))
 
 
+NUM = re.compile(r"\d+(?:[.,]\d+)*")
+NUM_WORDS = {"three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
+             "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+             "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
+             "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "hundred": 100,
+             "thousand": 1000, "million": None, "billion": None, "trillion": None,
+             "dozen": 12}
+NUM_WORD = re.compile(r"\b(" + "|".join(NUM_WORDS) + r")s?\b", re.IGNORECASE)
+NAME = re.compile(r"\b[A-Z][A-Za-z0-9]*(?:'s)?\b")
+# Capitalized words that start sentences or are generic; never treated as references.
+COMMON = set("""a an the and or but if so of in on at to for from by with without into onto over
+under about after before again all any are as be been being both can could did do does done
+each even every few get gets got had has have here how i if is it its it's just keep let lets
+like make makes many may me more most much my never new next no not now off old once one only
+other our out own same she should some still such than that the their them then there these
+they this those through too two up us very was we were what when where which while who why
+will with would yes yet you your you're stop start try use run read set ask pick spot find
+cut count test check plan name hold look see take put give tell turn ship skip swap trace
+compare measure weigh decide list match open line fix build write call quit work""".split())
+KNOWN_TAGS = {t.lower() for t in """#LearnToCode #FutureOfWork #WomenInTech #100DaysOfCode
+#BuildInPublic #DevOpsCommunity #PeopleOverProcess #TechForGood #ArtificialIntelligenceEthics
+#InfrastructureAsCode #DeveloperExperience #SiteReliabilityEngineering #CallForPapers
+#OpenSourceSoftware #SoftwareDevelopmentLifeCycle #CodeNewbie #MachineLearningOps
+#ResponsibleAI #GenerativeAI #PlatformEngineering #ContinuousDelivery #DigitalTransformation
+#ProductManagement #EngineeringLeadership #EngineeringManagement #MentalHealthAwareness
+#WorkLifeBalance #RemoteWork #DataScience #CloudNative #CyberSecurity""".split()}
+COINED_JOIN = re.compile(r"(?<=[a-z])(Over|Not|Vs|Than|Beats|Before|Is|Are)(?=[A-Z])")
+
+
+def camel_parts(tag: str) -> list:
+    return re.findall(r"[A-Z]+(?![a-z])|[A-Z][a-z]*|\d+|[a-z]+", tag.lstrip("#"))
+
+
+def norm_num(n: str) -> str:
+    # Keep "1.0" distinct from "1": an invented version label is the failure to catch.
+    return n.replace(",", "")
+
+
+def truth_checks(groups, tags, source, allow):
+    """Return flags for claims and references the source doesn't back."""
+    problems = []
+    src_nums = {norm_num(n) for n in NUM.findall(source)}
+    src_words = {w.lower() for w in re.findall(r"[A-Za-z0-9']+", source)}
+    src_words |= {w[:-2] for w in src_words if w.endswith("'s")}
+    src_words |= {w[:-1] for w in src_words if w.endswith("s")}
+    allow_l = {x.lower().lstrip("#$") for x in allow}
+
+    items = []  # (line, hook, action)
+    for n, hooks in sorted(groups.items()):
+        items.extend((ln, h, act or "") for h, act, ln in hooks)
+
+    for ln, hook, act in items:
+        text = hook + " \n " + act
+        for n in NUM.findall(text):
+            key = norm_num(n)
+            if key not in src_nums and key.lower() not in allow_l:
+                problems.append(f"line {ln}: number '{n}' is not in the source; use the source's figure "
+                                f"or drop it (--allow {key} if it is a verified public fact)")
+        for m in NUM_WORD.finditer(text):
+            w = m.group(1).lower()
+            digit = NUM_WORDS[w]
+            ok = w in src_words or (digit is not None and str(digit) in src_nums) or w in allow_l
+            if not ok:
+                problems.append(f"line {ln}: count '{m.group(0)}' is not in the source; check it "
+                                f"(--allow {w} if you derived and verified it)")
+
+    # Outside references: capitalized names absent from the source, used in 2+ hooks.
+    # A sentence-initial capital only counts when another capitalized word
+    # follows it ("Jurassic Park"); otherwise it is just the start of a sentence.
+    seen_in = {}
+    for ln, hook, act in items:
+        names = set()
+        for part in (hook, act):
+            toks = list(NAME.finditer(part))
+            for k, m in enumerate(toks):
+                start = m.start() == 0 or re.search(r"[.!?:]\s+[*_\"']*$", part[:m.start()])
+                nxt = toks[k + 1] if k + 1 < len(toks) else None
+                joined = nxt is not None and part[m.end():nxt.start()] == " "
+                if start and not joined:
+                    continue
+                w = re.sub(r"'s$", "", m.group(0)).lower()
+                if len(w) < 3 or w in COMMON or w in src_words or w.isdigit() or w in allow_l:
+                    continue
+                names.add(w)
+        for w in names:
+            seen_in.setdefault(w, []).append(ln)
+    for w, lns in sorted(seen_in.items()):
+        if len(lns) > 1:
+            problems.append(f"reference '{w}' (not in the source) appears in {len(lns)} hooks (lines "
+                            f"{', '.join(map(str, lns))}); use each outside reference once "
+                            f"(--allow {w} if it isn't a reference)")
+
+    for t in tags:
+        tl = t.lower()
+        if tl in KNOWN_TAGS or tl.lstrip("#") in allow_l:
+            continue
+        parts = camel_parts(t)
+        if len(parts) >= 3 or COINED_JOIN.search(t):
+            problems.append(f"hashtag {t} looks coined; use tags people already search and follow "
+                            f"(--allow {t} if you know it is in use)")
+    return problems
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("file")
     ap.add_argument("--max-chars", type=int, default=140)
+    ap.add_argument("--source", help="the article or pasted text the hooks are about")
+    ap.add_argument("--allow", action="append", default=[],
+                    help="number, name, or hashtag to accept in truth checks (repeatable)")
     a = ap.parse_args()
+    source = None
+    if a.source:
+        try:
+            source = open(a.source, encoding="utf-8").read()
+        except OSError as e:
+            print(f"cannot read source {a.source}: {e}", file=sys.stderr)
+            return 2
     try:
         lines = open(a.file, encoding="utf-8").read().splitlines()
     except OSError as e:
@@ -100,6 +229,7 @@ def main() -> int:
         return 2
 
     problems = []
+    warnings = []
     groups = {}          # n -> list of [hook, action, line]
     cur = None
     in_tags = False
@@ -148,6 +278,8 @@ def main() -> int:
             plain = re.sub(r"[*_`]", "", text)
             if len(plain) > a.max_chars:
                 problems.append(f"line {ln}: hook is {len(plain)} characters (max {a.max_chars}, aim for 120)")
+            elif len(plain) > 120:
+                warnings.append(f"line {ln}: hook is {len(plain)} characters; aim for 120 or fewer")
             if WARMUP.match(plain):
                 problems.append(f"line {ln}: warm-up opener; lead with the important words")
             if PREACHY.match(plain):
@@ -167,6 +299,10 @@ def main() -> int:
                                     f"(e.g. 'Line up...' not 'Lines up...')")
                 elif VAGUE.match(bare):
                     problems.append(f"line {ln}: action line starts with a vague verb; use a concrete task")
+                if CONTRAST.search(bare) or ACTION_CONTRAST.search(bare):
+                    problems.append(f"line {ln}: contrast framing in action line; say what the reader does")
+                if TRIAD.match(bare):
+                    problems.append(f"line {ln}: fragment triad in action line; write it as a sentence")
             for m in CLICHE.finditer(text):
                 problems.append(f"line {ln}: cliche '{m.group(0)}'")
             for m in AI_TELL.finditer(text):
@@ -209,7 +345,16 @@ def main() -> int:
         if stray:
             problems.append(f"hashtag line has non-hashtag text: {stray[:60]}")
 
+    all_tags = [t for l in tag_lines for t in TAG.findall(l)]
+    if source is not None:
+        problems.extend(truth_checks(groups, all_tags, source, a.allow))
+    else:
+        warnings.append("NOTE truth checks skipped; rerun with --source <article> to check numbers, "
+                        "repeated references, and coined hashtags")
+
     total = sum(len(h) for h in groups.values())
+    for w in warnings:
+        print(w if w.startswith("NOTE") else "WARN " + w)
     for p in problems:
         print("FLAG", p)
     print(f"{'PASS' if not problems else 'FAIL'}: {len(groups)} groups, {total} hooks, "

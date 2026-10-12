@@ -15,7 +15,9 @@ The author's original prompt is in `references/hook-prompt.md`. The writing prin
 /write:hook [file | URL | pasted text]
 ```
 
-Text after a `---` line in the user's message is the source. A file path or URL is read. With nothing given, use the article you created or edited most recently in this conversation, else run `../write-review/scripts/last-article.sh` (it prints the newest changed jeffbaileyblog article), and name the article you picked.
+Text after a `---` line in the user's message is the source. A file path or URL is read. With nothing given, use the article you created or edited most recently in this conversation, else run `${CLAUDE_SKILL_DIR}/../write-review/scripts/last-article.sh` (it prints the newest changed jeffbaileyblog article). Don't stop to confirm the pick; name it and how you found it on the Source line so the user can redirect you. If the script is missing (write-review not installed), ask which article to use.
+
+The checker in step 7 compares the hooks against the source, so it needs the source as a file: use the article path, or save pasted text or a fetched URL to a scratch file.
 
 ## Workflow
 
@@ -25,9 +27,11 @@ Text after a `---` line in the user's message is the source. A file path or URL 
    * two to five concrete details: a real number, a named tool, a striking line, a mistake, a before and after;
    * who it's for and what they can do after reading it.
 
-   Every hook draws on this list. For a Hugo article, skip front matter and shortcodes; the title and description show the angle the author already chose.
+   Every hook draws on this list. For a Hugo article, skip front matter and shortcodes; the title and description show the angle the author already chose. For a long tutorial (2,000+ words), read the intro, the headings, and the sections whose details you'll use, not every line. Copy numbers, counts, and names exactly as the source states them; a count you work out yourself (characters in a command, companies in a list) has to be checked, not estimated.
 
-2. **Draft more than you need.** Write about 15 candidates per group, then keep the best 10. The first idea is the obvious one, and everyone else's first idea is the same. Humor especially comes on the rewrite: the funny hook is rarely the first frame you think of but the unexpected one (the snow on the floor that turns out to be Parmesan). The groups:
+   Also decide the post's kind, because it sets the action lines in step 4: a **how-to** (the reader runs, builds, or changes something) or an **essay** (the post argues a position; the reader comes away with a judgment, not a task).
+
+2. **Draft past the obvious.** The first idea is the obvious one, and everyone else's first idea is the same. You don't need a fixed quota of extra candidates: write the ten, then replace the weakest two or three in each group with a second attempt, and draft more only for a group that is still flat (usually the funny one). Humor especially comes on the rewrite: the funny hook is rarely the first frame you think of but the unexpected one (the snow on the floor that turns out to be Parmesan). The groups:
 
    | # | Group | What it's for |
    |---|---|---|
@@ -39,7 +43,7 @@ Text after a `---` line in the user's message is the source. A file path or URL 
 
    Within a group, vary the device: paradox, bold statement, existential question, metaphor or mental model, sharp observation, reframing of a common belief, a number that sets expectations. Ten hooks that are all questions read as one hook ten times.
 
-   Across all 50, use each pop-culture reference and each joke once. Two Star Wars hooks, or the same punchline in groups 1 and 5, make the list read as 40 hooks padded to 50. The cut candidates from this step are scratch; don't deliver them.
+   Across all 50, use each pop-culture reference and each joke once. Two Star Wars hooks, or the same punchline in groups 1 and 5, make the list read as 40 hooks padded to 50. Outside references (a movie, a meme, a person not in the source) are where repeats hide; the checker flags any outside name used in two hooks. The cut candidates are scratch; don't deliver them.
 
    Hooks are platform-neutral: the same line works on X, LinkedIn, and Threads. Write per-platform variants only when the user asks for them.
 
@@ -56,11 +60,13 @@ Text after a `---` line in the user's message is the source. A file path or URL 
 
    Start with a concrete verb the reader would do: line up, swap, search, compare, delete, rename, ask, try, measure, spot. Skip "learn", "discover", "explore", and "find out", which promise a feeling instead of a task.
 
+   **Essay mode.** When the post argues rather than instructs, there's no task to point at, and forcing one produces contrived lines ("Smell-test the AI boom against iSmell"). Name the judgment the post equips the reader to make, still in the imperative: "Decide whether your team's AI spending would survive the money drying up", "Weigh what an assistant speeds up against the cleanup it leaves behind", "Test today's copilots against the two traits that got Clippy pulled". Good verbs: decide, weigh, judge, test, ask, separate, price, question. The claim must be one the post actually makes.
+
 5. **Pick the hashtags.** Hashtags work by joining conversations people are already having, so use tags people already search and follow, not ones you coin. Pick 12-20, mixed: a few high-traffic broad tags for reach (#SoftwareEngineering, #AI, #Leadership), mid-traffic niche tags for the actual topic (#DevOps, #CommandLine, #TechnicalDebt), and thought-leader / philosophy / self-agency tags for audience quality (#SystemsThinking, #CriticalThinking, #Agency). Use CamelCase so they read well and screen readers can split them. Skip spam tags (#motivation, #success, #hustle, #viral) unless the post is literally about them.
 
    Order the line best first. A single post should carry only two or three hashtags (more reads as noise), so the 12-20 are a pool to rotate across posts and platforms. Under the pool line, add one line naming the best two or three for a single post (see the output format).
 
-6. **Remove AI tells.** Run the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin, from [jeffabailey/skills](https://github.com/jeffabailey/skills)) in edit mode on the draft, prose reference only. A batch of 50 hooks is where generated cadence piles up, and readers on X and LinkedIn have learned to scroll past it. Hooks are built from devices ai-sanitize normally flags, so apply its two tests (removal and reason) per hook with these calibrations:
+6. **Remove AI tells.** A batch of 50 hooks is where generated cadence piles up, and readers on X and LinkedIn have learned to scroll past it. The checker already greps for the prose tells from the `ai-sanitize` skill (performed insight, hype words, engagement bait, fragment triads, contrast overuse), so you don't need to run the whole ai-sanitize workflow on 50 one-liners. Instead, read the draft once, top to bottom, applying ai-sanitize's two tests per hook (would the hook lose anything if this device were removed; is there a reason for it beyond sounding like a hook?) with these calibrations. Run the full `ai-sanitize` skill only if the user asks for it.
 
    * **Contrast** ("It's not X. It's Y.", "X isn't just Y"): keep it only when real readers actually believe X. At most two contrast hooks per group; rewrite the rest to state Y directly.
    * **Questions:** a hook may be a question if the post answers it and the reader can't answer it yet. Cut questions the hook answers itself, and engagement bait ("What's your take?", "Agree?").
@@ -68,19 +74,21 @@ Text after a `---` line in the user's message is the source. A file path or URL 
    * **Performed insight:** cut "quiet truth", "the real lesson", "changes everything", "silent revolution", "this is where it gets interesting". Replace with the claim from step 1, or drop the hook and write a new one.
    * **Action lines** are plain prose: no signposting, no hype words, no melodrama. Say what the reader does.
 
-   Keep the author's profanity, humor, and strong opinions; ai-sanitize does the same. If ai-sanitize isn't installed, say so in one line and rely on these calibrations plus the checker in step 7.
+   * **Unsourced color:** a vivid detail that isn't in the source ("Super Bowl money", "half your plugins duplicate the shell") is an invented fact, even when no number is involved. Swap it for a detail the source gives.
+
+   Keep the author's profanity, humor, and strong opinions.
 
 7. **Check, then deliver.** Write the draft to a scratch file and run:
 
    ```bash
-   python3 "${CLAUDE_SKILL_DIR}/scripts/check_hooks.py" <draft.md>
+   python3 "${CLAUDE_SKILL_DIR}/scripts/check_hooks.py" <draft.md> --source <article.md>
    ```
 
-   It checks the shape (5 groups x 10 hooks, an action line on each, in the imperative, 12-20 hashtags on one line, a 2-3 tag pick drawn from the pool), length, warm-up and preachy openers, sales lines, emdashes and en dashes, cliches and business jargon, AI tells, contrast overuse, duplicates, and spam tags. Fix every flag, rerun until it prints `PASS`, then paste the draft into your reply. A cliche flag is almost always right; if a flagged phrase is genuinely the post's subject (a post about hustle culture can say "hustle"), keep it and say why in one line.
+   With `--source` it checks the truth rule mechanically: numbers, years, versions, dollar figures, and spelled-out counts that the source doesn't contain ("Clippy 1.0", a guessed character count), outside references used in more than one hook, and hashtags that look coined. When a flagged number is a verified public fact (HTTP 404, Windows 95) or a count you derived and checked, pass `--allow <token>` and say why in one line of your reply; otherwise fix the hook. It also checks the shape (5 groups x 10 hooks, an action line on each, in the imperative, 12-20 hashtags on one line, a 2-3 tag pick drawn from the pool), length, warm-up and preachy openers, sales lines, emdashes and en dashes, cliches and business jargon, AI tells, contrast overuse, contrast framing in action lines, duplicates, and spam tags. `WARN` lines (hooks over the 120-character aim) don't fail the check, but shorten them unless the length earns its place. Fix every `FLAG`, rerun until it prints `PASS`, then paste the draft into your reply. A cliche flag is almost always right; if a flagged phrase is genuinely the post's subject (a post about hustle culture can say "hustle"), keep it and say why in one line.
 
 ## Rules that keep hooks honest
 
-- **Tell the truth.** A hook may exaggerate tone, never facts. Claims about the subject (what the tool does, what the post argues, any number) come from the source. Pop-culture references and well-known public facts can come from outside it, as long as they're accurate. Don't promise something the post doesn't deliver, call something surprising that isn't, invent statistics, or put words in a real person's mouth. A pop-culture reference can allude ("This is the Jurassic Park of config files"); it can't quote a line you aren't sure is real. Hype wins one click and costs the next ten.
+- **Tell the truth.** A hook may exaggerate tone, never facts. Claims about the subject (what the tool does, what the post argues, any number) come from the source. Pop-culture references and well-known public facts can come from outside it, as long as they're accurate. Counts you derive from the source are claims too; check them. Don't promise something the post doesn't deliver, call something surprising that isn't, invent statistics, or put words in a real person's mouth. A pop-culture reference can allude ("This is the Jurassic Park of config files"); it can't quote a line you aren't sure is real. Hype wins one click and costs the next ten.
 - **No emdashes or en dashes anywhere**, in hooks, action lines, or hashtags. Use a period, comma, colon, or parentheses.
 - **No cliches, platitudes, or engagement bait**: "Let that sink in", "Read that again", "Nobody talks about this", "Here's the thing", "unlock your potential", "game-changer", "the secret to", "move the needle", "at the end of the day", "low-hanging fruit". A cliche was once a fresh image; now it tells the reader nobody thought hard about this. Edgy means a sharp point, not a cheap trick.
 - **Edgy has limits.** Punch at ideas, habits, tools, and institutions, not at groups of people. Profanity is fine when the source uses it or it's the author's voice (jeffbaileyblog posts do); don't add it to a source that has none.
