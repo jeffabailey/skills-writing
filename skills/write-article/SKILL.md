@@ -76,7 +76,7 @@ Opinion requests rule out Diataxis frameworks and Fundamentals: those force seco
 
 5. **Place the bundle (jeffbaileyblog).** Path: `hugo/content/blog/<section>/<folder>/index.md`, with the section from the framework table. Keep folder name, `slug`, and the last segment of `url` identical. Confirm the folder does not already exist. Get today's date with `date +%Y-%m-%d` for `date`, `lastmod`, and the `url` path. Use the AGENTS.md front matter shape with `draft: true`, pick `categories` that sibling posts already use, and apply the SEO rules: quoted `description` of 160 characters or fewer, keyword-first title, concrete keywords.
 
-6. **Draft.** Substitute the gathered values and follow the loaded prompt. Fact discipline:
+6. **Draft.** Substitute the gathered values and follow the loaded prompt. The framework sets the structure; `references/great-blog-post.md` sets the quality bar for any blog post (so-what, opening, rewrite passes, specificity, evidence). Read it before drafting, then run its pre-publish checklist on the draft before step 7. Site rules still win where it says so. Fact discipline:
    - Do not invent statistics, studies, versions, command flags, quotes, URLs, dates, or anecdotes. Cite a source link for each factual claim, or mark it `<!-- TODO verify: <claim> -->`, or write `[NEEDS FACT: <what>]`.
    - Check commands, config keys, and version numbers against official docs or the tool's `--help` before presenting them as working.
    - Keep a running claims-to-verify list for the delivery note.
@@ -113,5 +113,6 @@ Opinion requests rule out Diataxis frameworks and Fundamentals: those force seco
 ## Reference
 
 - `references/*.md`: the 16 framework prompts plus fallback copies of `writing-style.md` and `seo-front-matter.md`.
+- `references/great-blog-post.md`: framework-independent quality guidance and pre-publish checklist, distilled from Ann Handley's *Everybody Writes*.
 - `scripts/blog_links.py`: finds published link targets and checks every `ref` in a draft against `hugo list all`.
 - Cover prompt: `../generate-cover-image/references/cover-prompt.md`.
