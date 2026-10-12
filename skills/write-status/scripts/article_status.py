@@ -3,7 +3,7 @@
 
 Usage:
   article_status.py check [ARTICLE] [--json] [--since-days N]
-  article_status.py record SKILL ARTICLE [--note TEXT]
+  article_status.py record SKILL ARTICLE [--note TEXT] [--force]
   article_status.py review latest ARTICLE   # newest saved write-review report
   article_status.py review new ARTICLE      # path to save a new report to
 
@@ -22,6 +22,14 @@ Evidence, strongest first:
 
 A run is "stale" when the article's last commit (or mtime, if uncommitted) is
 newer than the run.
+
+write-validate-article runs lychee, markdownlint-cli2 and an AGENTS.md pass, so
+its run also counts for write-check-links, write-run-markdown-lint and
+hugo-agents-compliance ("covered") unless one of those has a newer run of its own,
+or the validate note says a step was NOT RUN.
+
+SEO artifact rule (from hugo/content/prompts/seo-front-matter.md): quoted-or-not
+description of at most 160 characters and 4-7 keywords.
 
 Stdlib only.
 """
@@ -52,6 +60,15 @@ SKILLS = [
 # The others (SEO, cover) leave their work in the file, so later edits don't undo them.
 CHECKS = {"write-review", "write-validate-article", "write-check-links",
           "write-run-markdown-lint", "hugo-agents-compliance"}
+# write-validate-article runs these as its own steps (lychee, markdownlint-cli2,
+# AGENTS.md pass), so a current validate run covers them.
+COVERED_BY = {"write-check-links": "write-validate-article",
+              "write-run-markdown-lint": "write-validate-article",
+              "hugo-agents-compliance": "write-validate-article"}
+SEO_DESC_MAX = 160
+SEO_KW_MIN, SEO_KW_MAX = 4, 7
+DEDUPE_MINUTES = 10
+DEFAULT_BLOG = Path.home() / "Projects/websites/jeffbaileyblog"
 ALIASES = {
     "write-internal-link-optimize": "write-seo",
     "write-cover": "generate-cover-image",
@@ -77,20 +94,35 @@ def norm_skill(name: str) -> str | None:
     return n if n in SKILLS else None
 
 
-def resolve_article(arg: str | None) -> Path:
+def blog_root_source() -> str:
+    """Which rule last-article.sh will use to pick the repo (mirrors its pick_root)."""
+    br = os.environ.get("BLOG_ROOT")
+    if br and git_root(Path(br) / "x"):
+        return f"BLOG_ROOT={br}"
+    cwd = git_root(Path.cwd() / "x")
+    if cwd and ((cwd / "content").is_dir() or (cwd / "hugo/content").is_dir()):
+        return f"cwd repo {cwd}"
+    return f"default {DEFAULT_BLOG} (BLOG_ROOT unset, cwd is not a blog repo)"
+
+
+def resolve_article(arg: str | None) -> tuple[Path, str]:
+    """Return the article and a one-line note on how it was picked."""
     if arg:
         p = Path(arg).expanduser().resolve()
         if p.is_dir():
             p = p / "index.md"
         if not p.is_file():
             sys.exit(f"article not found: {p}")
-        return p
+        return p, "named by the user"
     if not LAST_ARTICLE.is_file():
-        sys.exit("no article given and write-review's last-article.sh is not installed")
+        sys.exit("no article given and write-review's last-article.sh is not installed; "
+                 "pass the article path")
+    root = blog_root_source()
     out = subprocess.run([str(LAST_ARTICLE)], capture_output=True, text=True)
     if out.returncode != 0:
-        sys.exit(out.stderr.strip() or "last-article.sh found no article")
-    return Path(out.stdout.split("\t")[0].strip())
+        sys.exit((out.stderr.strip() or "last-article.sh found no article") + f" [repo from {root}]")
+    path, _, how = out.stdout.strip().partition("\t")
+    return Path(path.strip()), f"last-article.sh ({how or 'unknown'}); repo from {root}"
 
 
 def git_root(p: Path) -> Path | None:
@@ -222,15 +254,25 @@ def artifact_signs(p: Path) -> dict[str, str]:
     desc = re.search(r'^description:\s*"?(.*?)"?\s*$', fm, re.M)
     kw = re.search(r"^keywords:\s*\n((?:\s+-.*\n?)+)", fm + "\n", re.M)
     n_kw = len(re.findall(r"^\s+-", kw.group(1), re.M)) if kw else 0
-    if desc and len(desc.group(1)) <= 160 and 4 <= n_kw <= 7:
-        signs["write-seo"] = f"front matter complete ({n_kw} keywords, description {len(desc.group(1))} chars)"
+    n_desc = len(desc.group(1)) if desc else 0
+    if desc and n_desc <= SEO_DESC_MAX and SEO_KW_MIN <= n_kw <= SEO_KW_MAX:
+        signs["write-seo"] = f"front matter complete ({n_kw} keywords, description {n_desc} chars)"
+    else:
+        why = []
+        if not desc:
+            why.append("no description")
+        elif n_desc > SEO_DESC_MAX:
+            why.append(f"description {n_desc} chars > {SEO_DESC_MAX}")
+        if not SEO_KW_MIN <= n_kw <= SEO_KW_MAX:
+            why.append(f"{n_kw} keywords, needs {SEO_KW_MIN}-{SEO_KW_MAX}")
+        signs["write-seo-why"] = "front matter incomplete: " + ", ".join(why)
     return signs
 
 
 # ---------- commands ----------
 
 def check(args) -> int:
-    p = resolve_article(args.article)
+    p, picked = resolve_article(args.article)
     key, folder = article_key(p), p.parent.name
     changed = last_changed(p)
     since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=args.since_days)
@@ -239,33 +281,55 @@ def check(args) -> int:
     signs = artifact_signs(p)
     rank = {"ledger": 0, "transcript": 1, "inferred": 2}
 
+    def latest(skill):
+        mine = [r for r in runs if r["skill"] == skill]
+        return (max(mine, key=lambda r: (r["ts"], -rank[r["source"]])), len(mine)) if mine else (None, 0)
+
     rows = []
     for s in SKILLS:
-        mine = [r for r in runs if r["skill"] == s]
-        if mine:
-            last = max(mine, key=lambda r: (r["ts"], -rank[r["source"]]))
+        last, n = latest(s)
+        parent = COVERED_BY.get(s)
+        plast = latest(parent)[0] if parent else None
+        if plast and "not run" in plast["where"].lower():
+            plast = None  # validate skipped a step; don't claim coverage
+        if plast and (not last or plast["ts"] > last["ts"]):
+            stale = s in CHECKS and plast["ts"] < changed
+            rows.append({"skill": s, "status": "stale" if stale else "covered",
+                         "last_run": plast["ts"].isoformat(timespec="minutes"),
+                         "source": plast["source"], "runs": n,
+                         "detail": f"by {parent}" + (" (article changed since)" if stale else "")})
+        elif last:
             status = "stale" if s in CHECKS and last["ts"] < changed else "ran"
             rows.append({"skill": s, "status": status, "last_run": last["ts"].isoformat(timespec="minutes"),
-                         "source": last["source"], "runs": len(mine),
+                         "source": last["source"], "runs": n,
                          "detail": f"session {last['where']}" if last["source"] != "ledger" else last["where"]})
         elif s in signs:
             rows.append({"skill": s, "status": "artifact", "last_run": None,
                          "source": "artifact", "runs": 0, "detail": signs[s]})
         else:
             rows.append({"skill": s, "status": "missing", "last_run": None,
-                         "source": None, "runs": 0, "detail": ""})
+                         "source": None, "runs": 0, "detail": signs.get(f"{s}-why", "")})
 
-    result = {"article": str(p), "folder": folder, "changed": changed.isoformat(timespec="minutes"),
-              "ledger": str(LEDGER), "transcripts_kept_days": transcript_retention(), "skills": rows}
+    by = {st: [r["skill"] for r in rows if r["status"] == st]
+          for st in ("missing", "stale", "covered", "artifact")}
+    result = {"article": str(p), "folder": folder, "picked_by": picked,
+              "changed": changed.isoformat(timespec="minutes"),
+              "ledger": str(LEDGER), "transcripts_kept_days": transcript_retention(),
+              "skills": rows, "summary": by}
     if args.json:
         print(json.dumps(result, indent=2))
         return 0
     print(f"Article: {p}")
+    print(f"Picked by: {picked}")
     print(f"Last changed: {result['changed']}")
     w = max(len(s) for s in SKILLS)
     for r in rows:
         when = r["last_run"] or "-"
         print(f"  {r['skill']:<{w}}  {r['status']:<8}  {when:<22}  {r['source'] or '-':<10}  {r['detail']}".rstrip())
+    stale_txt = ", ".join(f"{r['skill']} ({r['last_run'][:16].replace('T', ' ')})"
+                          for r in rows if r["status"] == "stale")
+    print(f"Missing: {', '.join(by['missing']) or 'none'}. Stale: {stale_txt or 'none'}."
+          + (f" Covered by write-validate-article: {', '.join(by['covered'])}." if by["covered"] else ""))
     return 0
 
 
@@ -287,8 +351,16 @@ def record(args) -> int:
     if not p.is_file():
         sys.exit(f"article not found: {p}")
     STATE.mkdir(parents=True, exist_ok=True)
-    entry = {"ts": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+    now = dt.datetime.now(dt.timezone.utc)
+    # Microseconds, so a record made in the same second as an edit doesn't read as stale.
+    entry = {"ts": now.isoformat(timespec="microseconds"),
              "skill": s, "article": article_key(p), "note": args.note or ""}
+    if not args.force:
+        for r in reversed(ledger_runs(entry["article"], p.parent.name)):
+            if r["skill"] == s and now - r["ts"] < dt.timedelta(minutes=DEDUPE_MINUTES):
+                print(f"already recorded {s} on {entry['article']} at "
+                      f"{r['ts'].isoformat(timespec='seconds')}; skipped (use --force to add another)")
+                return 0
     with LEDGER.open("a") as fh:
         fh.write(json.dumps(entry) + "\n")
     print(f"recorded {s} on {entry['article']}")
@@ -334,6 +406,8 @@ def main() -> int:
     r.add_argument("skill")
     r.add_argument("article")
     r.add_argument("--note")
+    r.add_argument("--force", action="store_true",
+                   help=f"append even if the same skill was recorded on this article in the last {DEDUPE_MINUTES} min")
     r.set_defaults(fn=record)
     v = sub.add_parser("review")
     v.add_argument("action", choices=["latest", "new"])
