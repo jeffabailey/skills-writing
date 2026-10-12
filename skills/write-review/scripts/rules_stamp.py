@@ -6,10 +6,14 @@
         Rubric: references/fundamentals.md @ <blob hash>
         Style: hugo/content/prompts/writing-style.md @ <blob hash>
         SEO: hugo/content/prompts/seo-front-matter.md @ <blob hash>
+        Checklist: write-article/references/great-blog-post.md @ <blob hash>
       RUBRIC is a filename in this skill's references/ (fundamentals.md, ...).
       Style/SEO are the blog's live prompts when the article's repo has them
       (path relative to the repo root), else the bundled copies, shown as
       "references/<file> (bundled)". --no-blog omits them (non-blog articles).
+      Checklist is the blog-post quality checklist every review scores, read
+      from the sibling write-article skill; it is omitted when that skill is
+      not installed.
 
   rules_stamp.py check REVIEW ARTICLE
       Recompute the stamp REVIEW carries and compare. Prints one line per rule:
@@ -29,7 +33,8 @@ import sys
 from pathlib import Path
 
 REFS = Path(__file__).resolve().parent.parent / "references"
-LINE = re.compile(r"^\s*(?:[-*]\s*)?\**(Rubric|Style|SEO)\**:\s*\**\s*(\S+)(?:\s+\(bundled\))?\s+@\s+([0-9a-f]{40})\b")
+CHECKLIST = REFS.parent.parent / "write-article" / "references" / "great-blog-post.md"
+LINE = re.compile(r"^\s*(?:[-*]\s*)?\**(Rubric|Style|SEO|Checklist)\**:\s*\**\s*(\S+)(?:\s+\(bundled\))?\s+@\s+([0-9a-f]{40})\b")
 
 
 def blob_hash(p: Path) -> str:
@@ -56,7 +61,8 @@ def blog_prompt(article: Path, name: str) -> tuple[str, Path]:
     return f"references/{name} (bundled)", REFS / name
 
 
-def stamp_lines(article: Path, rubrics: list[str], blog: bool) -> list[tuple[str, str, Path]]:
+def stamp_lines(article: Path, rubrics: list[str], blog: bool,
+                checklist: bool = True) -> list[tuple[str, str, Path]]:
     rows = []
     for r in rubrics:
         name = Path(r).name
@@ -67,6 +73,8 @@ def stamp_lines(article: Path, rubrics: list[str], blog: bool) -> list[tuple[str
     if blog:
         rows.append(("Style", *blog_prompt(article, "writing-style.md")))
         rows.append(("SEO", *blog_prompt(article, "seo-front-matter.md")))
+    if checklist and CHECKLIST.is_file():
+        rows.append(("Checklist", "write-article/references/great-blog-post.md", CHECKLIST))
     return rows
 
 
@@ -88,9 +96,10 @@ def cmd_check(a) -> int:
         print(f"no rules stamp in {review}: re-check every finding against the current rules")
         return 2
     rubrics = [Path(lbl).name for kind, lbl, _ in stamped if kind == "Rubric"]
-    blog = any(kind != "Rubric" for kind, _, _ in stamped)
+    blog = any(kind in ("Style", "SEO") for kind, _, _ in stamped)
+    checklist = any(kind == "Checklist" for kind, _, _ in stamped)
     now = {kind + ":" + (lbl if kind == "Rubric" else ""): (lbl, p)
-           for kind, lbl, p in stamp_lines(article, rubrics, blog)}
+           for kind, lbl, p in stamp_lines(article, rubrics, blog, checklist)}
     bad = 0
     for kind, lbl, old in stamped:
         key = kind + ":" + (lbl if kind == "Rubric" else "")

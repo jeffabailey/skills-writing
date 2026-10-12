@@ -1,6 +1,6 @@
 ---
 name: write-review
-description: Reviews articles against 16 bundled writing framework rubrics. Detects the framework from front matter, content directory, and structure (or takes it as an argument), loads the rubric from this skill, and evaluates the article without editing it. Use when the user says /write:review, asks to review an article, evaluate writing quality, check an article against a framework, or get feedback on a draft, and when another skill (such as write-article-revision) needs a framework rubric score. Triggers on "review article", "evaluate writing", "check article", "review draft", "writing feedback", "article quality". With no article specified, reviews the last article created or adjusted.
+description: Reviews articles against 16 bundled writing framework rubrics. Detects the framework from front matter, content directory, and structure (or takes it as an argument), loads the rubric from this skill, and evaluates the article without editing it, plus a blog-post quality checklist score shared with write-article. Use when the user says /write:review, asks to review an article, evaluate writing quality, check an article against a framework, or get feedback on a draft, and when another skill (such as write-article-revision) needs a framework rubric score. Triggers on "review article", "evaluate writing", "check article", "review draft", "writing feedback", "article quality". With no article specified, reviews the last article created or adjusted.
 ---
 
 # Article Review
@@ -72,9 +72,16 @@ Score an article against the rubric for the framework it was written in, and rep
    * Check `title:`, `description:` (160 characters or fewer), and `keywords:` against `seo-front-matter.md`. Prefer the blog's own `hugo/content/prompts/seo-front-matter.md` when it exists; the bundled copy is the fallback.
    * Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode so it lists AI tells without editing. Triage its hits (link titles often trip the Title-Case check) and fold real ones into the issues with locations. If it is not installed, say so and skip it.
 
-7. **Deliver the review.** Lead with three lines: article (absolute path), framework and the signal that decided it, rubric file(s) loaded. Then use the rubric's own output format: the JSON summary, the overall score, a PASS / NEEDS_IMPROVEMENT / FAIL status for each rubric section with its evidence, the issues with locations, the prioritized improvement plan, and strengths to keep. Add the blog rubric's extra section when it defines one ("Blog-Specific Fixes" for Fundamentals, "Learn X Launch Pad Fixes" for Learn X). Do not invent numeric per-dimension scores the rubric does not define. End by confirming the article was not modified.
+7. **Score the blog-post checklist.** The framework rubric judges whether the article does its type's job; it doesn't ask whether the piece is worth reading. `write-article` drafts against the "Pre-publish checklist" at the end of `${CLAUDE_SKILL_DIR}/../write-article/references/great-blog-post.md`, so score every review against the same list; the writer and the reviewer then hold the same bar. Read that section (and the guidance above it when an item is unclear) and mark each item:
+   * **PASS** or **FAIL**, with a quoted passage or heading as evidence. A FAIL also becomes an issue in the issue list with its location and a proposed fix, so `write-review-apply` can act on it.
+   * **N/A** only when the item can't apply: no opinions to support, no statistics to source. "The draft got a step-away and a rewrite" can't be seen in the text; mark it N/A unless the author said so.
+   * The item on `writing-style.md` and `seo-front-matter.md` reuses step 6's result; on non-blog articles mark it N/A.
 
-8. **Save the review** so `write-review-apply` can act on it later, even from another session. Write the full review you delivered (the three lead lines, JSON summary, and Markdown review) to the path this prints, outside the blog repo:
+   Report the score as `Checklist: <passed>/<applicable> (<n> N/A)`. Keep it separate from the rubric score: callers such as `write-article-revision` loop on the rubric score, so folding the checklist into it would move their target. Where an item conflicts with a site rule, the site rule wins (see "Where site rules win" in the same file). If the file is missing (`write-article` not installed), say so and skip this step.
+
+8. **Deliver the review.** Lead with three lines: article (absolute path), framework and the signal that decided it, rubric file(s) loaded. Then use the rubric's own output format: the JSON summary, the overall score, a PASS / NEEDS_IMPROVEMENT / FAIL status for each rubric section with its evidence, the issues with locations, the prioritized improvement plan, and strengths to keep. Add the blog rubric's extra section when it defines one ("Blog-Specific Fixes" for Fundamentals, "Learn X Launch Pad Fixes" for Learn X). After the rubric sections, add a "Blog-Post Checklist" section: the score line from step 7, then one line per item with its status and evidence. In the JSON summary, add `"checklist": {"passed": <n>, "applicable": <n>, "na": <n>}`. Do not invent numeric per-dimension scores the rubric does not define. End by confirming the article was not modified.
+
+9. **Save the review** so `write-review-apply` can act on it later, even from another session. Write the full review you delivered (the three lead lines, JSON summary, and Markdown review) to the path this prints, outside the blog repo:
 
    ```bash
    python3 "${CLAUDE_SKILL_DIR}/../write-status/scripts/article_status.py" review new <article index.md>
@@ -86,7 +93,7 @@ Score an article against the rubric for the framework it was written in, and rep
    python3 "${CLAUDE_SKILL_DIR}/scripts/rules_stamp.py" stamp <article index.md> <rubric.md> [<base rubric.md>]
    ```
 
-   It prints `Rubric: references/<file> @ <hash>` per rubric, plus `Style:` and `SEO:` lines for the `writing-style.md` and `seo-front-matter.md` step 6 reads (live blog copy first, bundled fallback). Paste its output verbatim.
+   It prints `Rubric: references/<file> @ <hash>` per rubric, `Style:` and `SEO:` lines for the `writing-style.md` and `seo-front-matter.md` step 6 reads (live blog copy first, bundled fallback), and a `Checklist:` line for step 7's checklist. Paste its output verbatim.
 
    Saving to that path does not touch the article, so the read-only rule still holds. If the script isn't installed, skip this step and say the review wasn't saved. End the reply with one line offering the follow-up: "Run `/write:review-apply` to apply these fixes."
 
