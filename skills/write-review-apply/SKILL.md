@@ -17,6 +17,14 @@ The review is advice, not a script. Some findings carry exact replacement text; 
 
 `article` is a path to an `index.md` or its bundle folder. With nothing named: the article reviewed most recently in this conversation, else the last article created or changed (`../write-review/scripts/last-article.sh`).
 
+## Called from write-article
+
+`write-article` step 9 loops `write-review` and this skill until a fresh review scores the new draft 9.5 or higher. That loop is the author's standing request, so in loop mode three rules change and everything else (dispositions, never inventing facts, voice, the change check) holds:
+
+* **Step 3:** edit the draft in place even though it is untracked; `write-article` keeps a copy of every round.
+* **Step 5:** skip validation; `write-article` validates once after the loop.
+* **Step 6:** skip the self re-score; the loop's next fresh `write-review` is the score. Return the report with its **Needs your input** and **Your call** lists, and say whether anything was applied: a round that applied nothing ends the loop.
+
 ## Workflow
 
 1. **Find the review.** Stop at the first that applies, and say which one you used:
@@ -55,7 +63,7 @@ The review is advice, not a script. Some findings carry exact replacement text; 
 
    When the review gives exact replacement text, use it unless it breaks a site rule, invents a fact, or carries an unverified command or claim; then adapt it (drop the unsupported part) and say how.
 
-3. **Pick the output file.** Same rule as `write-article-revision`: if the article is tracked by git and has no uncommitted changes (`git -C <dir> ls-files --error-unmatch <file>` succeeds and `git -C <dir> status --porcelain -- <file>` prints nothing), edit in place, since git holds the original and the author reviews with `git diff`. Otherwise write the result beside it as `index.revised.md` and leave the original untouched. Either way, save a copy of the starting text to a temp file (`mktemp`) for step 4's change check.
+3. **Pick the output file.** Same rule as `write-article-revision`: if the article is tracked by git and has no uncommitted changes (`git -C <dir> ls-files --error-unmatch <file>` succeeds and `git -C <dir> status --porcelain -- <file>` prints nothing), edit in place, since git holds the original and the author reviews with `git diff`. Otherwise write the result beside it as `index.revised.md` and leave the original untouched (except in loop mode; see "Called from write-article"). Either way, save a copy of the starting text to a temp file (`mktemp`) for step 4's change check.
 
 4. **Apply the fixes, highest priority first.** Work through the **Apply** items in the review's priority order (critical issues, then the improvement plan, then section findings).
    * **Scope:** change only the passages a finding names, plus the sentence before and after when a joint needs smoothing. Every other sentence stays byte for byte. Problems you notice that the review didn't raise go under *Noticed, not changed*.
@@ -81,7 +89,7 @@ The review is advice, not a script. Some findings carry exact replacement text; 
 
    Fix failures and AI tells inside the passages you changed. List the rest as pre-existing. If a tool is missing, say "not run: <tool> missing", separate from checks that ran and failed.
 
-6. **Re-score once, and label it.** Re-score only the rubric sections that contain a changed block (`sections_touched` from step 4, mapped to the rubric's sections), using the same rubric file and framework the first review used; every other section keeps its original status. Report the old and new score and which section statuses moved, labeled **self re-score**: the agent that applied the fixes is grading them, so it leans generous. Offer a fresh `write-review` (in a new session, which saves a new report) when the author wants an independent score. Don't loop to chase a higher score: a second round of fixes on the same article is the author's decision, and repeated passes drift from their voice.
+6. **Re-score once, and label it.** Re-score only the rubric sections that contain a changed block (`sections_touched` from step 4, mapped to the rubric's sections), using the same rubric file and framework the first review used; every other section keeps its original status. Report the old and new score and which section statuses moved, labeled **self re-score**: the agent that applied the fixes is grading them, so it leans generous. Offer a fresh `write-review` (in a new session, which saves a new report) when the author wants an independent score. Don't loop to chase a higher score: a second round of fixes on the same article is the author's decision, and repeated passes drift from their voice. The one exception is `write-article`'s review loop (see "Called from write-article"), which the author asked for, scores each round with a fresh review, and caps the rounds.
 
 7. **Record the run.**
 

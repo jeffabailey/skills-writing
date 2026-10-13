@@ -17,8 +17,8 @@ See [SETUP.md](SETUP.md) for Cursor and other tools, and for releasing changes.
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
-| [write-article](skills/write-article/SKILL.md) | `/write:article` | Create articles with 16 bundled writing frameworks; for jeffbaileyblog, places the bundle, checks links are published, and verifies the draft build |
-| [write-review](skills/write-review/SKILL.md) | `/write:review [article] [framework]` | Review articles against framework rubrics (read-only) |
+| [write-article](skills/write-article/SKILL.md) | `/write:article` | Create articles with 16 bundled writing frameworks plus Comparison (via write-comparison-article-create); for jeffbaileyblog, places the bundle, checks links are published, loops write-review and write-review-apply until the draft scores 9.5+, and verifies the draft build |
+| [write-review](skills/write-review/SKILL.md) | `/write:review [article] [framework]` | Review articles against framework rubrics, including comparison pages (read-only) |
 | [write-review-apply](skills/write-review-apply/SKILL.md) | `/write:review-apply [article]` | Apply a write-review report: makes the fixes the article supports, lists facts and structural calls for you, validates, and re-scores |
 | [write-status](skills/write-status/SKILL.md) | `/write:status [article]` | Which writing skills have run on an article and which are missing or stale; offers write-review (y/N) when it never ran |
 | [write-ideate](skills/write-ideate/SKILL.md) | `/write:ideate`, `/write:idea-storm` | Brainstorm article ideas, deduped against existing posts and draft stubs |
@@ -43,7 +43,7 @@ The create, revise, copy, review, and validate skills also call [`ai-sanitize`](
 
 ## Writing Frameworks
 
-### Article Creation (16 frameworks)
+### Article Creation (17 frameworks)
 
 **Documentation (Diataxis):** Tutorials, How-to Guides, Reference, Explanation
 
@@ -56,6 +56,8 @@ The create, revise, copy, review, and validate skills also call [`ai-sanitize`](
 **Reference:** Fact-Based Reference, List Articles, Fundamentals
 
 **Learning:** Learn X (launch pad — teaches the 20% that does 80%, then links curated video/audio/books/online resources)
+
+**Decision:** Comparison (X vs Y; structure and checker from write-comparison-article-create)
 
 ### Article Review
 

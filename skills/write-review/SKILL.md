@@ -1,13 +1,13 @@
 ---
 name: write-review
-description: Reviews articles against 16 bundled writing framework rubrics. Detects the framework from front matter, content directory, and structure (or takes it as an argument), loads the rubric from this skill, and evaluates the article without editing it, plus a blog-post quality checklist score shared with write-article. Use when the user says /write:review, asks to review an article, evaluate writing quality, check an article against a framework, or get feedback on a draft, and when another skill (such as write-article-revision) needs a framework rubric score. Triggers on "review article", "evaluate writing", "check article", "review draft", "writing feedback", "article quality". With no article specified, reviews the last article created or adjusted.
+description: Reviews articles against 17 bundled writing framework rubrics, including comparison (X vs Y) pages. Detects the framework from front matter, content directory, and structure (or takes it as an argument), loads the rubric from this skill, and evaluates the article without editing it, plus a blog-post quality checklist score shared with write-article. Use when the user says /write:review, asks to review an article, evaluate writing quality, check an article against a framework, or get feedback on a draft, and when another skill (such as write-article-revision) needs a framework rubric score. Triggers on "review article", "evaluate writing", "check article", "review draft", "writing feedback", "article quality". With no article specified, reviews the last article created or adjusted.
 ---
 
 # Article Review
 
 Score an article against the rubric for the framework it was written in, and report findings the author can act on. Every rubric is bundled in `references/`; nothing is fetched at runtime.
 
-**A review never edits.** The article file must be byte-identical before and after. Some rubric text talks about rewrites, diffs, or "conversion"; treat all of it as proposed text in the report, never as edits to the file, and run the review once (no loop toward a target score). Applying changes is the author's job, or a calling skill's (for example `write-article-revision`).
+**A review never edits.** The article file must be byte-identical before and after. Some rubric text talks about rewrites, diffs, or "conversion"; treat all of it as proposed text in the report, never as edits to the file, and run the review once (no loop toward a target score). Applying changes is the author's job, or a calling skill's (for example `write-article-revision`, or `write-article`'s review loop, which re-runs this skill after each round of fixes; each run is still a single pass).
 
 ## Usage
 
@@ -23,6 +23,7 @@ Score an article against the rubric for the framework it was written in, and rep
 | Key (`articletype`) | Aliases | Rubric | Detection signals (after front matter) |
 |---|---|---|---|
 | `fundamentals` | fundamentals-x | `fundamentals.md` + base `diataxis-article-explanation.md` | dir `content/blog/fundamentals/`; `series: Fundamentals`; title "Fundamentals of ..." |
+| `comparison` | x-vs-x, vs | `comparison.md` + base `diataxis-article-explanation.md` | dir `content/blog/x-vs-x/`; title "X vs Y"; "The short answer" and "Head-to-head" sections |
 | `learn` | learn-x | `learn.md` + base `diataxis-article-how-to-guides.md` | dir `content/blog/learn-x/`; "Beyond the Basics" launch-pad section; `learn_x_header` partial |
 | `diataxis-tutorial` | tutorial | `diataxis-article-tutorials.md` | "you will build/learn", one guided path, checkpoints for a beginner |
 | `diataxis-how-to` | how-to, howto | `diataxis-article-how-to-guides.md` | dirs `how-x/`, `troubleshooting/`; "How do I ...", "Fix: ..."; goal, prerequisites, ordered steps |
@@ -54,14 +55,14 @@ Score an article against the rubric for the framework it was written in, and rep
 2. **Determine the framework.** Take the first rule that decides it, and record which signal decided:
 
    1. An explicit `framework` argument (match keys, aliases, or rubric filenames, case-insensitive).
-   2. Front matter `articletype:` (keys above). `comparison` has no dedicated rubric: fall through to the `diataxis` field, then default to explanation, and say so.
-   3. Content directory `fundamentals/` or `learn-x/`. These beat the `diataxis` field: a Fundamentals article also carries `diataxis: explanation`, but it gets the Fundamentals rubric.
+   2. Front matter `articletype:` (keys above).
+   3. Content directory `fundamentals/`, `learn-x/`, or `x-vs-x/`. These beat the `diataxis` field: a Fundamentals or comparison article also carries `diataxis: explanation`, but it gets its own rubric.
    4. Front matter `diataxis:`, `diataxis_type:`, or `documentation_type:` (`tutorial`, `how-to`, `reference`, `explanation`).
    5. The other directory and title signals in the table.
    6. Structure signals in the table.
    7. Still ambiguous between two rubrics: ask once, naming the two candidates and the signals for each.
 
-3. **Load the rubric.** Read the rubric file for the framework. For `fundamentals` also read `diataxis-article-explanation.md`, and for `learn` also read `diataxis-article-how-to-guides.md`: the blog rubric's override block and extra checks apply on top of that base rubric, and the base rubric supplies the type gate and output format.
+3. **Load the rubric.** Read the rubric file for the framework. For `fundamentals` and `comparison` also read `diataxis-article-explanation.md`, and for `learn` also read `diataxis-article-how-to-guides.md`: the blog rubric's override block and extra checks apply on top of that base rubric, and the base rubric supplies the type gate and output format.
 
 4. **Fill the template variables.** Rubrics open with fields like `{{subject_area|default="technical concepts"}}`. Pre-fill each from the article (subject from the title, audience from front matter or prerequisites), otherwise use the default. Do not stop to ask: the rubrics say to decide and proceed. The only field with an empty default is `list_topic` in `a-list.md`; take it from the title. List the values you used in one line of the report so the user can rerun with overrides.
 
@@ -79,7 +80,7 @@ Score an article against the rubric for the framework it was written in, and rep
 
    Report the score as `Checklist: <passed>/<applicable> (<n> N/A)`. Keep it separate from the rubric score: callers such as `write-article-revision` loop on the rubric score, so folding the checklist into it would move their target. Where an item conflicts with a site rule, the site rule wins (see "Where site rules win" in the same file). If the file is missing (`write-article` not installed), say so and skip this step.
 
-8. **Deliver the review.** Lead with three lines: article (absolute path), framework and the signal that decided it, rubric file(s) loaded. Then use the rubric's own output format: the JSON summary, the overall score, a PASS / NEEDS_IMPROVEMENT / FAIL status for each rubric section with its evidence, the issues with locations, the prioritized improvement plan, and strengths to keep. Add the blog rubric's extra section when it defines one ("Blog-Specific Fixes" for Fundamentals, "Learn X Launch Pad Fixes" for Learn X). After the rubric sections, add a "Blog-Post Checklist" section: the score line from step 7, then one line per item with its status and evidence. In the JSON summary, add `"checklist": {"passed": <n>, "applicable": <n>, "na": <n>}`. Do not invent numeric per-dimension scores the rubric does not define. End by confirming the article was not modified.
+8. **Deliver the review.** Lead with three lines: article (absolute path), framework and the signal that decided it, rubric file(s) loaded. Then use the rubric's own output format: the JSON summary, the overall score, a PASS / NEEDS_IMPROVEMENT / FAIL status for each rubric section with its evidence, the issues with locations, the prioritized improvement plan, and strengths to keep. Add the blog rubric's extra section when it defines one ("Blog-Specific Fixes" for Fundamentals, "Learn X Launch Pad Fixes" for Learn X, "Comparison Fixes" for comparisons). After the rubric sections, add a "Blog-Post Checklist" section: the score line from step 7, then one line per item with its status and evidence. In the JSON summary, add `"checklist": {"passed": <n>, "applicable": <n>, "na": <n>}`. Do not invent numeric per-dimension scores the rubric does not define. End by confirming the article was not modified.
 
 9. **Save the review** so `write-review-apply` can act on it later, even from another session. Write the full review you delivered (the three lead lines, JSON summary, and Markdown review) to the path this prints, outside the blog repo:
 

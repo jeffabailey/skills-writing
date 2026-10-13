@@ -50,6 +50,7 @@ Every file listed below sits beside this index in `references/`.
 | Framework | File | Evaluates |
 |-----------|------|-----------|
 | Fundamentals Review | `fundamentals.md` | Loads `diataxis-article-explanation.md` as base, then second-person and scaffolding checks |
+| Comparison Review | `comparison.md` | Loads `diataxis-article-explanation.md` as base, then runs the comparison checker and judges verdict, sourcing, and decision drivers |
 | Learn X Review | `learn.md` | Loads `diataxis-article-how-to-guides.md` as base, then 20/80 core and launch-pad checks |
 
 ---

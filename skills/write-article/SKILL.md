@@ -1,6 +1,6 @@
 ---
 name: write-article
-description: Creates articles using 16 bundled writing framework prompts (Diataxis tutorial, how-to, reference, explanation, AIDA, PAS, Influence Pieces, Classical Rhetoric, TEA, Thought Pieces, Backward Design, Lesson Planning, Fact-Based Reference, List Articles, Fundamentals, Learn X). Picks the best framework, loads it from this skill, and drafts the article; for jeffbaileyblog it also applies hugo/AGENTS.md, the site writing style and SEO rules, places the page bundle in the right section, checks internal links are published, and verifies the Hugo build. Use when the user says /write:article, asks to write an article, blog post, opinion piece, essay, tutorial, how-to, explanation, reference doc, "Learn X" or "Fundamentals of X" post, or wants a specific writing framework. Triggers on "write article", "create article", "draft post", "write a post about", "I have opinions about", "write tutorial", "write how-to", "write explanation", "write reference doc".
+description: Creates articles using 16 bundled writing framework prompts (Diataxis tutorial, how-to, reference, explanation, AIDA, PAS, Influence Pieces, Classical Rhetoric, TEA, Thought Pieces, Backward Design, Lesson Planning, Fact-Based Reference, List Articles, Fundamentals, Learn X) plus Comparison, whose rules come from write-comparison-article-create. Picks the best framework, loads it from this skill, and drafts the article; for jeffbaileyblog it also applies hugo/AGENTS.md, the site writing style and SEO rules, places the page bundle in the right section, checks internal links are published, then loops write-review and write-review-apply until the draft scores 9.5 or higher, and verifies the Hugo build. Use when the user says /write:article, asks to write an article, blog post, opinion piece, essay, tutorial, how-to, explanation, reference doc, "Learn X" or "Fundamentals of X" post, or wants a specific writing framework. Triggers on "write article", "create article", "draft post", "write a post about", "I have opinions about", "write tutorial", "write how-to", "write explanation", "write reference doc".
 ---
 
 # Article Creation
@@ -29,8 +29,9 @@ If the user names a framework, use it. Otherwise use the selection guide below.
 | List Article | Curated collection, "best X for Y" | `a-list.md` | `lists` |
 | Fundamentals | "Fundamentals of X" explainer series | `fundamentals.md` | `fundamentals` |
 | Learn X | 20/80 of a topic plus curated video, audio, books, links | `learn.md` | `learn-x` |
+| Comparison | Decide between 2–4 options ("X vs Y", "which should I pick") | `../write-comparison-article-create/SKILL.md` | `x-vs-x` |
 
-All files live in `references/`; nothing is fetched at runtime. Comparisons ("X vs Y") belong to the `write-comparison-article-create` skill and `x-vs-x`. When a section is unclear, open two or three recent siblings in the candidate folder and match them.
+All files live in `references/` except Comparison's, which is the sibling `write-comparison-article-create` skill so its section order and checker stay in one place; nothing is fetched at runtime. If that skill is not installed, say so and stop rather than drafting a comparison without its rules. When a section is unclear, open two or three recent siblings in the candidate folder and match them.
 
 ### Selection guide
 
@@ -46,8 +47,20 @@ All files live in `references/`; nothing is fetched at runtime. Comparisons ("X 
 - "The evidence shows..." → TEA
 - "Teach someone to..." → Backward Design or Lesson Planning
 - "A list of...", "best X for Y" → List Article
+- "X vs Y", "which should I pick", "compare X and Y" → Comparison. A list of many options without a head-to-head verdict stays a List Article.
 
-Opinion requests rule out Diataxis frameworks and Fundamentals: those force second person and forbid "I".
+Opinion requests rule out Diataxis frameworks, Fundamentals, and Comparison: those force second person and forbid "I".
+
+### Comparison
+
+The comparison skill's SKILL.md is the framework prompt: read all of it in step 3. It has no `{{variable}}` fields; its inputs are the options, the audience, and 4–6 decision-driving criteria. Then run the workflow below with these changes:
+
+- **Step 3:** also do its "Research facts" step before drafting, keeping a source URL for every version, price, date, and license.
+- **Step 5:** front matter adds `diataxis: explanation` and `articletype: comparison`; categories start with `X vs X`; the slug is `a-vs-b[-vs-c]`.
+- **Step 6:** draft in its canonical section order and scorecard format, under its "Facts and sourcing" rule (an unsourced claim gets the literal `TODO verify` inside the same sentence, not a separate HTML comment, because its checker matches a link or that text per sentence).
+- **After step 7:** run its checker, `python3 <skill-dir>/../write-comparison-article-create/scripts/check_comparison.py <index.md>`, and fix every FAIL. Re-run it after step 8; ai-sanitize must keep the canonical headings.
+- **Step 11:** also run the checker with `--build`; it confirms the cards, procon blocks, and single category footer rendered.
+- **Step 12:** list every `TODO verify` with the claims to verify.
 
 ## Workflow
 
@@ -72,7 +85,7 @@ Opinion requests rule out Diataxis frameworks and Fundamentals: those force seco
    - **Structure:** no H1 in the body. The framework's sections form the main body; open with a short hook intro and close with a conclusion per AGENTS.md "Post structure". Do not add `{{< partial "category_footer" >}}`; `layouts/_default/single.html` already renders it.
    - **Profanity** in the author's notes or drafts is intentional voice; keep it.
 
-   For other destinations, ask about style preferences once and skip the blog-only steps (4, 5, 7, 10).
+   For other destinations, ask about style preferences once and skip the blog-only steps (4, 5, 7, 11).
 
 5. **Place the bundle (jeffbaileyblog).** Path: `hugo/content/blog/<section>/<folder>/index.md`, with the section from the framework table. Keep folder name, `slug`, and the last segment of `url` identical. Confirm the folder does not already exist. Get today's date with `date +%Y-%m-%d` for `date`, `lastmod`, and the `url` path. Use the AGENTS.md front matter shape with `draft: true`, pick `categories` that sibling posts already use, and apply the SEO rules: quoted `description` of 160 characters or fewer, keyword-first title, concrete keywords.
 
@@ -92,9 +105,21 @@ Opinion requests rule out Diataxis frameworks and Fundamentals: those force seco
 
 8. **Remove AI tells.** Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin) on the draft in edit mode. Site style wins where the two disagree. If it is not installed, say so in the delivery note.
 
-9. **Generate the cover image.** Invoke the `generate-cover-image` skill on the sanitized draft; for jeffbaileyblog it builds the Canva design, exports `<slug>.png` into the bundle, and sets `cover.image` and `cover.alt`. Skip it if the user supplied a cover or asked for none. If it cannot generate an image, note the `<slug>.png.prompt.txt` it leaves.
+9. **Review loop: reach 9.5.** The draft is not done until a fresh `write-review` gives it a rubric score of 9.5/10 or higher. Save a copy of the draft to a temp dir first (`mktemp -d`), since a new bundle is untracked and git can't show what the loop changed. Then repeat, without asking the user between rounds:
+   1. **Review.** Run `write-review` on the draft, passing the framework from step 2 explicitly. Run it in a fresh subagent (Agent tool) when one is available, so the grader is not the agent that wrote and fixed the draft; give it the absolute path and the framework, and ask for the full review back, JSON summary included. Without subagents, run it inline and label every score "self-review". The gate is the rubric `score` in the JSON summary; the blog-post checklist score is reported but does not gate.
+   2. **Stop at 9.5 or higher.** The loop passes.
+   3. **Apply.** Run `write-review-apply` on that review in loop mode (its "Called from write-article" section): edits in place, no validation or self re-score per round. Copy the result to the temp dir as `round-<n>.md` before the next review.
 
-10. **Verify the build (jeffbaileyblog).** Hand off to the `write-validate-article` skill when available; it runs the build, banned-phrase scan, links, and lint. Otherwise check `command -v hugo` (missing: `brew install hugo`, and report "tool missing", not "build failed"), then from `hugo/`:
+   Stop below 9.5 when any of these happens, and keep the highest-scoring version on disk (restore its copy if a later round scored lower):
+   - five reviews have run;
+   - a round applied nothing, because every remaining finding is **Needs your input**, **Your call**, or **Declined**;
+   - the score did not rise in two rounds in a row.
+
+   Never raise the score by inventing a fact, source, number, quote, or author experience, and never fill a `TODO(author)`, `[NEEDS FACT]`, or `TODO verify` by guessing; those findings stay with the author even when they are what blocks 9.5. If the loop stops below 9.5, the article is **not done**: step 12 says so first, with the final score, why the loop stopped, and the findings that block 9.5.
+
+10. **Generate the cover image.** Invoke the `generate-cover-image` skill on the reviewed draft; for jeffbaileyblog it builds the Canva design, exports `<slug>.png` into the bundle, and sets `cover.image` and `cover.alt`. Skip it if the user supplied a cover or asked for none. If it cannot generate an image, note the `<slug>.png.prompt.txt` it leaves.
+
+11. **Verify the build (jeffbaileyblog).** Hand off to the `write-validate-article` skill when available; it runs the build, banned-phrase scan, links, and lint. Otherwise check `command -v hugo` (missing: `brew install hugo`, and report "tool missing", not "build failed"), then from `hugo/`:
 
     ```bash
     out=$(mktemp -d); hugo --buildDrafts --gc --minify -d "$out" && ls "$out/blog/YYYY/MM/DD/<slug>/index.html"
@@ -102,8 +127,9 @@ Opinion requests rule out Diataxis frameworks and Fundamentals: those force seco
 
     `--buildDrafts` is required: the new post is `draft: true` and the site sets `buildDrafts = false`, so a plain `hugo --gc --minify` succeeds without rendering it. Any `REF_NOT_FOUND` or missing `index.html` is a failure to fix before delivering.
 
-11. **Deliver.** Report:
+12. **Deliver.** Only call the article done when step 9 reached 9.5 and step 11 passed. Report:
     - file path, framework and why, section choice
+    - the review loop: score per round (for example `7.8 -> 8.9 -> 9.6`), whether a subagent graded it or it was a self-review, the last saved review path, and, if it stopped below 9.5, why and the findings blocking it
     - the `ai-sanitize` change list
     - cover image path, alt text, and Canva link (or why it was skipped)
     - build or validation result
@@ -113,6 +139,7 @@ Opinion requests rule out Diataxis frameworks and Fundamentals: those force seco
 ## Reference
 
 - `references/*.md`: the 16 framework prompts plus fallback copies of `writing-style.md` and `seo-front-matter.md`.
+- `../write-comparison-article-create/SKILL.md` and its `scripts/check_comparison.py`: the Comparison framework and its checker.
 - `references/great-blog-post.md`: framework-independent quality guidance and pre-publish checklist, distilled from Ann Handley's *Everybody Writes*.
 - `scripts/blog_links.py`: finds published link targets and checks every `ref` in a draft against `hugo list all`.
 - Cover prompt: `../generate-cover-image/references/cover-prompt.md`.
