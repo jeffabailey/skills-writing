@@ -4,7 +4,7 @@
 Usage: changed_blocks.py ORIGINAL RESULT [--json]
 
 ORIGINAL is the article before the fixes (a saved copy, or `git show HEAD:<path>`
-written to a temp file); RESULT is the edited index.md or index.revised.md.
+written to a temp file); RESULT is the edited index.md.
 
 Splits both bodies into blocks (paragraphs, list groups, headings, fenced code)
 and prints only the blocks that changed, with their line in RESULT and the

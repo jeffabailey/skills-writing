@@ -1,6 +1,6 @@
 ---
 name: write-review-apply
-description: Applies the fixes from a write-review report to the article it reviewed, then validates and re-scores it. Finds the review in this conversation or the saved report from an earlier session (running write-review first if there is none), turns every finding into a fix list, re-checks each against the current style rules and rubric, tests any command or claim the review supplies, applies the ones the article's own content supports, and lists the rest (missing facts, structural calls) for the author instead of inventing anything. Keeps the author's voice and profanity, edits in place only when git holds the original, and reports the score before and after as a labeled self re-score. Use when the user says /write:review-apply, "apply the review", "fix what the review found", "apply those fixes", "do the improvement plan", "address the review feedback" for an article or blog post, or answers yes after write-review offers the follow-up. With no article named, uses the last reviewed or changed article.
+description: Applies the fixes from a write-review report to the article it reviewed, then validates and re-scores it. Finds the review in this conversation or the saved report from an earlier session (running write-review first if there is none), turns every finding into a fix list, re-checks each against the current style rules and rubric, tests any command or claim the review supplies, applies the ones the article's own content supports, and lists the rest (missing facts, structural calls) for the author instead of inventing anything. Keeps the author's voice and profanity, edits the article's index.md in place (saving a copy of the starting text first), and reports the score before and after as a labeled self re-score. Use when the user says /write:review-apply, "apply the review", "fix what the review found", "apply those fixes", "do the improvement plan", "address the review feedback" for an article or blog post, or answers yes after write-review offers the follow-up. With no article named, uses the last reviewed or changed article.
 ---
 
 # Apply an article review
@@ -19,9 +19,8 @@ The review is advice, not a script. Some findings carry exact replacement text; 
 
 ## Called from write-article
 
-`write-article` step 9 loops `write-review` and this skill until a fresh review scores the new draft 9.5 or higher. That loop is the author's standing request, so in loop mode three rules change and everything else (dispositions, never inventing facts, voice, the change check) holds:
+`write-article` step 9 loops `write-review` and this skill until a fresh review scores the new draft 9.5 or higher. That loop is the author's standing request, so in loop mode two rules change and everything else (dispositions, never inventing facts, voice, editing in place, the change check) holds:
 
-* **Step 3:** edit the draft in place even though it is untracked; `write-article` keeps a copy of every round.
 * **Step 5:** skip validation; `write-article` validates once after the loop.
 * **Step 6:** skip the self re-score; the loop's next fresh `write-review` is the score. Return the report with its **Needs your input** and **Your call** lists, and say whether anything was applied: a round that applied nothing ends the loop.
 
@@ -63,7 +62,7 @@ The review is advice, not a script. Some findings carry exact replacement text; 
 
    When the review gives exact replacement text, use it unless it breaks a site rule, invents a fact, or carries an unverified command or claim; then adapt it (drop the unsupported part) and say how.
 
-3. **Pick the output file.** Same rule as `write-article-revision`: if the article is tracked by git and has no uncommitted changes (`git -C <dir> ls-files --error-unmatch <file>` succeeds and `git -C <dir> status --porcelain -- <file>` prints nothing), edit in place, since git holds the original and the author reviews with `git diff`. Otherwise write the result beside it as `index.revised.md` and leave the original untouched (except in loop mode; see "Called from write-article"). Either way, save a copy of the starting text to a temp file (`mktemp`) for step 4's change check.
+3. **Save the starting text, then edit in place.** Always edit the article's `index.md` directly, whether or not git tracks it or it has uncommitted changes. Never write an `index.revised.md` or ask the author to move a file into place. First copy the starting text to a temp file (`S=$(mktemp)`, `cp index.md "$S"`); step 4's change check diffs against it, and it is the author's way back when git doesn't hold the pre-edit text (an untracked draft, or uncommitted changes). Report its path.
 
 4. **Apply the fixes, highest priority first.** Work through the **Apply** items in the review's priority order (critical issues, then the improvement plan, then section findings).
    * **Scope:** change only the passages a finding names, plus the sentence before and after when a joint needs smoothing. Every other sentence stays byte for byte. Problems you notice that the review didn't raise go under *Noticed, not changed*.
@@ -79,15 +78,7 @@ The review is advice, not a script. Some findings carry exact replacement text; 
 
      It prints each added or rewritten prose block with its line and section, changed code blocks separately, moves, and removed blocks. It FAILs (exit 1) when `url`/`slug`/`date`/`draft` changed, profanity dropped, an emdash or a `category_footer` partial was added, and WARNs on new external URLs or a new "we". Fix every FAIL. Every CODE entry must trace to a finding you verified in step 2; any other change outside a finding's passage gets reverted. Then apply `writing-clearly-and-concisely`'s rules to the PROSE blocks only. Don't run its `check_edit.py` on the whole file here: it treats any code change as a failure, including the ones the review asked for.
 
-5. **Validate.** On jeffbaileyblog, invoke `write-validate-article` on the result (Hugo build first, then front matter, banned phrases, an `ai-sanitize` report, links, and lint). If you wrote `index.revised.md`, swap it in for validation and restore the original afterward, even if validation fails:
-
-   ```bash
-   "${CLAUDE_SKILL_DIR}/../write-article-revision/scripts/swap-revision.sh" in  <bundle-dir>
-   # ...invoke write-validate-article on <bundle-dir>/index.md...
-   "${CLAUDE_SKILL_DIR}/../write-article-revision/scripts/swap-revision.sh" out <bundle-dir>
-   ```
-
-   Fix failures and AI tells inside the passages you changed. List the rest as pre-existing. If a tool is missing, say "not run: <tool> missing", separate from checks that ran and failed.
+5. **Validate.** On jeffbaileyblog, invoke `write-validate-article` on the result (Hugo build first, then front matter, banned phrases, an `ai-sanitize` report, links, and lint) on the edited `index.md`. Fix failures and AI tells inside the passages you changed. List the rest as pre-existing. If a tool is missing, say "not run: <tool> missing", separate from checks that ran and failed.
 
 6. **Re-score once, and label it.** Re-score only the rubric sections that contain a changed block (`sections_touched` from step 4, mapped to the rubric's sections), using the same rubric file and framework the first review used; every other section keeps its original status. Report the old and new score and which section statuses moved, labeled **self re-score**: the agent that applied the fixes is grading them, so it leans generous. Offer a fresh `write-review` (in a new session, which saves a new report) when the author wants an independent score. Don't loop to chase a higher score: a second round of fixes on the same article is the author's decision, and repeated passes drift from their voice. The one exception is `write-article`'s review loop (see "Called from write-article"), which the author asked for, scores each round with a fresh review, and caps the rounds.
 
@@ -104,7 +95,7 @@ The review is advice, not a script. Some findings carry exact replacement text; 
 Lead with the file you changed and how to see the diff, then the score, then the lists. Keep each item to one line with its location.
 
 ```markdown
-**Article:** <absolute path> (edited in place; `git -C <repo> diff -- <path>`) | (wrote <path>/index.revised.md; original untouched)
+**Article:** <absolute path> (edited in place; starting text saved to <temp copy>; `diff <temp copy> <path>`, or `git -C <repo> diff -- <path>` when git held a clean original)
 **Review used:** <this conversation | saved report <path>, current/stale | ran write-review just now>
 **Score:** <old> -> <new> (<framework>; self re-score of <n> changed sections). Sections improved: <list>. Still below PASS: <list>.
 
