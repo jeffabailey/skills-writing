@@ -12,9 +12,16 @@ little, and a word broken across lines ruins the cover.
 Calibrated on real exports: DEVELOPMENT breaks at 130 and fits at 100;
 ACCESSIBILITY breaks at 120 and fits at 104; 1000 LIFE GIVING fits at 100.
 
-Usage: title-size.py "<line 1>" ["<line 2>" ...]
-Prints the size (72 to 130). Exits 2 if a line needs less than 72 px, which
-means: break that line at a space and run again.
+Political Incorruption (--site political-incorruption) uses a narrower font
+in an 877 px box: its capitals run 0.765 of the weights above ("TRUST THE"
+measured 765 px wide at 138), the template's size of 138 is the cap, and the
+title must fit between the top edge and the logo (about 490 px of line
+height at 1.4), which caps three lines at 116 ("WHY WAS / TRUMP /
+REELECTED?" fits at 115.7).
+
+Usage: title-size.py [--site political-incorruption] "<line 1>" ["<line 2>" ...]
+Prints the size (72 up to the site's cap). Exits 2 if a line needs less than
+72 px, which means: break that line at a space and run again.
 """
 import math
 import sys
@@ -37,10 +44,22 @@ def size(lines: list) -> int:
     return s
 
 
+def size_political_incorruption(lines: list) -> int:
+    widest = max(ems(l) for l in lines) * 0.765
+    s = min(138, math.floor(877 / (widest * MARGIN)))
+    return min(s, math.floor(490 / (len(lines) * 1.4)))
+
+
 if __name__ == "__main__":
-    lines = [l for l in sys.argv[1:] if l.strip()]
+    args = sys.argv[1:]
+    site = None
+    if args[:1] == ["--site"]:
+        site, args = args[1] if len(args) > 1 else "", args[2:]
+        if site != "political-incorruption":
+            sys.exit(f"unknown site {site!r}; only political-incorruption has its own sizing")
+    lines = [l for l in args if l.strip()]
     if not lines:
         sys.exit(__doc__)
-    s = size(lines)
+    s = size_political_incorruption(lines) if site else size(lines)
     print(s)
     sys.exit(2 if s < 72 else 0)

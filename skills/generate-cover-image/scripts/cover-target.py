@@ -6,6 +6,8 @@ Usage:
 
 Prints one JSON object per file:
 
+    site         the repo directory name (jeffbaileyblog, political-incorruption),
+                 which picks the brand template and prompt
     slug         from front matter `slug:`, else the last segment of `url:`,
                  else the bundle directory name (949 of 1278 posts have no slug:)
     slug_source  "slug", "url", or "dir"
@@ -51,6 +53,15 @@ def cover_key(fm: str, key: str) -> str:
     return k.group(1).strip().strip("'\"") if k else ""
 
 
+def site_of(bundle: str) -> str:
+    d = bundle
+    while d != os.path.dirname(d):
+        if os.path.exists(os.path.join(d, ".git")):
+            return os.path.basename(d)
+        d = os.path.dirname(d)
+    return ""
+
+
 def resolve(path: str) -> dict:
     text = open(path, encoding="utf-8").read()
     fm, body = front_matter(text)
@@ -88,7 +99,7 @@ def resolve(path: str) -> dict:
         for s, a in re.findall(r'\{\{<\s*cover-inline\s+src="([^"]*)"\s+alt="([^"]*)"', body)
     ]
     out = {
-        "file": path, "kind": "category" if category else "article",
+        "file": path, "site": site_of(bundle), "kind": "category" if category else "article",
         "title": top_key(fm, "title"), "slug": slug, "slug_source": source, "png": png,
         "design_name": f"category-{slug}" if category else slug,
         "cover_image": cur, "cover_alt": cover_key(fm, "alt"),
