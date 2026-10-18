@@ -1,6 +1,6 @@
 ---
 name: generate-cover-image
-description: Generates a 1200x630 PNG cover image from what an article means, using the bundled prompt (dark, futuristic, human-and-system artwork with no text) and the Canva connector. For jeffbaileyblog it builds or overwrites the article's own Canva cover design from the jbb-feature-image-template brand template, sets the title, files and exports it beside the article, and sets the Hugo cover front matter; it also covers category pages and runs in batches for many covers at once. Use whenever someone wants a cover, hero, featured, header, OG, social-preview, or share image for a blog post, article, or category page, says /write:cover, asks to redo or refresh an existing cover, or when write-article finishes a jeffbaileyblog draft, even if they don't say "cover".
+description: Generates a 1200x630 PNG cover image from what an article means, using the bundled prompt (dark, futuristic, human-and-system artwork with no text) and the Canva connector. For jeffbaileyblog it builds or overwrites the article's own Canva cover design from the jbb-feature-image-template brand template, sets the title, files and exports it beside the article, and sets the Hugo cover front matter; for Political Incorruption it files the generated artwork in that site's Canva folder; it also covers category pages and runs in batches for many covers at once. Use whenever someone wants a cover, hero, featured, header, OG, social-preview, or share image for a blog post, article, or category page, says /write:cover, asks to redo or refresh an existing cover, or when write-article finishes a jeffbaileyblog draft, even if they don't say "cover".
 ---
 
 # Generate Cover Image
@@ -12,6 +12,14 @@ The prompt ends with `Use the text below as the central inspiration:` and a `---
 ## Inputs
 
 - **Article**: a Markdown file path, or the draft in the conversation.
+- **Site**: the repo the article lives in, from `git -C <article dir> rev-parse --show-toplevel`. It picks the Canva folder the generated images go to:
+
+  | Site (repo root) | Canva folder | What goes in it |
+  |------------------|--------------|-----------------|
+  | `~/Projects/websites/jeffbaileyblog` | `FAFgCl26Zkg` | each new cover design, titled and exported (step 5) |
+  | `~/Projects/websites/political-incorruption` | `FAEsL_JzVxg` | the generated artwork itself (step 3); this site has no brand template, so there is no design to build |
+
+  For any other site there is no folder: the artwork stays in the Canva account's uploads, and the report says so. A draft that lives only in the conversation has no site; ask which one it is for.
 - **Output**: for jeffbaileyblog, `<page bundle>/<slug>.png` beside the bundle's `index.md`. Elsewhere, ask.
 - **Slug**: resolve it with `python3 scripts/cover-target.py <index.md>` (read-only, one JSON line per file, several files at once). Most posts (949 of 1278) have no `slug:`, so it falls back to the last segment of `url:`, then the bundle directory name. It also reports the current `cover.image`, whether a PNG already exists (an overwrite), any body `cover-inline` shortcodes, and the category's `prompts.md`. When it warns that `cover.image` differs from `<slug>.png` (about 20 posts, e.g. `21-laws-of-leadership-book-review.png` in `a-21-laws-of-leadership-book-review`), ask which name to keep; recommend the existing name when that file exists, since renaming orphans the old PNG and changes the shared `og:image` URL. Use the kept name for the PNG and front matter, and look up the design under both names: older designs are named after their PNG (the 21 Laws review's design is `21-laws-of-leadership-book-review`), so with the existing name kept the design name is its stem (`keep_existing` in the script's output).
 - **Category pages** (jeffbaileyblog `hugo/content/categories/<slug>/_index.md`) take covers too. The slug is the directory name, the output is `<slug>.png` beside `_index.md`, and the cover title is the bundle's `title`. A category has no body, so read its `description` and the titles and descriptions of up to ten of its newest posts for the inspiration text: find them with `grep -rlE '^\s*- "?<Title>"?\s*$' hugo/content/blog --include=index.md`, keep the files where that line sits under `categories:` (the same line can be a tag or keyword), and sort by front matter `date:`. Ten is enough to find what the category is about; reading every post in a large one adds nothing to the picture. If the category has no `description` and only a few posts, say the text rests on thin input.
@@ -22,7 +30,7 @@ For jeffbaileyblog, the generated artwork is only the background. The published 
 | Item | Value |
 |------|-------|
 | Brand template (source, read-only) | `jbb-feature-image-template`, ID `EAHXEEDJKs0`, brand kit `kAEqeQflWyc` |
-| Destination folder | `FAFgCl26Zkg` |
+| Destination folder | `FAFgCl26Zkg` (jeffbaileyblog's folder from the **Site** table) |
 | Design name | the stem of the article's PNG name (normally the resolved slug); for a category, `category-<slug>`, so it never collides with an article cover |
 
 Never open, edit, or publish the brand template: every cover on the blog is built from it. Edits go to the cover's own design, found by its design name, or to a new one made with `create-design-from-brand-template`.
@@ -41,6 +49,8 @@ Check the local tools before the first Canva call: `for t in python3 curl pngqua
 
 3. **Generate with the Canva connector.** Send the joined prompt (`cat references/cover-prompt.md <inspiration.txt>`) to `generate-image` with `aspectRatio: LANDSCAPE_2_1`, then poll `get-generate-image-job` until `SUCCESS`. The result is a media ID (`M...`), the background for step 5. Canva crops it to fill the 1200x630 page.
 
+   For Political Incorruption, file the artwork once you keep it (after step 4's check, so a rejected image never lands there): `move-item-to-folder` with the media ID as the item and `to_folder_id: FAEsL_JzVxg`. Don't move the regenerated misses. For jeffbaileyblog, leave the artwork where it is; its folder holds the cover designs, which step 5 files.
+
    Use only Canva; do not call the OpenAI Images API or any other image service. If Canva is not connected or the job fails, write the joined prompt to `<output>.prompt.txt`, tell the user why, and stop. Never draw a placeholder or substitute graphic.
 
 4. **Judge the artwork from the job's preview,** before building anything on it. Regenerate once with a sharper inspiration text if it shows letters, numbers, code, or UI chrome (icons in circles count), or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it. Checking here, not after export, means a bad image costs one generation instead of a whole design. The job preview is small (about 200 px wide), so small marks such as symbols on coins can slip past it: look again at the larger thumbnail the edit returns in step 5, before committing. If the miss shows there, regenerate and send another `update_fill` in the same open transaction; nothing is lost. For subjects that invite emblems or lettering (money, flags, sports, brands, and type, writing, books, or code), say in the inspiration text that surfaces are plain and unmarked.
@@ -55,7 +65,7 @@ Check the local tools before the first Canva call: `for t in python3 curl pngqua
    4. Hand the cover to the user for review: give the design's edit URL, say they can change anything in Canva (the editor saves as they go), and wait for them to confirm it looks good. Don't export before that confirmation; if they don't answer, stop with the edit URL and say the PNG hasn't been written. A bundle that already has a `<slug>.png` is an overwrite: say the export will replace it.
    5. Once they confirm, `read-design` the saved design (with `"thumbnails"`) before exporting, because they may have changed it. If its background `mediaId` or alt text no longer matches what step 4 wrote, rewrite the alt text from the new thumbnail; if the title text changed, use the new title in the front matter alt. Then export it as a 1200x630 PNG and fetch it with `scripts/fetch-covers.sh`, which compresses it with `pngquant`. Look at the result.
 
-   Leave the background's brightness alone: no shade layer, no vignette. If a Canva step fails, stop, tell the user which step and why, and leave any existing PNG in place. Outside jeffbaileyblog, skip this step and give the user the generated image's "Open generated image" link and media ID.
+   Leave the background's brightness alone: no shade layer, no vignette. If a Canva step fails, stop, tell the user which step and why, and leave any existing PNG in place. Outside jeffbaileyblog, skip this step and give the user the generated image's "Open generated image" link, its media ID, and the folder it was filed in (step 3), or say it wasn't filed because the site has no folder.
 
 6. **Set the front matter and store the text (jeffbaileyblog),** only after the commit and export succeed, so the files never describe a cover that was not published. Run `scripts/set-cover-frontmatter.py <bundle file> <png name> "<alt>"`. It writes the cover block unquoted, as `hugo/AGENTS.md` requires, replacing any old one, and gives every body `{{< cover-inline src=... alt=... >}}` that showed the old cover the new src and alt (38 posts repeat the cover inline; a stale alt there would describe the old picture):
 
@@ -71,7 +81,7 @@ Check the local tools before the first Canva call: `for t in python3 curl pngqua
 
    Then build the site from `hugo/` (config is `hugo/config.toml`): `out=$(mktemp -d); hugo --quiet -D -d "$out"`. New posts are `draft: true`, and only `-D` renders them. Confirm the page's HTML exists in `$out` and that its `og:image` is the new PNG.
 
-7. **Report** the image path and size, the alt text (and how many `cover-inline` shortcodes changed), the artwork's media ID, and the design's name, edit URL, and folder. Include the inspiration text so the cover can be regenerated later, and say whether `prompts.md` was updated.
+7. **Report** the image path and size, the alt text (and how many `cover-inline` shortcodes changed), the artwork's media ID and the folder it was filed in (Political Incorruption), and the design's name, edit URL, and folder (jeffbaileyblog). Include the inspiration text so the cover can be regenerated later, and say whether `prompts.md` was updated.
 
 ## Batch mode
 
