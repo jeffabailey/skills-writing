@@ -9,29 +9,37 @@ Each framework is a complete prompt in `references/` that defines approach, stru
 
 ## Frameworks
 
-If the user names a framework, use it. Otherwise use the selection guide below.
+If the user names a framework, use it. Otherwise check `articletype` (below), then the selection guide.
 
-| Framework | When to use | File | jeffbaileyblog section |
-|-----------|-------------|------|------------------------|
-| Tutorial | Learning by doing, guided lesson for beginners | `diataxis-article-tutorials.md` | `how-x` |
-| How-to Guide | Task recipe for someone who knows the basics | `diataxis-article-how-to-guides.md` | `how-x` (`troubleshooting` for "Fix: <error>") |
-| Reference | Scan-friendly facts, cheat sheets | `diataxis-article-reference.md` | `reference` |
-| Explanation | Context, "what is" / "why does", mental models | `diataxis-article-explanation.md` | `what-x` ("what is"), `why-x` ("why") |
-| AIDA | Attention, interest, desire, action | `aida.md` | `why-x` |
-| Problem-Agitate-Solve | Name a problem, show its cost, give the fix | `problem-agitate-solve.md` | `why-x` or `think-x` |
-| Influence Pieces | Change behavior via proof, authority, framing | `influence-pieces.md` | `why-x` |
-| Classical Rhetoric | Argue a position with ethos, pathos, logos | `classical-rhetoric.md` | `think-x` |
-| TEA | Topic, evidence, analysis | `tea.md` | `reference` or `think-x` |
-| Thought Piece | Exploring or arguing an idea in the author's voice | `thought-pieces.md` | `think-x` |
-| Backward Design | Outcomes-first instruction | `backward-design.md` | `how-x` |
-| Lesson Planning | Bloom's, 5E, Gagne lessons | `lesson-planning.md` | `how-x` |
-| Fact-Based Reference | Authoritative lookup documentation | `fact-based-reference.md` | `reference` |
-| List Article | Curated collection, "best X for Y" | `a-list.md` | `lists` |
-| Fundamentals | "Fundamentals of X" explainer series | `fundamentals.md` | `fundamentals` |
-| Learn X | 20/80 of a topic plus curated video, audio, books, links | `learn.md` | `learn-x` |
-| Comparison | Decide between 2–4 options ("X vs Y", "which should I pick") | `../write-comparison-article-create/SKILL.md` | `x-vs-x` |
+| Framework | `articletype` | When to use | File | jeffbaileyblog section |
+|-----------|---------------|-------------|------|------------------------|
+| Tutorial | `diataxis-tutorial` | Learning by doing, guided lesson for beginners | `diataxis-article-tutorials.md` | `how-x` |
+| How-to Guide | `diataxis-how-to` | Task recipe for someone who knows the basics | `diataxis-article-how-to-guides.md` | `how-x` (`troubleshooting` for "Fix: <error>") |
+| Reference | `diataxis-reference` | Scan-friendly facts, cheat sheets | `diataxis-article-reference.md` | `reference` |
+| Explanation | `diataxis-explanation` | Context, "what is" / "why does", mental models | `diataxis-article-explanation.md` | `what-x` ("what is"), `why-x` ("why") |
+| AIDA | `aida` | Attention, interest, desire, action | `aida.md` | `why-x` |
+| Problem-Agitate-Solve | `problem-agitate-solve` | Name a problem, show its cost, give the fix | `problem-agitate-solve.md` | `why-x` or `think-x` |
+| Influence Pieces | `influence-pieces` | Change behavior via proof, authority, framing | `influence-pieces.md` | `why-x` |
+| Classical Rhetoric | `classical-rhetoric` | Argue a position with ethos, pathos, logos | `classical-rhetoric.md` | `think-x` |
+| TEA | `tea` | Topic, evidence, analysis | `tea.md` | `reference` or `think-x` |
+| Thought Piece | `thought-pieces` | Exploring or arguing an idea in the author's voice | `thought-pieces.md` | `think-x` |
+| Backward Design | `backward-design` | Outcomes-first instruction | `backward-design.md` | `how-x` |
+| Lesson Planning | `lesson-planning` | Bloom's, 5E, Gagne lessons | `lesson-planning.md` | `how-x` |
+| Fact-Based Reference | `fact-based-reference` | Authoritative lookup documentation | `fact-based-reference.md` | `reference` |
+| List Article | `a-list` | Curated collection, "best X for Y" | `a-list.md` | `lists` |
+| Fundamentals | `fundamentals` | "Fundamentals of X" explainer series | `fundamentals.md` | `fundamentals` |
+| Learn X | `learn` | 20/80 of a topic plus curated video, audio, books, links | `learn.md` | `learn-x` |
+| Comparison | `comparison` | Decide between 2–4 options ("X vs Y", "which should I pick") | `../write-comparison-article-create/SKILL.md` | `x-vs-x` |
 
 All files live in `references/` except Comparison's, which is the sibling `write-comparison-article-create` skill so its section order and checker stay in one place; nothing is fetched at runtime. If that skill is not installed, say so and stop rather than drafting a comparison without its rules. When a section is unclear, open two or three recent siblings in the candidate folder and match them.
+
+### articletype
+
+`articletype:` in front matter names the framework, so the skills that touch the article pick the same prompt and rubric: `write-article` drafts with it, `write-review` grades with it, `write-article-revision` passes it to the review, and `write-review-apply` inherits it from that review. The keys in the table match `write-review`'s keys; aliases such as `learn-x`, `how-to`, `tutorial`, `pas`, `list`, and `x-vs-x` resolve to the same rows.
+
+- **Read it first.** When the request points at an existing bundle (a stub, a draft, or a file the user names, such as `learn-x/learn-agile/index.md` with `articletype: learn`), read its front matter before choosing. A recognized `articletype` decides the framework: skip the selection guide and say "framework from `articletype: <key>`". An explicit framework from the user still wins; if it disagrees with `articletype`, use the user's choice, update the field, and say so. An unrecognized value: report it and fall back to the selection guide.
+- **Write it.** Every new jeffbaileyblog bundle gets `articletype: <key>` from the table in step 5, and a stub you fill gets it if missing. No template reads the field; it exists so the next skill does not have to guess from the directory or structure.
+- **Pass it.** Step 9 passes the same key to `write-review` as its `framework` argument.
 
 ### Selection guide
 
@@ -64,7 +72,7 @@ The comparison skill's SKILL.md is the framework prompt: read all of it in step 
 
 ## Workflow
 
-1. **Understand the request.** Pin down topic, audience, outcome, and destination. Treat the destination as jeffbaileyblog when the user says "the blog" or "my site", or the working directory is that repo (it has `hugo/config.toml`). If the user named a framework, skip step 2.
+1. **Understand the request.** Pin down topic, audience, outcome, and destination. Treat the destination as jeffbaileyblog when the user says "the blog" or "my site", or the working directory is that repo (it has `hugo/config.toml`). If the request points at an existing bundle, read its front matter now. If the user named a framework, or the bundle has a recognized `articletype`, skip step 2.
 
 2. **Choose the framework.** If one framework clearly fits, say which and why in one line and continue. If two fit, present both with the trade-off and ask once; if the user said "just write it", take your recommendation.
 
@@ -87,7 +95,7 @@ The comparison skill's SKILL.md is the framework prompt: read all of it in step 
 
    For other destinations, ask about style preferences once and skip the blog-only steps (4, 5, 7, 11).
 
-5. **Place the bundle (jeffbaileyblog).** Path: `hugo/content/blog/<section>/<folder>/index.md`, with the section from the framework table. Keep folder name, `slug`, and the last segment of `url` identical. Confirm the folder does not already exist. Get today's date with `date +%Y-%m-%d` for `date`, `lastmod`, and the `url` path. Use the AGENTS.md front matter shape with `draft: true`, pick `categories` that sibling posts already use, and apply the SEO rules: quoted `description` of 160 characters or fewer, keyword-first title, concrete keywords.
+5. **Place the bundle (jeffbaileyblog).** Path: `hugo/content/blog/<section>/<folder>/index.md`, with the section from the framework table. Keep folder name, `slug`, and the last segment of `url` identical. Confirm the folder does not already exist. Get today's date with `date +%Y-%m-%d` for `date`, `lastmod`, and the `url` path. Use the AGENTS.md front matter shape with `draft: true` and `articletype: <key>` from the framework table, pick `categories` that sibling posts already use, and apply the SEO rules: quoted `description` of 160 characters or fewer, keyword-first title, concrete keywords.
 
 6. **Draft.** Substitute the gathered values and follow the loaded prompt. The framework sets the structure; `references/great-blog-post.md` sets the quality bar for any blog post (so-what, opening, rewrite passes, specificity, evidence). Read it before drafting, then run its pre-publish checklist on the draft before step 7. Site rules still win where it says so. Fact discipline:
    - Do not invent statistics, studies, versions, command flags, quotes, URLs, dates, or anecdotes. Cite a source link for each factual claim, or mark it `<!-- TODO verify: <claim> -->`, or write `[NEEDS FACT: <what>]`.
@@ -106,7 +114,7 @@ The comparison skill's SKILL.md is the framework prompt: read all of it in step 
 8. **Remove AI tells.** Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin) on the draft in edit mode. Site style wins where the two disagree. If it is not installed, say so in the delivery note.
 
 9. **Review loop: reach 9.5.** The draft is not done until a fresh `write-review` gives it a rubric score of 9.5/10 or higher. Save a copy of the draft to a temp dir first (`mktemp -d`), since a new bundle is untracked and git can't show what the loop changed. Then repeat, without asking the user between rounds:
-   1. **Review.** Run `write-review` on the draft, passing the framework from step 2 explicitly. Run it in a fresh subagent (Agent tool) when one is available, so the grader is not the agent that wrote and fixed the draft; give it the absolute path and the framework, and ask for the full review back, JSON summary included. Without subagents, run it inline and label every score "self-review". The gate is the rubric `score` in the JSON summary; the blog-post checklist score is reported but does not gate.
+   1. **Review.** Run `write-review` on the draft, passing the framework's `articletype` key as `framework` explicitly. Run it in a fresh subagent (Agent tool) when one is available, so the grader is not the agent that wrote and fixed the draft; give it the absolute path and the `articletype` key, and ask for the full review back, JSON summary included. Without subagents, run it inline and label every score "self-review". The gate is the rubric `score` in the JSON summary; the blog-post checklist score is reported but does not gate.
    2. **Stop at 9.5 or higher.** The loop passes.
    3. **Apply.** Run `write-review-apply` on that review in loop mode (its "Called from write-article" section): edits in place, no validation or self re-score per round. Copy the result to the temp dir as `round-<n>.md` before the next review.
 
@@ -128,7 +136,7 @@ The comparison skill's SKILL.md is the framework prompt: read all of it in step 
     `--buildDrafts` is required: the new post is `draft: true` and the site sets `buildDrafts = false`, so a plain `hugo --gc --minify` succeeds without rendering it. Any `REF_NOT_FOUND` or missing `index.html` is a failure to fix before delivering.
 
 12. **Deliver.** Only call the article done when step 9 reached 9.5 and step 11 passed. Report:
-    - file path, framework and why, section choice
+    - file path, framework and why (including whether `articletype` decided it), the `articletype` written, section choice
     - the review loop: score per round (for example `7.8 -> 8.9 -> 9.6`), whether a subagent graded it or it was a self-review, the last saved review path, and, if it stopped below 9.5, why and the findings blocking it
     - the `ai-sanitize` change list
     - cover image path, alt text, and Canva link (or why it was skipped)
