@@ -18,6 +18,7 @@ See [SETUP.md](SETUP.md) for Cursor and other tools, and for releasing changes.
 | Skill | Command | Purpose |
 |-------|---------|---------|
 | [write-article](skills/write-article/SKILL.md) | `/write:article` | Create articles with 16 bundled writing frameworks plus Comparison (via write-comparison-article-create); for jeffbaileyblog, places the bundle, checks links are published, loops write-review and write-review-apply until the draft scores 9.5+, and verifies the draft build |
+| [write-article-complete](skills/write-article-complete/SKILL.md) | `/write:article-complete` | Run write-article, then a fresh write-review, then write-review-apply as one uninterrupted workflow |
 | [write-review](skills/write-review/SKILL.md) | `/write:review [article] [framework]` | Review articles against framework rubrics, including comparison pages (read-only) |
 | [write-review-apply](skills/write-review-apply/SKILL.md) | `/write:review-apply [article]` | Apply a write-review report: makes the fixes the article supports, lists facts and structural calls for you, validates, and re-scores |
 | [write-status](skills/write-status/SKILL.md) | `/write:status [article]` | Which writing skills have run on an article and which are missing or stale; offers write-review (y/N) when it never ran |
