@@ -1,6 +1,6 @@
 ---
 name: write-article-complete
-description: Creates an article and immediately runs the complete writing improvement workflow in one request: write-article, write-review, and write-review-apply, in that order. Use whenever the user asks to write, draft, improve, polish, or finish an article and wants creation plus review and fixes handled automatically, even if they do not name these skills. Do not stop for confirmation between stages.
+description: "Creates an article and immediately runs the complete writing improvement workflow in one request: write-article, write-review, and write-review-apply, in that order. Use whenever the user asks to write, draft, improve, polish, or finish an article and wants creation plus review and fixes handled automatically, even if they do not name these skills. Do not stop for confirmation between stages."
 ---
 
 # Complete article workflow
