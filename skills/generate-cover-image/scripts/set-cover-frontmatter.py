@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Set the Hugo cover block in a jeffbaileyblog bundle's front matter.
 
-Writes, unquoted as hugo/AGENTS.md requires:
+Writes, unquoted as hugo/CODING_STANDARDS.md requires:
 
     cover:
       image: <png>

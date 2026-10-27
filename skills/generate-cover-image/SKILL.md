@@ -67,7 +67,7 @@ Check the local tools before the first Canva call: `for t in python3 curl pngqua
 
    Leave the background's brightness alone: no shade layer, no vignette. If a Canva step fails, stop, tell the user which step and why, and leave any existing PNG in place. On any other site, skip this step and give the user the generated image's "Open generated image" link, its media ID, and the folder it was filed in (step 3), or say it wasn't filed because the site has no folder.
 
-6. **Set the front matter and store the text (jeffbaileyblog and Political Incorruption),** only after the commit and export succeed, so the files never describe a cover that was not published. Run `scripts/set-cover-frontmatter.py <bundle file> <png name> "<alt>"`. It writes the cover block unquoted, as `hugo/AGENTS.md` requires, replacing any old one, and gives every body `{{< cover-inline src=... alt=... >}}` that showed the old cover the new src and alt (38 posts repeat the cover inline; a stale alt there would describe the old picture):
+6. **Set the front matter and store the text (jeffbaileyblog and Political Incorruption),** only after the commit and export succeed, so the files never describe a cover that was not published. Run `scripts/set-cover-frontmatter.py <bundle file> <png name> "<alt>"`. It writes the cover block unquoted, as `hugo/CODING_STANDARDS.md` requires, replacing any old one, and gives every body `{{< cover-inline src=... alt=... >}}` that showed the old cover the new src and alt (38 posts repeat the cover inline; a stale alt there would describe the old picture):
 
    ```yaml
    cover:

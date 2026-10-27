@@ -62,11 +62,11 @@ Checks what the build lets through: bare `url`/`slug`/`cover.image`; `date`/`las
 
 Read the files every run; they change.
 
-1. `hugo/AGENTS.md` top to bottom. Walk its `##` headings **as they appear in the file**, writing one line per heading: checked / not relevant (why). Do not use a remembered list of sections; if a heading is new or gone, the file wins. (There is no "SEO checklist" or "Publishing checklist" section; do not look for one.)
+1. `hugo/AGENTS.md` and `hugo/CODING_STANDARDS.md` top to bottom. Walk their `##` headings **as they appear in the file**, writing one line per heading: checked / not relevant (why). Do not use a remembered list of sections; if a heading is new or gone, the file wins. (There is no "SEO checklist" or "Publishing checklist" section; do not look for one.)
 2. Every `AGENTS.md` on the path from `content/` to the bundle (`find hugo/content -name AGENTS.md`). Nearer files add to or override the global one.
 3. `content/prompts/writing-style.md`. It wins over AGENTS.md on conflicts. It pulls in `content/prompts/seo-front-matter.md` through an `include-prompt` shortcode; read that too, since it holds the `title`/`description`/`keywords` rules.
 
-Scripts cover the mechanical rules. Spend this pass on the ones that need judgment: voice (Diátaxis how-to/tutorial/reference/explanation use "you", never "I"); post structure (intro, main, conclusion); cards shortcode instead of comparison tables; Mermaid (prefer `graph TB`) instead of ```` ```text ```` diagrams; heading hierarchy with no H1 in the body; alt text on every image; no `{{< partial "category_footer" >}}` in the body (`layouts/_default/single.html` already renders it). Report these as WARNING unless a rule is stated as NEVER/must, then BLOCKING.
+Scripts cover the mechanical rules. Spend this pass on the ones that need judgment: voice (Diátaxis how-to/tutorial/reference/explanation use "you", never "I"); cards shortcode instead of comparison tables; Mermaid (prefer `graph TB`) instead of ```` ```text ```` diagrams; heading hierarchy with no H1 in the body; alt text on every image; no `{{< partial "category_footer" >}}` in the body (`layouts/_default/single.html` already renders it). Report these as WARNING unless a rule is stated as NEVER/must, then BLOCKING.
 
 ### 4. Banned-phrase scan
 
