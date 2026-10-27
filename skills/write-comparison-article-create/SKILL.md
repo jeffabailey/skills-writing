@@ -15,9 +15,9 @@ This skill adds only what is specific to comparison articles: the decision-first
 
 - **`hugo/content/prompts/writing-style.md`**. The rules that matter most here: no emdashes; reference-style links only (`[text][label]` plus a definition, never inline or HTML links); the Diátaxis voice override (no first-person author voice, second person for guidance); `## References` for factual claims; no Markdown tables (use `cards`); the "Things to NOT Do" list.
 - **`hugo/content/prompts/seo-front-matter.md`** for `title`, `description` (160 characters or fewer), and `keywords`.
-- **`hugo/CODING_STANDARDS.md`** for front-matter shape, cover-image fields, and cards syntax. The build command in `hugo/AGENTS.md` does not render drafts; use step 8 below instead.
+- **`hugo/CODING_STANDARDS.md`** for front-matter quoting and dates, cover-image fields, and cards syntax, and **`hugo/archetypes/blog.md`** for the front-matter fields. The build command in `hugo/AGENTS.md` does not render drafts; use step 8 below instead.
 
-A comparison is a neutral **Diátaxis explanation**. The only comparison-specific front-matter fields are `diataxis: explanation` and `articletype: comparison`. Keep `draft: true` (the CODING_STANDARDS.md default) unless the user says to publish.
+A comparison is a neutral **Diátaxis explanation**. The only comparison-specific front-matter fields are `diataxis: explanation` and `articletype: comparison`. Keep `draft: true` (the `archetypes/blog.md` default) unless the user says to publish.
 
 ## What makes a comparison page good (non-negotiable)
 
@@ -41,7 +41,7 @@ Comparison pages go stale and get quoted, so wrong facts do real damage.
 
 Produce these sections in this order. Omit a section only when it genuinely does not apply (only Cost and the decision-tree part of "Which should you choose?" are optional).
 
-1. **Front matter**: CODING_STANDARDS.md shape plus `diataxis: explanation` and `articletype: comparison`. Categories start with `X vs X`.
+1. **Front matter**: `archetypes/blog.md` fields plus `diataxis: explanation` and `articletype: comparison`. Categories start with `X vs X`.
 2. **Framing intro** (2–4 short paragraphs, no heading): who is choosing, why it's hard, what changed recently.
 3. **`## The short answer`**: one `**Choose X if…**` card per option in a `cards` block, plus an optional overall pick and its caveat. The single most important section.
 4. **`## The contenders`**: one card per option: what it is, who it's for, its one-line differentiator. The card count here defines the option count the checker uses.

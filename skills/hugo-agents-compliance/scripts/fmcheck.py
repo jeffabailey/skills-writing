@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Check a jeffbaileyblog post's front matter against hugo/CODING_STANDARDS.md mechanics
-("Front matter (blog posts)", "Body content") and content/prompts/seo-front-matter.md.
+("Front matter", "Cover and images"), hugo/archetypes/blog.md, and
+content/prompts/seo-front-matter.md.
 
 Shared by hugo-agents-compliance (authoring) and write-validate-article (the
 read-only gate, which calls it by sibling path). Keep one copy.
