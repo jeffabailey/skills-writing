@@ -15,7 +15,7 @@ This skill adds only what is specific to comparison articles: the decision-first
 
 - **`hugo/content/prompts/writing-style.md`**. The rules that matter most here: no emdashes; reference-style links only (`[text][label]` plus a definition, never inline or HTML links); the Diátaxis voice override (no first-person author voice, second person for guidance); `## References` for factual claims; no Markdown tables (use `cards`); the "Things to NOT Do" list.
 - **`hugo/content/prompts/seo-front-matter.md`** for `title`, `description` (160 characters or fewer), and `keywords`.
-- **`hugo/CODING_STANDARDS.md`** for front-matter quoting and dates, cover-image fields, and cards syntax, and **`hugo/archetypes/blog.md`** for the front-matter fields. The build command in `hugo/AGENTS.md` does not render drafts; use step 8 below instead.
+- **`hugo/archetypes/blog.md`** for the front-matter fields and each field's rule (quoting, dates, cover), and **`hugo/CODING_STANDARDS.md`** for cards syntax and `ref`. Step 8 below adds this article's page checks to the build gate in `hugo/AGENTS.md`.
 
 A comparison is a neutral **Diátaxis explanation**. The only comparison-specific front-matter fields are `diataxis: explanation` and `articletype: comparison`. Keep `draft: true` (the `archetypes/blog.md` default) unless the user says to publish.
 
@@ -80,7 +80,7 @@ Descriptive cells beat checkmarks. Keep each cell under about 15 words; 3–4 op
 
 ## Internal links
 
-`{{< ref "…" >}}` resolves by content path or bundle folder name, not by front-matter `slug` (some published posts have a slug that differs from their folder). Find link targets with `hugo list all` run in `hugo/` (or `scripts/site-search` from the repo root, per AGENTS.md "Searching existing posts"), keep rows with `draft` = `false`, and use the folder name from the `path` column.
+`{{< ref "…" >}}` resolves by content path or bundle folder name, not by front-matter `slug` (some published posts have a slug that differs from their folder). Find link targets with `hugo list all` run in `hugo/` (or `scripts/site-search` from the repo root, per AGENTS.md's **Search** pointer), keep rows with `draft` = `false`, and use the folder name from the `path` column.
 
 **Do not link to draft posts.** A ref to a draft builds only with `-D`; once this article is published, the normal build fails with `REF_NOT_FOUND`. If the only relevant post is a draft, leave it out and mention it in the delivery note.
 

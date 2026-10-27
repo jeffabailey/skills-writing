@@ -1,6 +1,6 @@
 ---
 name: hugo-agents-compliance
-description: Enforces jeffbaileyblog Hugo Markdown rules by reading and applying hugo/AGENTS.md and hugo/CODING_STANDARDS.md section by section as written, plus any nested AGENTS.md and content/prompts/writing-style.md, then proving it with a live ban-list scan, a front-matter check, and a build that actually renders the page (drafts included). Use when editing or creating content under the Hugo site (hugo/content/), drafting blog posts, fixing Hugo build errors such as REF_NOT_FOUND, or the user says /hugo:agents, "apply AGENTS.md", "Hugo blog rules", or "compliance with hugo AGENTS".
+description: Enforces jeffbaileyblog Hugo Markdown rules by reading hugo/AGENTS.md and applying every file its pointers name (archetypes/blog.md, CODING_STANDARDS.md) as written, plus any nested AGENTS.md and content/prompts/writing-style.md, then proving it with a live ban-list scan, a front-matter check, and a build that actually renders the page (drafts included). Use when editing or creating content under the Hugo site (hugo/content/), drafting blog posts, fixing Hugo build errors such as REF_NOT_FOUND, or the user says /hugo:agents, "apply AGENTS.md", "Hugo blog rules", or "compliance with hugo AGENTS".
 ---
 
 # Hugo site: AGENTS.md compliance
@@ -20,15 +20,15 @@ Profanity is the author's voice in either mode. A compliance pass never removes 
 
 ## 2. Read the rules in their real order
 
-1. Read `hugo/AGENTS.md` (workflow) and `hugo/CODING_STANDARDS.md` (bundles, front matter, covers, headings, cards, `ref`) top to bottom. Walk their `##` headings **as they appear in the file** and, for each one, write a one-line note: applied / not relevant to this task (and why). Do not substitute a remembered list of sections; if a heading this skill mentions is gone, or a new one appeared, the file wins.
+1. Read `hugo/AGENTS.md`, a router of one-line pointers (search, front matter, body, prose, build gate, git). Walk its pointers **as they appear in the file** and, for each one, write a one-line note: applied / not relevant to this task (and why). For each applied pointer, read its target top to bottom: `archetypes/blog.md` (front-matter fields, with each field's rule in a `{{/* */}}` comment) and `CODING_STANDARDS.md` (headings, cards, `ref`, walked by `##` heading). Do not substitute a remembered list; if a pointer or heading this skill mentions is gone, or a new one appeared, the file wins.
 2. Find nested rules: every `AGENTS.md` on the path from `content/` down to the bundle (`find content -name AGENTS.md`). Read each top to bottom. Nearer files add to or override the global file. AGENTS.md text may call a folder by an old name (for example `fundamentals-x`); match on the directory that actually holds the file.
-3. Read `content/prompts/writing-style.md` (AGENTS.md's `## Writing style` delegates to it; it wins on conflicts) and, when you set `title`/`description`/`keywords`, `content/prompts/seo-front-matter.md`.
+3. Read `content/prompts/writing-style.md` (AGENTS.md's **Prose** pointer names it; it wins on conflicts) and, when you set `title`/`description`/`keywords`, `content/prompts/seo-front-matter.md`.
 
-**Do not explore sibling posts or grep `content/` by default.** The front-matter fields are in `archetypes/blog.md` (CODING_STANDARDS.md points to it), and categories come from `./scripts/generate-site-metadata.py` (prints `categories` and `category_counts`; fall back to `data/site-metadata.json`). **Exception:** when a nested AGENTS.md tells you to match comparable posts (for example the Fundamentals rules for `series:` and `diataxis:`), read the front matter of one or two of the closest siblings in that directory, only the front matter, and say which posts you matched. For "which posts cover X", use the search index AGENTS.md describes (`scripts/site-search` from the repo root) before any grep.
+**Do not explore sibling posts or grep `content/` by default.** The front-matter fields and their rules are in `archetypes/blog.md`, and categories come from `./scripts/generate-site-metadata.py` (prints `categories` and `category_counts`; fall back to `data/site-metadata.json`). **Exception:** when a nested AGENTS.md tells you to match comparable posts (for example the Fundamentals rules for `series:` and `diataxis:`), read the front matter of one or two of the closest siblings in that directory, only the front matter, and say which posts you matched. For "which posts cover X", use the search index AGENTS.md describes (`scripts/site-search` from the repo root) before any grep.
 
 ## 3. Apply, then verify with the scripts
 
-Front-matter mechanics that runs keep getting wrong (`archetypes/blog.md` has the full field list):
+Front-matter mechanics that runs keep getting wrong (`archetypes/blog.md` has the full field list and each field's rule):
 
 - `url`, `slug`, `cover.image` bare (no quotes); `description` quoted (an unquoted colon breaks YAML), ≤160 chars per `seo-front-matter.md`.
 - `slug`, bundle folder, and `url` tail match on new posts. `cover.image: <slug>.png`, `relative: true`, and an `alt` that says what the image shows. Open the PNG before you write `alt`. If the image does not exist yet, write `alt` from the article's subject and flag it for review once the cover is made.
@@ -59,7 +59,7 @@ Use the folder name from the `path` column (for example `death-by-1000-cuts-3-th
 
 ## 6. Report
 
-End with: mode (new / compliance pass / targeted fix); the AGENTS.md and CODING_STANDARDS.md headings walked with applied/not-relevant notes; nested AGENTS.md files applied and any siblings matched; banscan, fmcheck, and verify-build results (exit codes, page path); "suggested, not applied" items for legacy posts; cover handoff if needed. Do not commit or push unless asked (AGENTS.md's `## Git` section says how when the user does ask).
+End with: mode (new / compliance pass / targeted fix); the AGENTS.md pointers and CODING_STANDARDS.md headings walked with applied/not-relevant notes; nested AGENTS.md files applied and any siblings matched; banscan, fmcheck, and verify-build results (exit codes, page path); "suggested, not applied" items for legacy posts; cover handoff if needed. Do not commit or push unless asked (AGENTS.md's **Git** pointer says how when the user does ask).
 
 ## When this skill does not apply
 
