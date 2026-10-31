@@ -1,6 +1,8 @@
 ---
 name: write-run-markdown-lint
 description: Lints a Markdown file with markdownlint-cli2 and the user's config (project .markdownlint-cli2.jsonc, else ~/Shell/.markdownlint-cli2.jsonc), reports findings grouped by rule, and flags results that mean the config was not applied. Use when the user says /write:run-markdown-lint, wants to lint a Markdown file, check Markdown formatting or style, or asks "what's actually wrong" with a draft's Markdown.
+metadata:
+  version: "1.0.0"
 ---
 
 # Run Markdown Lint

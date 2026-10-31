@@ -1,6 +1,8 @@
 ---
 name: write-article
 description: Creates articles from 17 bundled writing frameworks (Diataxis, AIDA, PAS, Learn X, Fundamentals, Comparison, and more). Picks the framework, drafts the article, and for jeffbaileyblog applies the site rules, places the page bundle, and loops write-review and write-review-apply toward a score of 9.5. To fold new material into a finished article, use write-article-revision instead. Use when the user says /write:article, or asks to write an article, blog post, essay, tutorial, how-to, explanation, reference doc, "Learn X" post, or comparison ("X vs Y", "which should I pick", "create a comparison article"). Triggers on "write article", "draft post", "write a post about", "I have opinions about".
+metadata:
+  version: "1.0.0"
 ---
 
 # Article Creation

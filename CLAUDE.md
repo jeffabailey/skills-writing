@@ -75,6 +75,8 @@ graph_add_memory(type="decision|task|next|fact|blocker", content="one sentence m
 
 ## Skill Changes
 
+After you change anything under `skills/`, bump versions as [AGENTS.md](AGENTS.md) describes.
+
 After you add or edit a `SKILL.md`, run this command and fix each failure before you report the work as done:
 
 ```bash

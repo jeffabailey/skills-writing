@@ -1,6 +1,8 @@
 ---
 name: hugo-agents-compliance
 description: Enforces jeffbaileyblog Hugo Markdown rules by reading hugo/AGENTS.md and applying every file its pointers name (archetypes/blog.md, CODING_STANDARDS.md) as written, plus any nested AGENTS.md and content/prompts/writing-style.md, then proving it with a live ban-list scan, a front-matter check, and a build that actually renders the page (drafts included). Use when editing or creating content under the Hugo site (hugo/content/), drafting blog posts, fixing Hugo build errors such as REF_NOT_FOUND, or the user says /hugo:agents, "apply AGENTS.md", "Hugo blog rules", or "compliance with hugo AGENTS".
+metadata:
+  version: "1.0.0"
 ---
 
 # Hugo site: AGENTS.md compliance

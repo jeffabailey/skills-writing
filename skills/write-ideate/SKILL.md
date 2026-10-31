@@ -1,6 +1,8 @@
 ---
 name: write-ideate
 description: Brainstorms article ideas for a blog, checks each idea against what is already written (published posts and draft stubs), and hands back ready-to-write ideas with slug, section, categories, closest existing post, and the write-article framework to use. Use when the user says /write:ideate or /write:idea-storm, wants to brainstorm topics, generate article ideas, find gaps in what they have written, explore content angles, or asks "what should I write about". Triggers on "brainstorm", "idea storm", "article ideas", "content ideas", "post ideas", "topic ideas", "what should I write about", "what haven't I written about".
+metadata:
+  version: "1.0.0"
 ---
 
 # Writing Ideation

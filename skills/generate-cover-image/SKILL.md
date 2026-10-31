@@ -1,6 +1,8 @@
 ---
 name: generate-cover-image
 description: Generates a 1200x630 PNG cover image from what an article means, using the bundled prompt (dark, futuristic, human-and-system artwork with no text) and the Canva connector. For jeffbaileyblog it builds or overwrites the article's own Canva cover design from the jbb-feature-image-template brand template, sets the title, files and exports it beside the article, and sets the Hugo cover front matter; for Political Incorruption it does the same from the political-incorruption-feature-image-template brand template with that site's own civic prompt, filing designs and artwork in its Canva folder; it also covers category pages and runs in batches for many covers at once. Use whenever someone wants a cover, hero, featured, header, OG, social-preview, or share image for a blog post, article, or category page, says /write:cover, asks to redo or refresh an existing cover, or when write-article finishes a jeffbaileyblog draft, even if they don't say "cover".
+metadata:
+  version: "1.0.0"
 ---
 
 # Generate Cover Image

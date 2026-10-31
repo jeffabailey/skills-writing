@@ -1,6 +1,8 @@
 ---
 name: write-strategy
 description: Runs evidence-tagged strategic analysis in three modes, each with a bundled prompt. Content strategy plans a blog or publication from a measured inventory (published vs draft, pace, pillars, 90-day calendar). Competitor analysis maps 3-5 competitors plus disruptors for businesses, blogs, or open-source projects and scores the gaps. Growth audit (McKinsey-style) scores a business or project, finds bottlenecks, and lays out quick wins and a 90-day roadmap toward a revenue or non-revenue goal. Use when the user says /write:strategy, /write:competitor-analysis, or /write:mckinsey-consultant, or asks for a content strategy, editorial plan, competitor analysis, competitive landscape, growth audit, growth analysis, McKinsey-style analysis, strategic planning, or market analysis.
+metadata:
+  version: "1.0.0"
 ---
 
 # Writing Strategy

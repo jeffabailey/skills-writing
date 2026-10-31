@@ -1,6 +1,8 @@
 ---
 name: write-copy
 description: Writes marketing copy grounded in the product's own facts, for landing pages, sales pages, CTAs, button labels, short emails, ads, and taglines. Reads the README, site, or brief first, never invents proof or urgency, and delivers paste-ready copy plus a separate strategy appendix. Use when the user says /write:copy or /write:landing-page-copy, needs landing page copy, wants marketing text, sales copy, conversion copy, a call to action, a launch email, ad text, or a tagline. Triggers on "landing page", "landing page copy", "marketing copy", "sales copy", "conversion copy", "copywriting", "CTA", "call to action", "button label", "tagline", "ad copy", "promo email".
+metadata:
+  version: "1.0.0"
 ---
 
 # Marketing Copy

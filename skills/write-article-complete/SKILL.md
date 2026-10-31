@@ -1,6 +1,8 @@
 ---
 name: write-article-complete
 description: "Writes an article and finishes it in one request, with no confirmation stops between drafting, review, and fixes. Runs write-article, whose review loop already handles write-review and write-review-apply, and fills in only what that run could not do. Use whenever the user asks to write, draft, or finish a new article and wants review and fixes handled automatically, even if they do not name these skills. To polish an article that already exists, use write-review and write-review-apply."
+metadata:
+  version: "1.0.0"
 ---
 
 # Complete article workflow

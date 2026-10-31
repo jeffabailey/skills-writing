@@ -1,6 +1,8 @@
 ---
 name: write-article-revision
 description: Revises an existing article by integrating new input content from other sources, reviewing flow, weaving new concepts in smoothly, and producing a clear record of what was added and why. Use when the user says /write:article-revision, asks to revise or update an article with new material, merge sources into a draft, fold in new research or notes, or make a one-sided post acknowledge a counterargument from a source.
+metadata:
+  version: "1.0.0"
 ---
 
 # Article Revision

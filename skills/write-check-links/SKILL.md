@@ -1,6 +1,8 @@
 ---
 name: write-check-links
-description: Checks the links in a Markdown file with lychee and the Hugo site's lychee.toml, then triages every failure as broken, known false positive, or unverified, with the source line and a fix. Also checks Hugo {{< ref >}} targets and root-relative /blog/ links against hugo/content, which lychee cannot see. Use when the user says /write:check-links, wants to validate links, check for broken links or dead URLs, verify URLs in a post before publishing, or asks "is anything broken in this article".
+description: Checks the links in a Markdown file with lychee and the Hugo site's lychee.toml, then triages every failure as broken, known false positive, or unverified, with the source line and a fix. Also checks Hugo ref shortcode targets and root-relative /blog/ links against hugo/content, which lychee cannot see. Use when the user says /write:check-links, wants to validate links, check for broken links or dead URLs, verify URLs in a post before publishing, or asks "is anything broken in this article".
+metadata:
+  version: "1.0.0"
 ---
 
 # Check Links

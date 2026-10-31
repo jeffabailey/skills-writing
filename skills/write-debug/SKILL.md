@@ -1,6 +1,8 @@
 ---
 name: write-debug
 description: Systematic debugging and bug minimization with a bundled Bug Minimizer prompt. Triages noisy reports, shrinks the trigger to a minimal runnable repro, finds the root cause, and proves the fix by running the repro before and after. Use when the user says /write:debug or /write:bug-minimizer, pastes a bug report, wants to minimize or reproduce a bug, isolate an issue, or asks for structured debugging help. Triggers on "bug report", "minimize bug", "bug minimizer", "debug", "reproduce bug", "isolate issue", "minimal repro", "what broke".
+metadata:
+  version: "1.0.0"
 ---
 
 # Debug and Minimize a Bug

@@ -1,6 +1,8 @@
 ---
 name: writing-clearly-and-concisely
 description: Use when writing or tightening prose humans will read (README files, documentation, commit messages, error messages, explanations, reports, UI text, blog sections). Applies Strunk's rules (active voice, positive form, concrete words, omit needless words) while keeping the author's voice, facts, links, and code intact, and returns a change list tagged with rule numbers. Triggers on "tighten this", "make this clearer", "edit for clarity", "cut the fluff", "this rambles", "make this more concise".
+metadata:
+  version: "1.0.0"
 ---
 
 # Writing Clearly and Concisely

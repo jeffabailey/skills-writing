@@ -1,6 +1,8 @@
 ---
 name: write-validate-article
 description: Validates one Markdown article for the jeffbaileyblog Hugo site before it ships and returns a three-level verdict (blocking / warning / noise). Runs the Hugo build first as the gate (drafts included, into a temp dir), then a front-matter check, a banned-phrase scan read live from writing-style.md, an AGENTS.md compliance pass, one ai-sanitize report, link checking (lychee), and Markdown linting (markdownlint-cli2). Report-only unless the user asks for fixes. Use when the user says /write:validate-article, wants to validate an article, check an article before publishing, "run all the checks" on a Markdown file, or asks whether a post is ready to publish.
+metadata:
+  version: "1.0.0"
 ---
 
 # Validate Article

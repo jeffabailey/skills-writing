@@ -1,6 +1,8 @@
 ---
 name: write-hook
 description: Writes 50 social media post hooks for a piece of text (an article, draft, blog post, or pasted notes), in five groups of ten (funny with pop-culture and tech references, reflective/philosophical, clean/general, edgy/sharp, edgy with pop-culture references), each followed by a one-line action telling the reader what they'll do in the post, plus 12-20 hashtags on one paste-ready line for X, LinkedIn, and Threads. Use when the user says /write:hook, wants hooks, opening lines, scroll-stoppers, or teaser lines to promote an article or post, asks "how should I open this LinkedIn/X/Threads post?", wants social copy or hashtags for a jeffbaileyblog post, or pastes text after a dashed separator line asking for hooks. With no text given, uses the last article created or changed.
+metadata:
+  version: "1.0.0"
 ---
 
 # Social media hooks

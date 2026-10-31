@@ -1,6 +1,8 @@
 ---
 name: write-seo
 description: On-page SEO for the jeffbaileyblog Hugo site in two modes. Links mode adds contextual reference-style internal links from a post to other published posts (verified against `hugo list all` and a Hugo build). Front-matter mode rewrites or checks `title:`, `description:`, and `keywords:` against the blog's seo-front-matter prompt. Use when the user says /write:seo or /write:internal-link-optimize, wants to optimize or add internal links, cross-link posts, improve navigation between posts, boost SEO through contextual linking, or fix a weak page title, meta description, SEO title, or front matter keywords. Triggers on "internal links", "link optimization", "SEO links", "cross-linking", "internal linking strategy", "keywords", "front matter keywords", "meta description", "page title", "SEO title".
+metadata:
+  version: "1.0.0"
 ---
 
 # Write SEO: internal links and front matter

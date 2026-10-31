@@ -1,6 +1,8 @@
 ---
 name: create-practice-playground
 description: Builds a new in-browser practice playground for jeffbaileyblog (a real program running in the page, like the fd, Nushell, zsh, tmux, Neovim, and jq playgrounds) by first checking the tool can run in a browser at all, then driving the nWave waves with the recipe, intake questions, and gotchas learned from the shipped playgrounds, and, when the user says Yes, a Learn X article with the playground embedded and its drill replayed by the tests. Use when the user says /write:playground, asks to "add a fish (or any tool) playground", "make a practice shell, terminal, or editor for a tool", "a wasm or v86 practice app like the Nushell one", "let readers try a tool in the browser", or wants a Learn X article with a live practice terminal, even if they don't say "playground".
+metadata:
+  version: "1.0.0"
 ---
 
 # Create a practice playground

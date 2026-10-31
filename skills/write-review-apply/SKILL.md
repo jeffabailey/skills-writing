@@ -1,6 +1,8 @@
 ---
 name: write-review-apply
 description: Applies the fixes from a write-review report to the article it reviewed, then re-scores it. Uses the review from this conversation or a saved report (running write-review if there is none), applies only fixes the article's own content supports, and lists the rest for the author instead of inventing facts. Keeps the author's voice, backs up index.md before editing it in place, and reports before and after scores. Use when the user says /write:review-apply, "apply the review", "fix what the review found", "apply those fixes", "do the improvement plan", "address the review feedback" for an article or blog post, or answers yes after write-review offers the follow-up. With no article named, uses the last reviewed or changed article.
+metadata:
+  version: "1.0.0"
 ---
 
 # Apply an article review
