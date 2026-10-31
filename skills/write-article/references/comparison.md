@@ -1,23 +1,18 @@
----
-name: write-comparison-article-create
-description: Creates clean, decision-first comparison articles (X vs Y vs Z) that render well in Hugo — verdict up top, scorecard cards, per-criterion deep dive, use-case recommendations, and sourced version/price/license claims. Use when the user says /write:comparison-article-create, asks to write a comparison or "vs" page, "X vs Y", "which should I pick", or compare tools/frameworks/products. Articles live in content/blog/x-vs-x/.
----
+# Comparison Article
 
-# Comparison Article Create
-
-Creates a **comparison article**: a page that helps a reader *decide* between several options (frameworks, tools, products, approaches). Self-contained; no hosted prompt to fetch. Articles live in `hugo/content/blog/x-vs-x/<slug>/index.md` in jeffbaileyblog.
+Creates a **comparison article**: a page that helps a reader *decide* between several options (frameworks, tools, products, approaches). Articles live in `hugo/content/blog/x-vs-x/<slug>/index.md` in jeffbaileyblog. `SKILL.md`'s Comparison section says how this file fits the workflow; site rules win where they disagree with it.
 
 A great comparison page is **decision-first, not description-first**. The reader arrives with a choice to make and wants the answer fast, then evidence if they keep reading.
 
-## Scope
-
-This skill adds only what is specific to comparison articles: the decision-first rules, the section order, the shortcodes, the sourcing rule, and a checker. The site's general rules come from two canonical files; read them, and when they disagree with this skill they win:
-
-- **`hugo/content/prompts/writing-style.md`**. The rules that matter most here: no emdashes; reference-style links only (`[text][label]` plus a definition, never inline or HTML links); the Diátaxis voice override (no first-person author voice, second person for guidance); `## References` for factual claims; no Markdown tables (use `cards`); the "Things to NOT Do" list.
-- **`hugo/content/prompts/seo-front-matter.md`** for `title`, `description` (160 characters or fewer), and `keywords`.
-- **`hugo/archetypes/blog.md`** for the front-matter fields and each field's rule (quoting, dates, cover), and **`hugo/CODING_STANDARDS.md`** for cards syntax and `ref`. Step 8 below adds this article's page checks to the build gate in `hugo/AGENTS.md`.
-
 A comparison is a neutral **Diátaxis explanation**. The only comparison-specific front-matter fields are `diataxis: explanation` and `articletype: comparison`. Keep `draft: true` (the `archetypes/blog.md` default) unless the user says to publish.
+
+## Inputs and research
+
+Before drafting:
+
+1. **Gather inputs:** the options (2–4 works best on mobile), the audience, and the criteria that matter for this decision. Infer defaults from the request; ask once, in one message, only for what you cannot infer (usually just confirming the options). Pick the slug as `a-vs-b[-vs-c]`.
+2. **Research facts:** current versions and release dates, license, pricing (if paid), notable recent changes. Record a source URL for each. Anything you cannot confirm becomes `TODO verify`.
+3. **Pick 4–6 decision-driving criteria.** Discard trivia.
 
 ## What makes a comparison page good (non-negotiable)
 
@@ -56,8 +51,6 @@ Produce these sections in this order. Omit a section only when it genuinely does
 13. **`## References`**: one bullet per external source, `* [Title][label], for what it supports.` Required by writing-style.md for factual claims.
 14. **`## Related Content`**: 2–4 internal links to published posts, then all link reference definitions at the end of the file.
 
-Do **not** add `{{< partial "category_footer" >}}`. `layouts/_default/single.html` already renders the category footer, so adding it shows "Related Articles by Category" twice.
-
 ### Scorecard format
 
 Pick 5–6 fields that drive this decision (for example: Architecture or Type, Learning curve, Language, License, Ecosystem, Performance, Pricing model, Hosting, CI fit), ending with **Best for**. Every card uses the exact same labels in the same order, one bullet each, in this format so the checker can compare them:
@@ -78,32 +71,10 @@ Pick 5–6 fields that drive this decision (for example: Architecture or Type, L
 
 Descriptive cells beat checkmarks. Keep each cell under about 15 words; 3–4 options with 6 fields is already long on a phone.
 
-## Internal links
+## Checker
 
-`{{< ref "…" >}}` resolves by content path or bundle folder name, not by front-matter `slug` (some published posts have a slug that differs from their folder). Find link targets with `hugo list all` run in `hugo/` (or `scripts/site-search` from the repo root, per AGENTS.md's **Search** pointer), keep rows with `draft` = `false`, and use the folder name from the `path` column.
+`scripts/check_comparison.py <index.md>` needs `python3`, plus `hugo` for ref and build checks. It checks front matter, section order, one "Choose X if" and one scorecard card per option, identical scorecard labels, methodology criteria = Head-to-head `###`, every `###` opening with `Winner here:`, procon count, no tables / emdashes / category_footer, first-person author voice (reader-voice FAQ questions such as "Do I need to pay for Docker?" are exempt), unsourced version/price/license sentences, and that each `ref` resolves to a published post. Fix every FAIL; resolve or justify each WARN.
 
-**Do not link to draft posts.** A ref to a draft builds only with `-D`; once this article is published, the normal build fails with `REF_NOT_FOUND`. If the only relevant post is a draft, leave it out and mention it in the delivery note.
+With `--build` it runs `hugo --gc --minify -D -d <tempdir>` in `hugo/` (never writing `public/`), then confirms `<tempdir>/<url>/index.html` exists and contains `card-grid` and `md-procon`, the mermaid tree if one was written, no raw `{{<` shortcode text, and exactly one category footer. Exit 3 means `hugo` is missing (`brew install hugo`), which is a tool problem, not a failed check.
 
-## Workflow
-
-1. **Gather inputs**: the options (2–4 works best on mobile), the audience, and the criteria that matter for this decision. Infer defaults from the request; ask once, in one message, only for what you cannot infer (usually just confirming the options). Pick the slug as `a-vs-b[-vs-c]`.
-2. **Research facts**: current versions and release dates, license, pricing (if paid), notable recent changes. Record a source URL for each. Anything you cannot confirm becomes `TODO verify`.
-3. **Pick 4–6 decision-driving criteria.** Discard trivia.
-4. **Draft in canonical order**, verdict-first throughout, applying the sourcing rule as you write.
-5. **Apply writing-style.md** (links, voice, no tables, no emdashes, the "Things to NOT Do" list).
-6. **Run the checker** (needs `python3`; `hugo` for ref and build checks):
-
-   ```bash
-   python3 <skill-dir>/scripts/check_comparison.py hugo/content/blog/x-vs-x/<slug>/index.md
-   ```
-
-   It checks front matter, section order, one "Choose X if" and one scorecard card per option, identical scorecard labels, methodology criteria = Head-to-head `###`, every `###` opening with `Winner here:`, procon count, no tables / emdashes / category_footer, first-person author voice (reader-voice FAQ questions such as "Do I need to pay for Docker?" are exempt), unsourced version/price/license sentences, and that each `ref` resolves to a published post. Fix every FAIL; resolve or justify each WARN.
-7. **Remove AI tells**: invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` as a plugin) on the draft in edit mode. Comparison pages attract hollow verdicts ("a powerful, seamless choice"). Keep the canonical section headings (including "The bottom line") even if ai-sanitize flags them; the checker depends on them. If it is not installed, say so in the delivery note and skip this step. Re-run step 6 afterward.
-8. **Build and confirm the page renders.** The new post is `draft: true` and the site does not build drafts, so plain `hugo --gc --minify` exits 0 without rendering it. Run:
-
-   ```bash
-   python3 <skill-dir>/scripts/check_comparison.py hugo/content/blog/x-vs-x/<slug>/index.md --build
-   ```
-
-   This runs `hugo --gc --minify -D -d <tempdir>` in `hugo/` (never writing `public/`), then confirms `<tempdir>/<url>/index.html` exists and contains `card-grid` and `md-procon`, the mermaid tree if one was written, no raw `{{<` shortcode text, and exactly one category footer. Exit 3 means `hugo` is missing (`brew install hugo`), which is a tool problem, not a failed check. To do it by hand: `hugo --gc --minify -D -d "$(mktemp -d)"`, then grep the page's `index.html`.
-9. **Deliver**: the file path, the checker result, the list of `TODO verify` items, any draft posts you chose not to link, and the cover image TODO (`cover.image: <slug>.png`; the `generate-cover-image` skill can make it).
+Comparison pages attract hollow verdicts ("a powerful, seamless choice"), so `ai-sanitize` matters here, but keep the canonical section headings (including "The bottom line") even if it flags them; the checker depends on them.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check a comparison article (content/blog/x-vs-x/<slug>/index.md) for the
-comparison-specific rules in SKILL.md, and optionally build it with Hugo.
+comparison-specific rules in references/comparison.md, and optionally build it with Hugo.
 
 Usage:
   check_comparison.py path/to/index.md            # Markdown checks only

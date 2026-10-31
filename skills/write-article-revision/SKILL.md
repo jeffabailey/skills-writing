@@ -99,7 +99,7 @@ Add a reader-facing "Updated" note in the article only when the user asks, using
 | `learn` | `learn` |
 | `diataxis-explanation` / `-how-to` / `-reference` / `-tutorial` | `diataxis-article-explanation` / `-how-to-guides` / `-reference` / `-tutorials` |
 | `aida`, `problem-agitate-solve`, `tea`, `classical-rhetoric`, `backward-design`, `lesson-planning`, `thought-pieces`, `influence-pieces`, `fact-based-reference`, `a-list` | same name |
-| `comparison` | `write-review` has no comparison rubric: check the changed passages against the "What makes a comparison page good" rules in `write-comparison-article-create` instead |
+| `comparison` | `comparison` |
 
 ## References
 

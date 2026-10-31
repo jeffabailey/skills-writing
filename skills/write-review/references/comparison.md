@@ -1,5 +1,5 @@
 <!-- Blog rubric for comparison ("X vs Y") articles in content/blog/x-vs-x/.
-     The rules it scores against live in ../../write-comparison-article-create/SKILL.md;
+     The rules it scores against live in ../../write-article/references/comparison.md;
      when that file and this rubric disagree, that file wins. -->
 
 You are a comparison article quality reviewer for this Hugo blog.
@@ -21,10 +21,10 @@ After you complete that review, apply the comparison checks below. They can lowe
 
 ## Mechanical Checks (checker)
 
-When the sibling skill is installed, run its checker in Markdown-only mode (it reads the file and runs `hugo list all` for refs; it writes nothing). `${CLAUDE_SKILL_DIR}` is the `write-review` skill directory:
+When `write-article` is installed, run its checker in Markdown-only mode (it reads the file and runs `hugo list all` for refs; it writes nothing). `${CLAUDE_SKILL_DIR}` is the `write-review` skill directory:
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/../write-comparison-article-create/scripts/check_comparison.py" <article index.md>
+python3 "${CLAUDE_SKILL_DIR}/../write-article/scripts/check_comparison.py" <article index.md>
 ```
 
 Do not pass `--build`; rendering belongs to `write-validate-article`. Exit 3 means `hugo` is missing: report it as a tool problem and skip the ref check, not as a failed check. Every FAIL line becomes an issue with its location; weigh each WARN and keep only the real ones. If the script is missing, say so and check the same items by eye from the rules file.

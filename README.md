@@ -17,7 +17,7 @@ See [SETUP.md](SETUP.md) for Cursor and other tools, and for releasing changes.
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
-| [write-article](skills/write-article/SKILL.md) | `/write:article` | Create articles with 16 bundled writing frameworks plus Comparison (via write-comparison-article-create); for jeffbaileyblog, places the bundle, checks links are published, loops write-review and write-review-apply until the draft scores 9.5+, and verifies the draft build |
+| [write-article](skills/write-article/SKILL.md) | `/write:article` | Create articles with 17 bundled writing frameworks, including X vs Y comparison pages with sourced claims and a render check; for jeffbaileyblog, places the bundle, checks links are published, loops write-review and write-review-apply until the draft scores 9.5+, and verifies the draft build |
 | [write-article-complete](skills/write-article-complete/SKILL.md) | `/write:article-complete` | Run write-article, then a fresh write-review, then write-review-apply as one uninterrupted workflow |
 | [write-review](skills/write-review/SKILL.md) | `/write:review [article] [framework]` | Review articles against framework rubrics, including comparison pages (read-only) |
 | [write-review-apply](skills/write-review-apply/SKILL.md) | `/write:review-apply [article]` | Apply a write-review report: makes the fixes the article supports, lists facts and structural calls for you, validates, and re-scores |
@@ -32,7 +32,6 @@ See [SETUP.md](SETUP.md) for Cursor and other tools, and for releasing changes.
 | [hugo-agents-compliance](skills/hugo-agents-compliance/SKILL.md) | `/hugo:agents` | Apply Hugo `AGENTS.md` as written for blog Markdown, then verify with a live ban scan, front-matter check, and a drafts-aware build |
 | [create-practice-playground](skills/create-practice-playground/SKILL.md) | `/write:playground` | Build an in-browser practice playground (real program on wasm or v86) for jeffbaileyblog through the nWave waves, plus an optional Learn X article (calls write-article) |
 | [write-article-revision](skills/write-article-revision/SKILL.md) | `/write:article-revision` | Fold new source material into an existing article, with conflicts and provenance listed for you |
-| [write-comparison-article-create](skills/write-comparison-article-create/SKILL.md) | `/write:comparison-article-create` | Decision-first X vs Y comparison pages with sourced claims and a render check |
 | [write-validate-article](skills/write-validate-article/SKILL.md) | `/write:validate-article` | Read-only pre-publish gate: Hugo build first, front matter, live banned-phrase scan, ai-sanitize, lychee, markdownlint-cli2; blocking / warning / noise verdict |
 | [write-check-links](skills/write-check-links/SKILL.md) | `/write:check-links` | lychee with the site config, plus ref and /blog/ link checks, triaged broken / false positive / unverified |
 | [write-run-markdown-lint](skills/write-run-markdown-lint/SKILL.md) | `/write:run-markdown-lint` | markdownlint-cli2 with your config, findings grouped by rule |
@@ -58,7 +57,7 @@ The create, revise, copy, review, and validate skills also call [`ai-sanitize`](
 
 **Learning:** Learn X (launch pad — teaches the 20% that does 80%, then links curated video/audio/books/online resources)
 
-**Decision:** Comparison (X vs Y; structure and checker from write-comparison-article-create)
+**Decision:** Comparison (X vs Y; structure in `references/comparison.md`, plus a checker)
 
 ### Article Review
 

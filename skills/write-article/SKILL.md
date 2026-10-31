@@ -1,6 +1,6 @@
 ---
 name: write-article
-description: Creates articles from 16 bundled writing frameworks (Diataxis, AIDA, PAS, Learn X, Fundamentals, and more) plus Comparison. Picks the framework, drafts the article, and for jeffbaileyblog applies the site rules, places the page bundle, and loops write-review and write-review-apply until the score reaches 9.5. Use when the user says /write:article, or asks to write an article, blog post, essay, tutorial, how-to, explanation, reference doc, or "Learn X" post. Triggers on "write article", "draft post", "write a post about", "I have opinions about".
+description: Creates articles from 17 bundled writing frameworks (Diataxis, AIDA, PAS, Learn X, Fundamentals, Comparison, and more). Picks the framework, drafts the article, and for jeffbaileyblog applies the site rules, places the page bundle, and loops write-review and write-review-apply until the score reaches 9.5. Use when the user says /write:article, or asks to write an article, blog post, essay, tutorial, how-to, explanation, reference doc, "Learn X" post, or comparison ("X vs Y", "which should I pick", "create a comparison article"). Triggers on "write article", "draft post", "write a post about", "I have opinions about".
 ---
 
 # Article Creation
@@ -29,9 +29,9 @@ If the user names a framework, use it. Otherwise check `articletype` (below), th
 | List Article | `a-list` | Curated collection, "best X for Y" | `a-list.md` | `lists` |
 | Fundamentals | `fundamentals` | "Fundamentals of X" explainer series | `fundamentals.md` | `fundamentals` |
 | Learn X | `learn` | 20/80 of a topic plus curated video, audio, books, links | `learn.md` | `learn-x` |
-| Comparison | `comparison` | Decide between 2–4 options ("X vs Y", "which should I pick") | `../write-comparison-article-create/SKILL.md` | `x-vs-x` |
+| Comparison | `comparison` | Decide between 2–4 options ("X vs Y", "which should I pick") | `comparison.md` | `x-vs-x` |
 
-All files live in `references/` except Comparison's, which is the sibling `write-comparison-article-create` skill so its section order and checker stay in one place; nothing is fetched at runtime. If that skill is not installed, say so and stop rather than drafting a comparison without its rules. When a section is unclear, open two or three recent siblings in the candidate folder and match them.
+All files live in `references/`; nothing is fetched at runtime. When a section is unclear, open two or three recent siblings in the candidate folder and match them.
 
 ### articletype
 
@@ -61,12 +61,12 @@ Opinion requests rule out Diataxis frameworks, Fundamentals, and Comparison: tho
 
 ### Comparison
 
-The comparison skill's SKILL.md is the framework prompt: read all of it in step 3. It has no `{{variable}}` fields; its inputs are the options, the audience, and 4–6 decision-driving criteria. Then run the workflow below with these changes:
+`references/comparison.md` is the framework prompt: read all of it in step 3. It has no `{{variable}}` fields; its inputs are the options, the audience, and 4–6 decision-driving criteria. Then run the workflow below with these changes:
 
-- **Step 3:** also do its "Research facts" step before drafting, keeping a source URL for every version, price, date, and license.
+- **Step 3:** also do its "Inputs and research" steps before drafting, keeping a source URL for every version, price, date, and license.
 - **Step 5:** front matter adds `diataxis: explanation` and `articletype: comparison`; categories start with `X vs X`; the slug is `a-vs-b[-vs-c]`.
 - **Step 6:** draft in its canonical section order and scorecard format, under its "Facts and sourcing" rule (an unsourced claim gets the literal `TODO verify` inside the same sentence, not a separate HTML comment, because its checker matches a link or that text per sentence).
-- **After step 7:** run its checker, `python3 <skill-dir>/../write-comparison-article-create/scripts/check_comparison.py <index.md>`, and fix every FAIL. Re-run it after step 8; ai-sanitize must keep the canonical headings.
+- **After step 7:** run its checker, `python3 <skill-dir>/scripts/check_comparison.py <index.md>`, and fix every FAIL. Re-run it after step 8; ai-sanitize must keep the canonical headings.
 - **Step 11:** also run the checker with `--build`; it confirms the cards, procon blocks, and single category footer rendered.
 - **Step 12:** list every `TODO verify` with the claims to verify.
 
@@ -157,8 +157,8 @@ The comparison skill's SKILL.md is the framework prompt: read all of it in step 
 
 ## Reference
 
-- `references/*.md`: the 16 framework prompts plus fallback copies of `writing-style.md` and `seo-front-matter.md`.
-- `../write-comparison-article-create/SKILL.md` and its `scripts/check_comparison.py`: the Comparison framework and its checker.
+- `references/*.md`: the 17 framework prompts plus fallback copies of `writing-style.md` and `seo-front-matter.md`.
+- `scripts/check_comparison.py`: checks a comparison article, and its rendered page with `--build`.
 - `references/great-blog-post.md`: framework-independent quality guidance and pre-publish checklist, distilled from Ann Handley's *Everybody Writes*.
 - `scripts/source_links.py`: inventories a bundle's sibling source files (`notes.md`, `links.md`) and prints one clean, de-duplicated URL list.
 - `scripts/blog_links.py`: finds published link targets and checks every `ref` in a draft against `hugo list all`.
