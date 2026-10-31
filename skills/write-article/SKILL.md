@@ -1,6 +1,6 @@
 ---
 name: write-article
-description: Creates articles from 17 bundled writing frameworks (Diataxis, AIDA, PAS, Learn X, Fundamentals, Comparison, and more). Picks the framework, drafts the article, and for jeffbaileyblog applies the site rules, places the page bundle, and loops write-review and write-review-apply until the score reaches 9.5. Use when the user says /write:article, or asks to write an article, blog post, essay, tutorial, how-to, explanation, reference doc, "Learn X" post, or comparison ("X vs Y", "which should I pick", "create a comparison article"). Triggers on "write article", "draft post", "write a post about", "I have opinions about".
+description: Creates articles from 17 bundled writing frameworks (Diataxis, AIDA, PAS, Learn X, Fundamentals, Comparison, and more). Picks the framework, drafts the article, and for jeffbaileyblog applies the site rules, places the page bundle, and loops write-review and write-review-apply toward a score of 9.5. To fold new material into a finished article, use write-article-revision instead. Use when the user says /write:article, or asks to write an article, blog post, essay, tutorial, how-to, explanation, reference doc, "Learn X" post, or comparison ("X vs Y", "which should I pick", "create a comparison article"). Triggers on "write article", "draft post", "write a post about", "I have opinions about".
 ---
 
 # Article Creation
@@ -72,7 +72,7 @@ Opinion requests rule out Diataxis frameworks, Fundamentals, and Comparison: tho
 
 ## Workflow
 
-1. **Understand the request.** Pin down topic, audience, outcome, and destination. Treat the destination as jeffbaileyblog when the user says "the blog" or "my site", or the working directory is that repo (it has `hugo/config.toml`). If the request points at an existing bundle, read its front matter now. If the user named a framework, or the bundle has a recognized `articletype`, skip step 2.
+1. **Understand the request.** Pin down topic, audience, outcome, and destination. If the article is already written and the job is to fold in new material, hand off to `write-article-revision`, unless the user pointed at this skill by name or path. Treat the destination as jeffbaileyblog when the user says "the blog" or "my site", or the working directory is that repo (it has `hugo/config.toml`). If the request points at an existing bundle, read its front matter now. If the user named a framework, or the bundle has a recognized `articletype`, skip step 2.
 
    **Mine the bundle's source material.** When the target bundle already exists, every sibling of `index.md` is the author's research for this article, usually `notes.md` and `links.md`. Read all of it before choosing a framework or drafting; never draft from `index.md` alone when siblings exist.
    1. **Inventory.** Run `python3 <skill-dir>/scripts/source_links.py <bundle-dir>`. It lists each sibling (`.md`, `.markdown`, `.txt`) with its URL and prose counts, then one de-duplicated URL list with tracking parameters and stray `),` stripped, marking URLs `index.md` already cites. Then read every sibling in full: prose lines are the author's own thoughts, outlines, and opinions, and they outrank anything fetched.
@@ -91,7 +91,7 @@ Opinion requests rule out Diataxis frameworks, Fundamentals, and Comparison: tho
    - `writing_style_context`: for jeffbaileyblog, ignore the default; the site style in step 4 sets the voice.
    - **First-person frameworks** (Thought Piece, Classical Rhetoric, PAS, AIDA, Influence Pieces, and any piece in the author's voice): ask, in the same message, for the author's actual position and one or two real stories or examples. These are what make the piece the author's; the framework only arranges them. If the user wants a draft now, write `<!-- TODO(author): your story about <what> -->` where a story belongs. If no position was given, draft a working thesis without "I" and mark it `<!-- TODO(author): confirm or replace this claim with your position -->`. Never invent the author's experiences, opinions, teams, or quotes.
 
-4. **Load the site rules before drafting (jeffbaileyblog only).** Drafting first and patching style later bakes the wrong voice and link form into every paragraph. Read, in this order:
+4. **Load the site rules before drafting (jeffbaileyblog only).** Drafting first and patching style later bakes the wrong voice and link form into every paragraph. Read each file below with the Read tool, one call per file. Chaining `cat` with `echo =====` fails in zsh, which treats `=word` as a command lookup. Read, in this order:
    1. `hugo/AGENTS.md`, a router of one-line pointers (search, front matter, body, prose, build gate, git), and the files its pointers name: `hugo/archetypes/blog.md` (front-matter fields and their rules) and `hugo/CODING_STANDARDS.md` (headings, cards, `ref`), top to bottom.
    2. The nearest nested `AGENTS.md` for the target section (for example `hugo/content/blog/fundamentals/AGENTS.md`: title pattern, categories, `series`, `diataxis`, required "Laws, bias, and fallacies" and Glossary sections).
    3. `hugo/content/prompts/writing-style.md` and `hugo/content/prompts/seo-front-matter.md`. These live copies are authoritative; `references/writing-style.md` and `references/seo-front-matter.md` are fallbacks for when the blog repo is not available.
@@ -104,10 +104,11 @@ Opinion requests rule out Diataxis frameworks, Fundamentals, and Comparison: tho
 
    For other destinations, ask about style preferences once and skip the blog-only steps (4, 5, 7, 11).
 
-5. **Place the bundle (jeffbaileyblog).** Path: `hugo/content/blog/<section>/<folder>/index.md`, with the section from the framework table. Keep folder name, `slug`, and the last segment of `url` identical. Confirm the folder does not already exist. Get today's date with `date +%Y-%m-%d` for `date`, `lastmod`, and the `url` path. Use the `hugo/archetypes/blog.md` fields and rules with `draft: true` and `articletype: <key>` from the framework table, pick `categories` that sibling posts already use, and apply the SEO rules: quoted `description` of 160 characters or fewer, keyword-first title, concrete keywords.
+5. **Place the bundle (jeffbaileyblog).** Path: `hugo/content/blog/<section>/<folder>/index.md`, with the section from the framework table. Keep folder name, `slug`, and the last segment of `url` identical. For a new article, confirm the folder does not already exist. A stub sitting directly under `hugo/content/blog/` moves into its section as a whole folder, siblings included, keeping its `url` and `slug`; a stub already in a section stays put. Get today's date with `date +%Y-%m-%d` for `date`, `lastmod`, and the `url` path. Use the `hugo/archetypes/blog.md` fields and rules with `draft: true` and `articletype: <key>` from the framework table, pick `categories` that sibling posts already use, and apply the SEO rules: quoted `description` of 160 characters or fewer, keyword-first title, concrete keywords.
 
 6. **Draft.** Substitute the gathered values and follow the loaded prompt. The framework sets the structure; `references/great-blog-post.md` sets the quality bar for any blog post (so-what, opening, rewrite passes, specificity, evidence). Read it before drafting, then run its pre-publish checklist on the draft before step 7. Site rules still win where it says so. Fact discipline:
    - Do not invent statistics, studies, versions, command flags, quotes, URLs, dates, or anecdotes. Cite a source link for each factual claim, or mark it `<!-- TODO verify: <claim> -->`, or write `[NEEDS FACT: <what>]`.
+   - **Quotes are copied, never remembered.** Put quotation marks around someone's words only after finding that exact wording on a page you fetched, and link that page. When you cannot open it (a login wall, an unpublished deck, a talk you only saw summarized), paraphrase without quotation marks or cut the line. Re-check every quote against its source before step 9; reviews do not fetch sources, so a misquote survives the loop.
    - Check commands, config keys, and version numbers against official docs or the tool's `--help` before presenting them as working.
    - Keep a running claims-to-verify list for the delivery note.
    - **Use the source digest.** Work its ideas into the body, not a link dump: each claim taken from a source gets that source as a reference-style link, the primary source when step 1 found one. The author's own notes set the position; fetched sources support, sharpen, or push back on it. Frameworks with resource lists (Learn X's video, audio, book, and online sections, for example) draw on the digest's resources, with each entry checked live. Leave out off-topic and unreachable links rather than citing them unread.
@@ -123,19 +124,21 @@ Opinion requests rule out Diataxis frameworks, Fundamentals, and Comparison: tho
 
 8. **Remove AI tells.** Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin) on the draft in edit mode. Site style wins where the two disagree. If it is not installed, say so in the delivery note.
 
-9. **Review loop: reach 9.5.** The draft is not done until a fresh `write-review` gives it a rubric score of 9.5/10 or higher. Save a copy of the draft to a temp dir first (`mktemp -d`), since a new bundle is untracked and git can't show what the loop changed. Then repeat, without asking the user between rounds:
-   1. **Review.** Run `write-review` on the draft, passing the framework's `articletype` key as `framework` explicitly. Run it in a fresh subagent (Agent tool) when one is available, so the grader is not the agent that wrote and fixed the draft; give it the absolute path and the `articletype` key, and ask for the full review back, JSON summary included. Without subagents, run it inline and label every score "self-review". The gate is the rubric `score` in the JSON summary; the blog-post checklist score is reported but does not gate.
-   2. **Stop at 9.5 or higher.** The loop passes.
-   3. **Apply.** Run `write-review-apply` on that review in loop mode (its "Called from write-article" section): edits in place, no validation or self re-score per round. Copy the result to the temp dir as `round-<n>.md` before the next review.
+9. **Review loop: aim for 9.5.** The target is a fresh `write-review` rubric score of 9.5/10 or higher. Expect most drafts to stop short of it: in 74 saved reviews of 11 articles, the best independent score was 9.4. Each grader starts fresh, scores similar text about 0.3 apart, and finds new, smaller issues, so the real gains come in the first few rounds and later ones mostly lengthen the article. Save a copy of the draft to a temp dir first (`mktemp -d`), since a new bundle is untracked and git can't show what the loop changed. Then repeat, without asking the user between rounds:
+   1. **Review.** Run `write-review` on the draft, passing the framework's `articletype` key as `framework` explicitly. Run it in a fresh subagent (Agent tool), so the grader is not the agent that wrote and fixed the draft; give it the absolute path and the `articletype` key, and ask for the full review back, JSON summary included. The gate is the rubric `score` in the JSON summary; the blog-post checklist score is reported but does not gate. Only independent scores count. When no subagent can run (no Agent tool, a spend limit, repeated failures), stop the loop; if there is no independent score yet, run one review inline and label it "self-review". A self-review cannot reach the target or set a new high: one 9.5 self-review drew 8.8 from the next independent grader.
+   2. **Stop at 9.5 or higher.** The loop passed.
+   3. **Apply.** Run `write-review-apply` on that review in loop mode (its "Called from write-article" section): edits in place, no validation or self re-score per round. Prefer fixes that replace or cut text; a finding is rarely a reason for a new section. Copy the result to the temp dir as `round-<n>.md` before the next review.
 
-   Stop below 9.5 when any of these happens, and keep the highest-scoring version on disk (restore its copy if a later round scored lower):
-   - five reviews have run;
-   - a round applied nothing, because every remaining finding is **Needs your input**, **Your call**, or **Declined**;
-   - the score did not rise in two rounds in a row.
+   Check these stops right after each review, before applying it, and stop below 9.5 when any of them happens. The last review's findings stay open for the delivery note:
+   - five independent reviews have run;
+   - two reviews in a row set no new high (compare with the best score so far, not the previous round, because scores bounce; a tie is not a new high);
+   - a round applied nothing, because every remaining finding is **Needs your input**, **Your call**, or **Declined**.
 
-   Never raise the score by inventing a fact, source, number, quote, or author experience, and never fill a `TODO(author)`, `[NEEDS FACT]`, or `TODO verify` by guessing; those findings stay with the author even when they are what blocks 9.5. If the loop stops below 9.5, the article is **not done**: step 12 says so first, with the final score, why the loop stopped, and the findings that block 9.5.
+   These stops hold even when the user says "until 9.5": more rounds cost about as much as the draft and rarely lift the score. Stopping is the expected ending, not a failure, so continue with steps 10 to 12. Run more rounds only when the user asks after seeing the score history, and tell them to expect a similar result. Keep the latest version on disk; restore an earlier copy, the latest one with the best score, only if the final score is 0.4 or more below the best, since a smaller drop is grader noise and restoring would throw away real fixes.
 
-10. **Generate the cover image.** Invoke the `generate-cover-image` skill on the reviewed draft; for jeffbaileyblog it builds the Canva design, exports `<slug>.png` into the bundle, and sets `cover.image` and `cover.alt`. Skip it if the user supplied a cover or asked for none. If it cannot generate an image, note the `<slug>.png.prompt.txt` it leaves.
+   Never raise the score by inventing a fact, source, number, quote, or author experience, and never fill a `TODO(author)`, `[NEEDS FACT]`, or `TODO verify` by guessing; those findings stay with the author even when they are what blocks 9.5.
+
+10. **Generate the cover image.** Invoke the `generate-cover-image` skill on the reviewed draft; for jeffbaileyblog it builds the Canva design, exports `<slug>.png` into the bundle, and sets `cover.image` and `cover.alt`. Skip it if the user supplied a cover or asked for none. If it cannot generate an image, note the saved prompt path it reports.
 
 11. **Verify the build (jeffbaileyblog).** Hand off to the `write-validate-article` skill when available; it runs the build, banned-phrase scan, links, and lint. Otherwise check `command -v hugo` (missing: `brew install hugo`, and report "tool missing", not "build failed"), then from `hugo/`:
 
@@ -145,10 +148,10 @@ Opinion requests rule out Diataxis frameworks, Fundamentals, and Comparison: tho
 
     `--buildDrafts` is required: the new post is `draft: true` and the site sets `buildDrafts = false`, so a plain `hugo --gc --minify` succeeds without rendering it. Any `REF_NOT_FOUND` or missing `index.html` is a failure to fix before delivering.
 
-12. **Deliver.** Only call the article done when step 9 reached 9.5 and step 11 passed. Report:
+12. **Deliver.** Lead with the outcome: **passed** when step 9 reached 9.5 and step 11 passed, **stopped at <best score>** when the loop ended below 9.5 and step 11 passed (the author decides whether it is ready), or **not ready** when step 11 failed. Never describe a self-review as reaching the target. Report:
     - file path, framework and why (including whether `articletype` decided it), the `articletype` written, section choice
     - source material, when the bundle had siblings: files read, links fetched, links used, and every unreachable or skipped link (LinkedIn login walls included), plus the digest path
-    - the review loop: score per round (for example `7.8 -> 8.9 -> 9.6`), whether a subagent graded it or it was a self-review, the last saved review path, and, if it stopped below 9.5, why and the findings blocking it
+    - the review loop: score per round (for example `7.8 -> 8.9 -> 9.2 -> 9.1 -> 9.2`), whether a subagent graded it or it was a self-review, the last saved review path, and, if it stopped below 9.5, which stop applied and the substantive findings still open
     - the `ai-sanitize` change list
     - cover image path, alt text, and Canva link (or why it was skipped)
     - build or validation result

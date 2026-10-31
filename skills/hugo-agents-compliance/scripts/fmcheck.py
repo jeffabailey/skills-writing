@@ -161,6 +161,11 @@ def check(path):
                 known = set(json.loads(meta.read_text(encoding="utf-8")).get("categories", []))
             except (ValueError, OSError):
                 known = set()
+            for term in (root / "content" / "categories").glob("*/_index.md"):
+                # data/site-metadata.json is generated and lags new categories.
+                m = re.search(r"^title:\s*(.+)$", term.read_text(encoding="utf-8"), re.M)
+                if m:
+                    known.add(unq(m.group(1)))
             new = [c for c in cats if known and c not in known]
             if new:
                 rep("WARN", f"categories not yet used on the site: {new} (prefer existing ones)")

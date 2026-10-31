@@ -19,7 +19,7 @@ The review is advice, not a script. Some findings carry exact replacement text; 
 
 ## Called from write-article
 
-`write-article` step 9 loops `write-review` and this skill until a fresh review scores the new draft 9.5 or higher. That loop is the author's standing request, so in loop mode two rules change and everything else (dispositions, never inventing facts, voice, editing in place, the change check) holds:
+`write-article` step 9 loops `write-review` and this skill until a fresh review scores the new draft 9.5 or higher, or one of its stop rules applies. That loop is the author's standing request, so in loop mode two rules change and everything else (dispositions, never inventing facts, voice, editing in place, the change check) holds:
 
 * **Step 5:** skip validation; `write-article` validates once after the loop.
 * **Step 6:** skip the self re-score; the loop's next fresh `write-review` is the score. Return the report with its **Needs your input** and **Your call** lists, and say whether anything was applied: a round that applied nothing ends the loop.

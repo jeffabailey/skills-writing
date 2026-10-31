@@ -23,6 +23,8 @@ This project uses a local dual-graph MCP server for efficient context retrieval.
    - Example: if `recommended_files` is `["src/auth.ts::handleLogin", "src/db.ts"]`,
      call `graph_read(file: "src/auth.ts::handleLogin")` and `graph_read(file: "src/db.ts")`
      as two separate calls (they can be parallel).
+   - If a recommended file does not exist, the index is stale: call `graph_scan` with the
+     current project directory and call `graph_continue` once more. Do NOT ask the user.
 
 5. **Check `confidence` and obey the caps strictly:**
    - `confidence=high` -> Stop. Do NOT grep or explore further.
@@ -49,7 +51,7 @@ Live dashboard URL is printed at startup next to "Token usage".
 
 - Do NOT use `rg`, `grep`, or bash file exploration before calling `graph_continue`.
 - Do NOT do broad/recursive exploration at any confidence level.
-- `max_supplementary_greps` and `max_supplementary_files` are hard caps - never exceed them.
+- `max_supplementary_greps` and `max_supplementary_files` are hard caps on searches that locate context - never exceed them. They do not apply to a file the user names or a command an active skill requires.
 - Do NOT dump full chat history.
 - Do NOT call `graph_retrieve` more than once per turn.
 - After edits, call `graph_register_edit` with the changed files. Use `file::symbol` notation (e.g. `src/auth.ts::handleLogin`) when the edit targets a specific function, class, or hook.
@@ -70,6 +72,14 @@ graph_add_memory(type="decision|task|next|fact|blocker", content="one sentence m
 - `content` must be under 15 words
 - `files` lists the files this decision/task relates to (can be empty)
 - Log immediately when the item arises — not at session end
+
+## Skill Changes
+
+After you add or edit a `SKILL.md`, run this command and fix each failure before you report the work as done:
+
+```bash
+uv run --no-project --with pyyaml python .agents/skills/skill-creator/scripts/quick_validate.py skills/<skill-name>
+```
 
 ## Session End
 

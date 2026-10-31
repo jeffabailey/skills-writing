@@ -37,7 +37,7 @@ Never open, edit, or publish a brand template: every cover on its site is built 
 
 ## Preflight
 
-Check the local tools before the first Canva call: `for t in python3 curl pngquant magick hugo; do command -v $t >/dev/null || echo "missing: $t"; done`. `pngquant` and `magick` are optional (`brew install pngquant imagemagick`); without them the PNG stays uncompressed and the contact sheet is skipped. Report a missing tool as "tool missing", separately from a failed step.
+Canva tools may be deferred in the session, so before deciding Canva is not connected, look for them with the tool search and load them. Then check the local tools before the first Canva call: `for t in python3 curl pngquant magick hugo; do command -v $t >/dev/null || echo "missing: $t"; done`. `pngquant` and `magick` are optional (`brew install pngquant imagemagick`); without them the PNG stays uncompressed and the contact sheet is skipped. Report a missing tool as "tool missing", separately from a failed step.
 
 ## Workflow
 
@@ -51,7 +51,7 @@ Check the local tools before the first Canva call: `for t in python3 curl pngqua
 
    For Political Incorruption, file the artwork once you keep it (after step 4's check, so a rejected image never lands there): `move-item-to-folder` with the media ID as the item and `to_folder_id: FAEsL_JzVxg`. Don't move the regenerated misses. For jeffbaileyblog, leave the artwork where it is; its folder holds the cover designs, which step 5 files.
 
-   Use only Canva; do not call the OpenAI Images API or any other image service. If Canva is not connected or the job fails, write the joined prompt to `<output>.prompt.txt`, tell the user why, and stop. Never draw a placeholder or substitute graphic.
+   Use only Canva; do not call the OpenAI Images API or any other image service. If Canva is not connected or the job fails, write the joined prompt to `${XDG_STATE_HOME:-$HOME/.local/state}/jbb-writing/cover-prompts/<png name>.prompt.txt`, tell the user why and where it is, and end the cover work; a calling skill such as `write-article` carries on without the cover. Keep it out of the page bundle: Hugo publishes every file there with the page. Never draw a placeholder or substitute graphic.
 
 4. **Judge the artwork from the job's preview,** before building anything on it. Regenerate once with a sharper inspiration text if it shows letters, numbers, code, or UI chrome (icons in circles count), or if it ignores the article's meaning. After a second miss, keep the better image and tell the user what is wrong with it. Checking here, not after export, means a bad image costs one generation instead of a whole design. The job preview is small (about 200 px wide), so small marks such as symbols on coins can slip past it: look again at the larger thumbnail the edit returns in step 5, before committing. If the miss shows there, regenerate and send another `update_fill` in the same open transaction; nothing is lost. For subjects that invite emblems or lettering (money, flags, sports, brands, and type, writing, books, or code), say in the inspiration text that surfaces are plain and unmarked.
 
@@ -67,7 +67,7 @@ Check the local tools before the first Canva call: `for t in python3 curl pngqua
 
    Leave the background's brightness alone: no shade layer, no vignette. If a Canva step fails, stop, tell the user which step and why, and leave any existing PNG in place. On any other site, skip this step and give the user the generated image's "Open generated image" link, its media ID, and the folder it was filed in (step 3), or say it wasn't filed because the site has no folder.
 
-6. **Set the front matter and store the text (jeffbaileyblog and Political Incorruption),** only after the commit and export succeed, so the files never describe a cover that was not published. Run `scripts/set-cover-frontmatter.py <bundle file> <png name> "<alt>"`. It writes the cover block unquoted, as `hugo/archetypes/blog.md` requires, replacing any old one, and gives every body `{{< cover-inline src=... alt=... >}}` that showed the old cover the new src and alt (38 posts repeat the cover inline; a stale alt there would describe the old picture):
+6. **Set the front matter and store the text (jeffbaileyblog and Political Incorruption),** only after the commit and export succeed, so the files never describe a cover that was not published. Delete any `<output>.prompt.txt` an earlier run left in the bundle. Run `scripts/set-cover-frontmatter.py <bundle file> <png name> "<alt>"`. It writes the cover block unquoted, as `hugo/archetypes/blog.md` requires, replacing any old one, and gives every body `{{< cover-inline src=... alt=... >}}` that showed the old cover the new src and alt (38 posts repeat the cover inline; a stale alt there would describe the old picture):
 
    ```yaml
    cover:

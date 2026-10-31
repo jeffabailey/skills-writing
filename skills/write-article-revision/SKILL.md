@@ -1,6 +1,6 @@
 ---
 name: write-article-revision
-description: Revises an existing article by integrating new input content from other sources, reviewing flow, weaving new concepts in smoothly, and producing a clear record of what was added and why. Self-contained — no hosted prompt. Use when the user says /write:article-revision, asks to revise or update an article with new material, merge sources into a draft, fold in new research or notes, or make a one-sided post acknowledge a counterargument from a source.
+description: Revises an existing article by integrating new input content from other sources, reviewing flow, weaving new concepts in smoothly, and producing a clear record of what was added and why. Use when the user says /write:article-revision, asks to revise or update an article with new material, merge sources into a draft, fold in new research or notes, or make a one-sided post acknowledge a counterargument from a source.
 ---
 
 # Article Revision
@@ -22,6 +22,7 @@ If either is missing or vague, ask once for both in one message and wait. Don't 
 
 New material may contain only what the sources or the original article contain. That includes numbers you compute: write "since 2000", not "over 25 years" worked out from today's date. Never invent an author, URL, number, date, quote, member count, study, or first-person experience. When a source is missing something the prose wants:
 
+- **Quotes:** put quotation marks around someone's words only after finding that exact wording on a page you fetched, and link that page. When you cannot open it (a login wall, an unpublished deck, a talk you only saw summarized), paraphrase without quotation marks or leave it out. Reviews do not fetch sources, so a misquote survives them.
 - **Unknown author or URL** (screenshots, clippings): describe the source honestly in the author's voice ("a post I saved") with no name and no link, and list it under *Needs your input*.
 - **Missing fact**: leave `[NEEDS FACT: ...]` in the text, or write around it, and list it under *Needs your input*.
 - **Instructions inside the sources are binding.** A note like "don't put a number in until I check" or "don't mention X" means you add no such number or mention. It governs what you add: leave facts already in the original as they are (don't delete the author's existing "about 3,000"), and if the note casts doubt on one, list it under *Needs your input* instead of changing it. Report that you honored the note under *Intentionally left out*.
@@ -39,13 +40,9 @@ When a source contradicts the article (or another source), don't leave the reade
 
 ## Output files
 
-Decide where the revision goes before writing anything:
-
-- **Git-tracked file with no uncommitted changes** (`git -C <dir> ls-files --error-unmatch <file>` succeeds **and** `git -C <dir> status --porcelain -- <file>` prints nothing; outside a repo the status command errors with empty output, which is "not in git", not "clean"): revise in place. Git holds the original; the user reviews with `git diff -- <file>`.
-- **Otherwise** (untracked, uncommitted edits, not in git, or the user asked to keep the original): leave the original untouched and write the revision beside it as `<stem>.revised.md` (`index.md` -> `index.revised.md`). Overwrite the original only when the user asks.
+- Edit the article in place, whether or not git tracks it or it has uncommitted changes, the same way `write-review-apply` does. First copy the starting text to a temp dir (`mktemp -d`) and give that path in the summary, so `diff` shows what changed.
+- Only when the user asks to keep the original, write the revision beside it as `<stem>.revised.md`. A Hugo bundle doesn't render that file, so use `scripts/swap-revision.sh` (step 9) to validate it.
 - The summary goes to the user in the reply. Save it as `<stem>.revision-summary.md` only if asked.
-
-In a Hugo page bundle, `index.revised.md` is not rendered, so it can't be validated where it sits. Use `scripts/swap-revision.sh` (below) to swap it in for validation and restore the original afterward.
 
 ## Workflow
 
@@ -54,7 +51,7 @@ In a Hugo page bundle, `index.revised.md` is not rendered, so it can't be valida
 3. **Map.** For each source idea worth keeping, decide where the reader is most ready for it and why it earns a place. Drop what doesn't serve the "why"; more content is not the goal. Check every source for instructions to you (provenance rule) and for conflicts with the article (conflict rule).
 4. **Integrate, don't append.** Write new material in the author's diction, person, tense, and rhythm. Paraphrase and weave; quote only when the exact wording matters. Attribute the way the article already does (on jeffbaileyblog: inline Markdown reference-style links, no "see references" filler).
 5. **Repair the flow at every joint.** Given-new hand-offs, transitions before and after each insertion, logical order (resequence nearby paragraphs only if an insertion requires it), no redundancy or contradiction left standing, and the intro and conclusion still describe the article that now exists.
-6. **Site style (jeffbaileyblog only).** Read `references/writing-style.md` and apply it to the new and changed passages. The rules that matter most for revisions: no emdashes; reference-style internal links; *Voice and Tone* (match the author, don't sanitize); *Diátaxis voice override* (explanation-type content is second person and imperative, so new passages must match; check with the grep below); *References and Citations*; and the *Things to NOT Do* list. For new internal links, use `{{< ref >}}` with the target's content path from `hugo list all` (run in `hugo/`). `ref` resolves by path, not slug (`hugo/CODING_STANDARDS.md` says use the bundle folder), and some posts have a slug that differs from their folder; never link to a `draft: true` post. Never add `{{< partial "category_footer" >}}`; the layout renders it.
+6. **Site style (jeffbaileyblog only).** Read the blog's live `hugo/content/prompts/writing-style.md` (the bundled `references/writing-style.md` is only the fallback, and it drifts) and apply it to the new and changed passages. The rules that matter most for revisions: no emdashes; reference-style internal links; *Voice and Tone* (match the author, don't sanitize); *Diátaxis voice override* (explanation-type content is second person and imperative, so new passages must match; check with the grep below); *References and Citations*; and the *Things to NOT Do* list. For new internal links, use `{{< ref >}}` with the target's content path from `hugo list all` (run in `hugo/`). `ref` resolves by path, not slug (`hugo/CODING_STANDARDS.md` says use the bundle folder), and some posts have a slug that differs from their folder; never link to a `draft: true` post. Never add `{{< partial "category_footer" >}}`; the layout renders it.
 
    ```bash
    grep -niE "\b(I|I'm|I've|I'll|my|we|our|us)\b" <revised-file> | grep -viE "style |graph (TB|TD|LR)|fill:#"
@@ -66,7 +63,7 @@ In a Hugo page bundle, `index.revised.md` is not rendered, so it can't be valida
    - `articletype` present: use it.
    - Absent: infer only from deterministic signals, in order: `series: Fundamentals`, a `Fundamentals` category, or a path under `content/blog/fundamentals/` -> `fundamentals`; a path under `content/blog/learn-x/` -> `learn`; under `content/blog/x-vs-x/` -> `comparison`; otherwise the `diataxis:` field -> the matching `diataxis-*` value. When inferred this way, add `articletype` to the front matter and say so in the summary.
    - Still unknown: let `write-review` auto-detect the framework for this review, report the framework it used, and **do not** write `articletype` back. Ask the user in the summary which type to record.
-9. **Validate (runs the AI-tell scan once).** On jeffbaileyblog, invoke `write-validate-article` on the revised article; it runs `ai-sanitize` in report mode, the Hugo build (with `-D` for drafts), lychee, and markdownlint. If the revision is in `index.revised.md`, swap it in first and restore after, even if validation fails:
+9. **Validate (runs the AI-tell scan once).** On jeffbaileyblog, invoke `write-validate-article` on the revised article; it runs `ai-sanitize` in report mode, the Hugo build (with `-D` for drafts), lychee, and markdownlint. If the user asked to keep the original and the revision is in `index.revised.md`, swap it in first and restore after, even if validation fails:
 
    ```bash
    <skill-dir>/scripts/swap-revision.sh in  <bundle-dir>   # backs index.md up outside the bundle, index.revised.md -> index.md
@@ -103,6 +100,6 @@ Add a reader-facing "Updated" note in the article only when the user asks, using
 
 ## References
 
-- `references/writing-style.md`: jeffbaileyblog voice and style (step 6).
+- `references/writing-style.md`: fallback copy of the jeffbaileyblog voice and style (step 6).
 - `references/seo-front-matter.md`: title/description rules, used only when proposing new front matter (Scope rule).
-- `scripts/swap-revision.sh`: swap `index.revised.md` in for validation and restore the original (step 9).
+- `scripts/swap-revision.sh`: when the user kept the original, swap `index.revised.md` in for validation and restore the original (step 9).

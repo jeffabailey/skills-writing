@@ -62,7 +62,7 @@ Score an article against the rubric for the framework it was written in, and rep
    6. Structure signals in the table.
    7. Still ambiguous between two rubrics: ask once, naming the two candidates and the signals for each.
 
-3. **Load the rubric.** Read the rubric file for the framework. For `fundamentals` and `comparison` also read `diataxis-article-explanation.md`, and for `learn` also read `diataxis-article-how-to-guides.md`: the blog rubric's override block and extra checks apply on top of that base rubric, and the base rubric supplies the type gate and output format.
+3. **Load the rubric.** Read each rule file with the Read tool, one call per file (chaining `cat` with `echo =====` fails in zsh, which treats `=word` as a command lookup). Read the rubric file for the framework. For `fundamentals` and `comparison` also read `diataxis-article-explanation.md`, and for `learn` also read `diataxis-article-how-to-guides.md`: the blog rubric's override block and extra checks apply on top of that base rubric, and the base rubric supplies the type gate and output format.
 
 4. **Fill the template variables.** Rubrics open with fields like `{{subject_area|default="technical concepts"}}`. Pre-fill each from the article (subject from the title, audience from front matter or prerequisites), otherwise use the default. Do not stop to ask: the rubrics say to decide and proceed. The only field with an empty default is `list_topic` in `a-list.md`; take it from the title. List the values you used in one line of the report so the user can rerun with overrides.
 
@@ -70,6 +70,7 @@ Score an article against the rubric for the framework it was written in, and rep
 
 6. **Blog checks (jeffbaileyblog only).** Apply these when the article lives in the jeffbaileyblog repo or has its Hugo front matter (`type: post`, `categories`, `cover`):
    * Read the blog's live `hugo/content/prompts/writing-style.md` (the bundled `references/writing-style.md` is only the fallback when the live file is missing; the live one is what the author edits, so the bundled copy drifts) and check: no emdashes; the banned-phrase list; voice (Diátaxis types and Learn X are second person and imperative; Fundamentals may use "I" for the author's judgments and experience, but their reader-facing scaffolding uses "you"; first person is right for thought pieces and opinion posts; never "we"/"our"; when the rubric and the live style guide disagree, the live style guide wins); link style. Profanity is intentional voice: never flag it.
+   * On a `draft: true` post, a missing cover PNG or empty `cover.alt` is expected, because `write-article` makes the cover after the review loop. Mention it once in the report; don't score it or list it as an issue, in this step or the checklist.
    * Check `title:`, `description:` (160 characters or fewer), and `keywords:` against `seo-front-matter.md`. Prefer the blog's own `hugo/content/prompts/seo-front-matter.md` when it exists; the bundled copy is the fallback.
    * Invoke the `ai-sanitize` skill (`jbb-skills:ai-sanitize` when installed as a plugin) in **report** mode so it lists AI tells without editing. Triage its hits (link titles often trip the Title-Case check) and fold real ones into the issues with locations. If it is not installed, say so and skip it.
 
@@ -97,6 +98,16 @@ Score an article against the rubric for the framework it was written in, and rep
    It prints `Rubric: references/<file> @ <hash>` per rubric, `Style:` and `SEO:` lines for the `writing-style.md` and `seo-front-matter.md` step 6 reads (live blog copy first, bundled fallback), and a `Checklist:` line for step 7's checklist. Paste its output verbatim.
 
    Saving to that path does not touch the article, so the read-only rule still holds. If the script isn't installed, skip this step and say the review wasn't saved. End the reply with one line offering the follow-up: "Run `/write:review-apply` to apply these fixes."
+
+## Reading scores across rounds
+
+Each review starts with no memory of the last one, so it scores similar text about 0.3 apart and raises new, smaller findings. A change of 0.3 or less between rounds is noise. In 74 saved reviews of 11 articles, the best independent score was 9.4, and loops usually stalled between 9.1 and 9.3.
+
+When someone asks to repeat review and apply until a target score, this skill still does one read-only review per call, and the caller applies these limits, even if the request says "until 9.5":
+
+* Stop after two reviews in a row with no new high, measured against the best score so far, or after five reviews. `write-article` step 9 holds the full loop.
+* Only independent reviews count. A self-review is labeled as one and can't reach a target: one 9.5 self-review drew 8.8 from the next grader.
+* Report the score history and the plateau plainly. Go further only if the user asks after seeing it, and tell them to expect a similar result.
 
 ## Record the run
 
