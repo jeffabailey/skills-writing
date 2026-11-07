@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: python-keeps-before-code
+expected_outcome: |
+  The deliberate "slow way" block is left alone. The csv module example becomes a short
+  DictReader loop or sum() with no class, no swallowed exceptions, and no redundant checks,
+  and still prints 20.25. The mermaid block is untouched.
+context:
+  scaffold_script: place-files.sh

@@ -34,6 +34,7 @@ See [SETUP.md](SETUP.md) for Cursor and other tools, and for releasing changes.
 | [write-article-revision](skills/write-article-revision/SKILL.md) | `/write:article-revision` | Fold new source material into an existing article, with conflicts and provenance listed for you |
 | [write-validate-article](skills/write-validate-article/SKILL.md) | `/write:validate-article` | Read-only pre-publish gate: Hugo build first, front matter, live banned-phrase scan, ai-sanitize, lychee, markdownlint-cli2; blocking / warning / noise verdict |
 | [write-check-links](skills/write-check-links/SKILL.md) | `/write:check-links` | lychee with the site config, plus ref and /blog/ link checks, triaged broken / false positive / unverified |
+| [write-optimize-code](skills/write-optimize-code/SKILL.md) | `/write:optimize-code` | reads every code block as one program; makes it correct, cohesive, simpler, and maintainable by the review-maintainability rubric |
 | [write-run-markdown-lint](skills/write-run-markdown-lint/SKILL.md) | `/write:run-markdown-lint` | markdownlint-cli2 with your config, findings grouped by rule |
 | [writing-clearly-and-concisely](skills/writing-clearly-and-concisely/SKILL.md) | (auto) | Tighten prose by Strunk's rules while keeping voice, facts, links, and code; returns a rule-tagged change list |
 
