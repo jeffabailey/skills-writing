@@ -2,7 +2,7 @@
 name: write-optimize-code
 description: Optimizes the code in a Markdown article by reading every fenced block (```bash, ```python, ```yaml, ...) together as one program, then making it correct, consistent across blocks, as simple as it can be, and maintainable by the review-maintainability rubric. Edits the article in place after a backup, keeps prose and output blocks in step with changed code, syntax-checks every block, and reports before and after maintainability scores. Use when the user says /write:optimize-code or /write:simplify-code, asks to simplify, clean up, tighten, optimize, or review the code samples, snippets, or commands in an article, blog post, tutorial, or README, or asks whether an article's code is too complicated, even if they don't say "maintainability".
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Optimize Article Code
