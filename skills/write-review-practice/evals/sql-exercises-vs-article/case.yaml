@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: sql-exercises-vs-article
+expected_outcome: |
+  A ranked review of the SQL playground and Learn SQL as one design, scored by 4C/ID component and alignment, with file:line evidence, constraint-aware recommendations, and an offer to apply. No files changed.

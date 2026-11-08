@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: jq-with-kubectl-source
+expected_outcome: |
+  A review that pairs the jq playground with Learn jq, treats the kubectl how-to as extra source content, notices the exercises have no hints, answers, or links, keeps recommendations within no-network real-program rules, and edits nothing.

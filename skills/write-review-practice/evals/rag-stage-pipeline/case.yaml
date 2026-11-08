@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: rag-stage-pipeline
+expected_outcome: |
+  A review that recognizes the RAG playground has no exercises.md and finds its tasks in the stages, checks, and article drill, judges messages.json as feedback, keeps model calls and register changes as owner decisions, and edits nothing.
